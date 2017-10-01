@@ -6,11 +6,13 @@
 
 export class Avian {
 
-    public params: Object
+    public arguments: string
 
-    constructor (params: Object) {
+    constructor (params: string) {
+
+        this.arguments = params
 
         let exec = require("child_process").execSync
-        let avian_cli = exec(`node avian.cli.js --name ${params.name} `)
+        let avian_cli = exec(`node avian.cli.js ${this.arguments} `)
     }
 }
