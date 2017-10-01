@@ -1,0 +1,25 @@
+{
+  "compilerOptions": {
+      "target": "es6",
+      "module": "commonjs",
+      "moduleResolution": "node",
+      "sourceMap": false,
+      "removeComments": true,
+	    "experimentalDecorators" : true,
+      "noImplicitAny": false,
+      "suppressImplicitAnyIndexErrors": true
+
+  },
+  "files" : [
+    "./src/index.ts",
+    "./src/valance.cli.ts",
+    "./src/valance.lib.ts",
+    "./src/valance.spec.ts"
+  ],
+  "exclude": [
+      "node_modules",
+      "dist",
+      "spec"
+  ],
+  "compileOnSave": false
+}

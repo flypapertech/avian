@@ -1,0 +1,50 @@
+# Avian
+A highly scalable, and easy to use environment for rapidly developing and delivering modern web, mobile and desktop applications.
+
+# Synopsis
+Host an HTML5 application using Avian...
+
+    avian --name appname --home /path/to/your/app --port 8080
+
+# Installation
+Avian can easily be installed using various methods.
+
+# NPM
+The latest stable release of Avian is available via the Node Package Manager.
+
+## Global
+    npm install avian -g
+
+## Local
+
+    npm install avian --save
+
+# GitHub
+The source code is available on GitHub.
+
+## Global
+    npm install https://github.com/ispyhumanfly/avian -g
+
+## Local
+    npm install https://github.com/ispyhumanfly/avian -g
+
+## Clone
+    git clone https://github.com/ispyhumanfly/avian.git
+
+# Examples
+Below I've made available some of the Avian applications that I'm creating for various customers of mine, and, I hope for now can serve as a starting point. Please ask me questions!
+
+### Dtownmom
+[https://github.com/ispyhumanfly/dtownmom]
+
+### Cabbage Patch Saloon
+[https://github.com/ispyhumanfly/cabbagepatchsaloon]
+
+### Silver Gate Lending
+[https://github.com/ispyhumanfly/silvergatelending]
+
+# Author
+Dan Stephenson (ispyhumanfly@gmail.com)
+
+# License
+MIT

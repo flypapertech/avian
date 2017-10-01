@@ -1,0 +1,20 @@
+{
+  "globalDependencies": {
+    "bootstrap": "registry:dt/bootstrap#3.3.5+20160619023404",
+    "browserify": "registry:dt/browserify#12.0.1+20160317120654",
+    "connect-redis": "registry:dt/connect-redis#0.0.0+20160305170114",
+    "express": "registry:dt/express#4.0.0+20160708185218",
+    "express-serve-static-core": "registry:dt/express-serve-static-core#4.0.0+20161012061536",
+    "jasmine-jquery": "registry:dt/jasmine-jquery#0.0.0+20160317120654",
+    "jquery": "registry:dt/jquery#1.10.0+20160929162922",
+    "less": "registry:dt/less#0.0.0+20160608105036",
+    "mime": "registry:dt/mime#0.0.0+20160316155526",
+    "node": "registry:dt/node#6.0.0+20161110151007",
+    "node_redis": "registry:dt/node_redis#0.8.0+20160316155526",
+    "pug": "registry:dt/pug#2.0.0-beta6+20160919072324",
+    "redis": "registry:dt/redis#0.12.1+20161011212150",
+    "serve-static": "registry:dt/serve-static#0.0.0+20160606155157",
+    "typescript": "registry:dt/typescript#0.4.0+20160317120654",
+    "typescriptservices": "registry:dt/typescriptservices#0.4.0+20160317120654"
+  }
+}
