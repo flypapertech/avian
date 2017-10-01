@@ -15,8 +15,6 @@ typings/*
 *.log
 *.swp
 *.log
-*.js
-!spec/avian.spec.js
 npm-debug*
 *.map
 

@@ -2,11 +2,11 @@
 
 exports.__esModule = true;
 
-describe("Valance Distribution Files", function() {
-    var valance;
+describe("Avian Distribution Files", function() {
+    var avian;
     beforeEach(function() {
-        valance.cli("./dist/valance.cli.js");
-        valance.lib("./dist/valance.lib.js");
+        avian.cli("./dist/avian.cli.js");
+        avian.lib("./dist/avian.lib.js");
     });
     it("Checks to see if all distribution files have been built.", function() {});
 });

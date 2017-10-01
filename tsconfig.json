@@ -12,9 +12,9 @@
   },
   "files" : [
     "./src/index.ts",
-    "./src/valance.cli.ts",
-    "./src/valance.lib.ts",
-    "./src/valance.spec.ts"
+    "./src/avian.cli.ts",
+    "./src/avian.lib.ts",
+    "./src/avian.spec.ts"
   ],
   "exclude": [
       "node_modules",
