@@ -19,6 +19,8 @@ var os = require("os");
 
 var fs = require("fs");
 
+require("ts-node/register");
+
 var session = require("express-session");
 
 var jsonfile = require("jsonfile");
@@ -48,8 +50,12 @@ if (cluster.isMaster) {
 } else {
     var avian = express();
     var application = void 0;
-    if (fs.existsSync(home + "/main.ts")) application = require(home + "/main");
+    if (fs.existsSync(home + "/main.ts")) application = require(home + "/main.ts");
+    var RedisStore = require("connect-redis-crypto")(session);
     avian.use(session({
+        store: new RedisStore({
+            host: "127.0.0.1"
+        }),
         secret: crypto.createHash("sha1").digest("hex"),
         resave: false,
         saveUninitialized: false

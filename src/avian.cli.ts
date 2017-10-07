@@ -14,6 +14,8 @@ import * as parser from "body-parser"
 import * as os from "os"
 import * as fs from "fs"
 
+import "ts-node/register"
+
 const session = require("express-session")
 const jsonfile = require("jsonfile")
 const compression = require("compression")
@@ -21,10 +23,10 @@ const shx = require("shelljs")
 
 const argv = require("yargs").argv
 
-let name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
-let home = argv.home || process.env.AVIAN_APP_HOME || shx.pwd()
-let port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
-let mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
+const name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
+const home = argv.home || process.env.AVIAN_APP_HOME || shx.pwd()
+const port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
+const mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
 
 if (cluster.isMaster) {
 
@@ -43,9 +45,12 @@ if (cluster.isMaster) {
     let application
 
     if (fs.existsSync(home + "/main.ts"))
-        application = require(home + "/main")
+        application = require(home + "/main.ts")
+
+    let RedisStore = require("connect-redis-crypto")(session);
 
     avian.use(session({
+        store: new RedisStore({host: "127.0.0.1"}),
         secret: crypto.createHash("sha1").digest("hex"),
         resave: false,
         saveUninitialized: false
@@ -102,11 +107,11 @@ if (cluster.isMaster) {
         }
         catch (err) {
             if (err)
-                if (home + `/components/${req.params.component}`) res.redirect("/errors")
+                if (home + `/components/${req.params.component}`)
+                    res.redirect("/errors")
         }
 
         try {
-
             req.cache.get(`${req.params.component}`, (err, storage) => {
                 res.render(home + `/components/${req.params.component}.template.pug`, JSON.parse(storage))
             })
@@ -128,6 +133,7 @@ if (cluster.isMaster) {
         })
     })
 
+    // Application code...
     if (fs.existsSync(home + "/main.ts"))
         avian.use("/main/", application.Routes(avian))
 
