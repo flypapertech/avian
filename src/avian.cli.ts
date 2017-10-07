@@ -40,6 +40,10 @@ if (cluster.isMaster) {
 } else {
 
     let avian = express()
+    let application
+
+    if (fs.existsSync(home + "/main.ts"))
+        application = require(home + "/main")
 
     avian.use(session({
         secret: crypto.createHash("sha1").digest("hex"),
@@ -47,7 +51,6 @@ if (cluster.isMaster) {
         saveUninitialized: false
     }))
 
-    avian.use("/avian_modules", express.static(__dirname + "../node_modules"))
     avian.use("/assets", express.static(home + "/assets"))
     avian.use("/static", express.static(home + "/static"))
     avian.use("/", express.static(home + "/assets"))
@@ -97,7 +100,6 @@ if (cluster.isMaster) {
                 req.cache.set(name,
                     JSON.stringify(jsonfile.readFileSync(home + `/components/${req.params.component}.storage.json`))))
         }
-
         catch (err) {
             if (err)
                 if (home + `/components/${req.params.component}`) res.redirect("/errors")
@@ -126,36 +128,8 @@ if (cluster.isMaster) {
         })
     })
 
-    avian.get("/:component/storage/:object/objects.json", (req, res, next) => {
-
-        event.emit("synch",
-            req.cache.set(req.params.component,
-                JSON.stringify(jsonfile.readFileSync(home + `/components/${req.params.component}.storage.json`))))
-
-        req.cache.get(req.params.component, (err, storage) => {
-
-            storage = JSON.parse(storage)
-
-            if (req.params.object === "all")
-                if (storage.objects) res.json(storage.objects)
-
-            storage.objects.forEach(object => {
-
-                if (req.params.object === "data")
-                    if (object.data) res.json(object.data)
-
-                if (req.params.object === "alerts")
-                    if (object.alerts) res.json(object.alerts)
-
-                if (req.params.object === "notifications")
-                    if (object.notifications) res.json(object.notifications)
-
-                if (req.params.object === "history")
-                    if (object.history) res.json(object.history)
-
-            })
-        })
-    })
+    if (fs.existsSync(home + "/main.ts"))
+        avian.use("/main/", application.Routes(avian))
 
     avian.all("*", (req, res, next) => {
         res.redirect("/index")

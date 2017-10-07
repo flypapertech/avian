@@ -6,13 +6,22 @@
 
 export class Avian {
 
-    public arguments: string
+    public name: string
+    public home: string
+    public port: string
+    public mode: string
 
-    constructor (params: string) {
+    constructor (name: string, home: string, port: string, mode: string) {
 
-        this.arguments = params
+        this.name = name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME
+        this.home = home || process.env.AVIAN_APP_HOME || process.env.HOSTNAME
+        this.port = port || process.env.AVIAN_APP_PORT || process.env.HOSTNAME
+        this.mode = mode || process.env.AVIAN_APP_MODE || process.env.HOSTNAME
+    }
+
+    start() {
 
         let exec = require("child_process").execSync
-        let avian_cli = exec(`node avian.cli.js ${this.arguments} `)
+        let avian_cli = exec(`node avian.cli.js --name ${this.name} --home ${this.home}`)
     }
 }
