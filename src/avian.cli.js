@@ -19,8 +19,6 @@ var os = require("os");
 
 var fs = require("fs");
 
-require("ts-node/register");
-
 var session = require("express-session");
 
 var jsonfile = require("jsonfile");
@@ -49,25 +47,23 @@ if (cluster.isMaster) {
     });
 } else {
     var avian = express();
-    var application = void 0;
-    if (fs.existsSync(home + "/main.ts")) application = require(home + "/main.ts");
-    var RedisStore = require("connect-redis-crypto")(session);
+    var redisStore = require("connect-redis-crypto")(session);
     avian.use(session({
-        store: new RedisStore({
+        store: new redisStore({
             host: "127.0.0.1"
         }),
-        secret: crypto.createHash("sha1").digest("hex"),
+        secret: crypto.createHash("sha512").digest("hex"),
         resave: false,
         saveUninitialized: false
     }));
+    avian.use(require("express-redis")(6379, "127.0.0.1", {
+        return_buffers: true
+    }, "cache"));
     avian.use("/assets", express.static(home + "/assets"));
     avian.use("/static", express.static(home + "/static"));
     avian.use("/", express.static(home + "/assets"));
     avian.set("view engine", "pug");
     avian.set("views", home);
-    avian.use(require("express-redis")(6379, "127.0.0.1", {
-        return_buffers: true
-    }, "cache"));
     if (mode === "production") {
         if (!fs.existsSync(home + "/cache/")) shx.mkdir(home + "/cache/");
         if (!fs.existsSync(home + "/logs/")) shx.mkdir(home + "/logs/");
@@ -118,7 +114,6 @@ if (cluster.isMaster) {
             res.json(JSON.parse(storage));
         });
     });
-    if (fs.existsSync(home + "/main.ts")) avian.use("/main/", application.Routes(avian));
     avian.all("*", function(req, res, next) {
         res.redirect("/index");
     });

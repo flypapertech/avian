@@ -14,8 +14,6 @@ import * as parser from "body-parser"
 import * as os from "os"
 import * as fs from "fs"
 
-import "ts-node/register"
-
 const session = require("express-session")
 const jsonfile = require("jsonfile")
 const compression = require("compression")
@@ -41,20 +39,26 @@ if (cluster.isMaster) {
 
 } else {
 
-    let avian = express()
-    let application
+    const avian = express()
 
-    if (fs.existsSync(home + "/main.ts"))
-        application = require(home + "/main.ts")
+    /*
+    if (fs.existsSync(home + "/main.ts")) {
+        require("ts-node/register")
+        let App = require(home + "/main.ts")
+        avian.use("/main/", App.Routes(avian))
+    }
+    */
 
-    let RedisStore = require("connect-redis-crypto")(session);
+    let redisStore = require("connect-redis-crypto")(session);
 
     avian.use(session({
-        store: new RedisStore({host: "127.0.0.1"}),
-        secret: crypto.createHash("sha1").digest("hex"),
+        store: new redisStore({host: "127.0.0.1"}),
+        secret: crypto.createHash("sha512").digest("hex"),
         resave: false,
         saveUninitialized: false
     }))
+
+    avian.use(require("express-redis")(6379, "127.0.0.1", {return_buffers: true}, "cache"))
 
     avian.use("/assets", express.static(home + "/assets"))
     avian.use("/static", express.static(home + "/static"))
@@ -62,8 +66,6 @@ if (cluster.isMaster) {
 
     avian.set("view engine", "pug")
     avian.set("views", home)
-
-    avian.use(require("express-redis")(6379, "127.0.0.1", {return_buffers: true}, "cache"))
 
     if (mode === "production") {
 
@@ -132,10 +134,6 @@ if (cluster.isMaster) {
             res.json(JSON.parse(storage))
         })
     })
-
-    // Application code...
-    if (fs.existsSync(home + "/main.ts"))
-        avian.use("/main/", application.Routes(avian))
 
     avian.all("*", (req, res, next) => {
         res.redirect("/index")
