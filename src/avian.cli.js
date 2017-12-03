@@ -61,6 +61,7 @@ if (cluster.isMaster) {
     }, "cache"));
     avian.use("/assets", express.static(home + "/assets"));
     avian.use("/static", express.static(home + "/static"));
+    avian.use("/node_modules", express.static(home + "/node_modules"));
     avian.use("/", express.static(home + "/assets"));
     avian.set("view engine", "pug");
     avian.set("views", home);
