@@ -1,8 +1,10 @@
 # Avian
-A highly scalable, and easy to use environment for rapidly developing and delivering modern web, mobile and desktop applications.
+Easily power your HTML5 web, mobile or desktop application.
 
 # Synopsis
-Host an HTML5 application using Avian...
+A highly scalable, and easy to use environment for rapidly developing and delivering modern HTML5 web, mobile and desktop applications.
+
+Host your HTML5 application using Avian...
 
     avian --name appname --home /path/to/your/app --port 8080
 

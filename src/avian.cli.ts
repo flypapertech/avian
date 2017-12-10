@@ -41,14 +41,6 @@ if (cluster.isMaster) {
 
     const avian = express()
 
-    /*
-    if (fs.existsSync(home + "/main.ts")) {
-        require("ts-node/register")
-        let App = require(home + "/main.ts")
-        avian.use("/main/", App.Routes(avian))
-    }
-    */
-
     let redisStore = require("connect-redis-crypto")(session);
 
     avian.use(session({
