@@ -1,6 +1,12 @@
 language: node_js
 install:
   - npm install
+node_js:
+  - "4.0"
+  - "5.0"
+  - "6.0"
+  - "7.0"
+
 deploy:
   provider: npm
   email: ispyhumanfly@gmail.com
