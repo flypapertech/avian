@@ -1,3 +1,7 @@
+[![Build Status](https://travis-ci.org/ispyhumanfly/avian.svg?branch=master)](https://travis-ci.org/ispyhumanfly/avian)
+
+[![NPM](https://nodei.co/npm/avian.png)](https://npmjs.org/package/avian)
+
 # Avian
 Easily power your HTML5 web, mobile or desktop application.
 
