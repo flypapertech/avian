@@ -1,8 +1,9 @@
+language: node
 deploy:
   provider: npm
   email: ispyhumanfly@gmail.com
   api_key:
     secure: tsJCJDt5TNvbdwxHrcOIiMyYifu6Iz4dW12ay+3MCA2WC4qYddD3HGLEJxgl1fkFyY2RtnSOy9dOC3ionxO3G/p4p9H8koZ2rXycKvs12XxMXghQbrb+9aQhHVP85beimCmgw/EmXu6P/noddeaVcY0i576809Es47cCvYuJUUZPtWFE1BECsKfx4LLBIkU9YIC3AUUIHhigdiFIsGe8ncbSw8KycDBsyhfyb5tmmlZilQXZDze61yUEQNSVVkih3KAJk7SuFFVCenDnpPPARCCkfErEw20FxIUhVNIGCKAtrfomr8n6+8RYGhqbPE3kntbIDrN6DUMALb2/7DeO6ZNbi+eS00VH3scwGa0lDB1VSDfmcg/gk6JsMC7SlWkxGSxZlhtJEbcD9P6aB4kwhY+nvMwOYyyKWOVpteFfvQ2FpiqJhnidku/70v2XYEPGYy9KMHh/TXlGOXlqo/7kZb4Iljjw/szKy24ISpOothhEYWaue1puBj0ljLmyJ2lcu9pxs5lqodk9GNnxHS6vq0a55FZBzpuQTek4AIlo2z2rp5D1my9gAZsOAWHOQmqMd10u5uJOMi8d44bRrQ3vw3dGDObC7pzx4oVfcrn695qx4VMzlYnagXspk/qpSd4bA0EBT2hphNNfVWlfMeHg0E46udTBAa+AHuQushNC92o=
   on:
-    tags: true
+    tags: false
     repo: ispyhumanfly/avian
