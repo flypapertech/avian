@@ -8,7 +8,7 @@
 Easily power your HTML5 web, mobile or desktop application.
 
 # Synopsis
-A highly scalable, and easy to use environment for rapidly developing and delivering modern HTML5 web, mobile and desktop applications.
+A highly scalable, and easy to use environment for hosting modern HTML5 web, mobile and desktop applications.
 
 Host your HTML5 application using Avian...
 
