@@ -1,5 +1,3 @@
-[![Code Climate](https://codeclimate.com/github/dwyl/esta/badges/gpa.png)](https://codeclimate.com/github/ispyhumanfly/avian)
-
 [![Build Status](https://travis-ci.org/ispyhumanfly/avian.svg?branch=master)](https://travis-ci.org/ispyhumanfly/avian)
 
 [![NPM](https://nodei.co/npm/avian.png)](https://npmjs.org/package/avian)
