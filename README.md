@@ -12,7 +12,7 @@ A highly scalable, and easy to use environment for hosting modern HTML5 web, mob
 
 Host your HTML5 application using Avian...
 
-    avian --name appname --home /path/to/your/app --port 8080
+    avian --name appname --home /path/to/your/app --port 8080 --mode production
 
 # Installation
 Avian can easily be installed using various methods.
@@ -39,8 +39,11 @@ The source code is available on GitHub.
 ## Clone
     git clone https://github.com/ispyhumanfly/avian.git
 
+# Tutorials
+I really don't have any right now, but will work to remedy this quickly since we're now available on NPM.
+
 # Examples
-Below I've made available some of the Avian applications that I'm creating for various customers of mine, and, I hope for now can serve as a starting point. Please ask me questions!
+Below I've made available some of the applications that I'm creating for various customers of mine. It's a pretty horrible place to start for those who are new to Avian. But it's what I got for now. Please contact me for questions I will work one-on-one with people who are seriously interested.
 
 ### Dtownmom
 [https://github.com/ispyhumanfly/dtownmom]
