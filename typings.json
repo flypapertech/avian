@@ -1,7 +1,5 @@
 {
   "globalDependencies": {
-    "bootstrap": "registry:dt/bootstrap#3.3.5+20160619023404",
-    "browserify": "registry:dt/browserify#12.0.1+20160317120654",
     "connect-redis": "registry:dt/connect-redis#0.0.0+20160305170114",
     "express": "registry:dt/express#4.0.0+20160708185218",
     "express-serve-static-core": "registry:dt/express-serve-static-core#4.0.0+20161012061536",
