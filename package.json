@@ -19,7 +19,7 @@
     "avian": "./dist/avian.cli.js"
   },
   "scripts": {
-    "prepublish": "typings install && npm run build_index && npm run build_cli && npm run build_spec && npm run build_lib && npm run test",
+    "prepublish": "node_modules/.bin/typings install && npm run build_index && npm run build_cli && npm run build_spec && npm run build_lib && npm run test",
     "build_index": "node_modules/.bin/tsc ./src/index.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/index.js -b -o ./src/index.js ; node_modules/.bin/uglifyjs ./src/index.js -o ./index.js",
     "build_cli": "node_modules/.bin/tsc ./src/avian.cli.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.cli.js -b -o ./src/avian.cli.js ; node_modules/.bin/uglifyjs ./src/avian.cli.js -o ./dist/avian.cli.js",
     "build_lib": "node_modules/.bin/tsc ./src/avian.lib.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.lib.js -b -o ./src/avian.lib.js ; node_modules/.bin/uglifyjs ./src/avian.lib.js -o ./dist/avian.lib.js",
