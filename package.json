@@ -7,12 +7,12 @@
     "url": "https://github.com/ispyhumanfly/avian.git"
   },
   "preferGlobal": true,
-  "main": "node dist/avian.cli.js",
+  "main": "./dist/avian.cli.js",
   "cpu": [
     "x64"
   ],
   "bin": {
-    "avian": "node dist/avian.cli.js"
+    "avian": "./dist/avian.cli.js"
   },
   "scripts": {
     "prepublish": "npm run build_cli && npm run build_spec && npm run test",
@@ -81,7 +81,6 @@
     "typescript-compiler": "^1.4.1-2",
     "uglify": "^0.1.5",
     "uglify-js": "^2.7.4",
-    "watch": "^1.0.1",
-    "yargs": "^7.0.2"
+    "yargs": "^7.0.2",
   }
 }
