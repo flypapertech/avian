@@ -1,7 +1,5 @@
 node_modules
 bower_components
-typings/*
-!typings/index.d.ts
 .vs
 .vscode
 .vs
