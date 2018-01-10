@@ -81,6 +81,7 @@
     "typescript-compiler": "^1.4.1-2",
     "uglify": "^0.1.5",
     "uglify-js": "^2.7.4",
-    "yargs": "^7.0.2",
+    "watch": "^1.0.1",
+    "yargs": "^7.0.2"
   }
 }
