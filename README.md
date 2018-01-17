@@ -3,7 +3,7 @@
 [![NPM](https://nodei.co/npm/avian.png)](https://npmjs.org/package/avian)
 
 # Avian
-Easily power your HTML5 web, mobile or desktop application.
+Easily power your enterprise-class HTML5 web, mobile or desktop application.
 
 # About
 A highly scalable, and easy to use environment for hosting modern HTML5 web, mobile and desktop applications.
@@ -21,7 +21,7 @@ Host an HTML5 application using Avian...
 Avian can easily be installed using various methods.
 
 ## System Requirements
-Avian uses the Redis cache server for fast retrieval of storage objects. Because of this, the following developer tools are required on the installation system to build the hiredis wrapper.
+Avian uses a Redis cache for fast retrieval of component storage objects. Because of this, the following developer tools are required on the installation system to build the hiredis wrapper.
 
 - macOS/Linux
     - Redis Server
