@@ -15,6 +15,11 @@ Host your HTML5 application using Avian...
 # Installation
 Avian can easily be installed using various methods.
 
+## System Requirements
+Avian uses the Redis cache server for fast retrieval of storage objects. Because of this, the following developer tools are required on the installation system.
+- GCC/MSBUILD Tools
+- Python 2.x
+
 # NPM
 The latest stable release of Avian is available via the Node Package Manager.
 
