@@ -5,17 +5,20 @@ html(lang="en")
 
         title Avian Vuetify Example
 
-        link(href="/node_modules/vuetify/dist/vuetify.min.css", rel="stylesheet")
+        // Index Style
 
+        link(href="/node_modules/vuetify/dist/vuetify.min.css", rel="stylesheet")
         style
             include:less index.style.less
 
     body
 
+        // Index Vuetfiy Application
+
         avian-vuetify-example#app
 
             v-app(dark)
-                v-toolbar.red
+                v-toolbar.blue
                     h1 Avian Vuetify Example
 
                 v-content(fluid)
@@ -23,6 +26,8 @@ html(lang="en")
                     v-container
 
                 v-footer(fluid)
+
+    // Index Component
 
     script(src="/node_modules/vue/dist/vue.js")
     script(src="/node_modules/vuetify/dist/vuetify.js")
