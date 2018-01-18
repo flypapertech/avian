@@ -1,0 +1,33 @@
+doctype html
+html(lang="en")
+    head
+        meta(name="viewport", content="width=device-width, initial-scale=1")
+
+        title Avian Vuetify Example
+
+        link(href="/node_modules/vuetify/dist/vuetify.min.css", rel="stylesheet")
+
+        style
+            include:less index.style.less
+
+    body
+
+        avian-vuetify-example#app
+
+            v-app(dark)
+                v-toolbar.red
+                    h1 Avian Vuetify Example
+
+                v-content(fluid)
+
+                    v-container
+
+                v-footer(fluid)
+
+    script(src="/node_modules/vue/dist/vue.js")
+    script(src="/node_modules/vuetify/dist/vuetify.js")
+    script
+        include:typescript index.component.ts
+
+
+

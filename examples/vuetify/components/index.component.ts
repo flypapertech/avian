@@ -1,0 +1,2 @@
+
+new Vue({ el: "#app" })

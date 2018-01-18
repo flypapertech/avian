@@ -1,0 +1,17 @@
+{
+  "name": "avian-vuetify-example",
+  "version": "1.0.0",
+  "description": "A good place to start for anyone wishing to develop Vuetify applications on Avian.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node node_modules/.bin/avian"
+  },
+  "author": "ispyhumanfly",
+  "license": "MIT",
+  "dependencies": {
+    "avian": "0.0.15",
+    "vue": "^2.5.13",
+    "vuetify": "^0.17.6"
+  }
+}
