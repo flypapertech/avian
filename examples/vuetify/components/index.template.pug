@@ -23,12 +23,18 @@ html(lang="en")
 
                 v-content(fluid)
 
-                    v-container
+                    // Server-Side Storage Object Rendering
+                    if objects
+                        each object, index in objects
+                            if object.containers
+                                each container, index in object.containers
+                                    v-container
+                                        h1(style="color:white;") hello
 
                 v-footer(fluid)
 
     // Index Component
-
+    script(src="/node_modules/jquery/dist/jquery.min.js")
     script(src="/node_modules/vue/dist/vue.js")
     script(src="/node_modules/vuetify/dist/vuetify.js")
     script

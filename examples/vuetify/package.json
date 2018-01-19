@@ -11,6 +11,8 @@
   "license": "MIT",
   "dependencies": {
     "avian": "0.0.15",
+    "jquery": "^3.2.1",
+    "require": "^2.4.20",
     "vue": "^2.5.13",
     "vuetify": "^0.17.6"
   }
