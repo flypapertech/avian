@@ -46,7 +46,7 @@ The source code is available on GitHub.
     npm install https://github.com/ispyhumanfly/avian -g
 
 ## Local
-    npm install https://github.com/ispyhumanfly/avian -g
+    npm install https://github.com/ispyhumanfly/avian --save
 
 ## Clone
     git clone https://github.com/ispyhumanfly/avian.git
