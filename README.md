@@ -37,7 +37,6 @@ The latest stable release of Avian is available via the Node Package Manager.
     npm install avian -g
 
 ## Local
-
     npm install avian --save
 
 # GitHub
@@ -52,20 +51,13 @@ The source code is available on GitHub.
 ## Clone
     git clone https://github.com/ispyhumanfly/avian.git
 
-# Tutorials
-I really don't have any right now, but will work to remedy this quickly since we're now available on NPM. My goal is to provide some simple "Getting Started" tutorials focused around using Avian with popular technologies such as jQuery, Vue, React, Skate, Angular and others.
+# Example Applications
+Yes, eventually, and soon, we will have *real* documentation. For now, I'm working to create example Avian applications using popular frameworks.
 
-# Examples
-Below I've made available some of the applications that I'm creating for various customers of mine. It's a pretty horrible place to start for those who are new to Avian. But it's what I got for now. Please contact me for questions I will work one-on-one with people who are seriously interested.
-
-### Dtownmom
-[https://github.com/ispyhumanfly/dtownmom]
-
-### Cabbage Patch Saloon
-[https://github.com/ispyhumanfly/cabbagepatchsaloon]
-
-### Silver Gate Lending
-[https://github.com/ispyhumanfly/silvergatelending]
+## Avian w/ Vuetify
+    examples/vuetify/README.md
+## Avian w/ jQuery
+    examples/jquery/README.md
 
 # Author
 Dan Stephenson (ispyhumanfly@gmail.com)
