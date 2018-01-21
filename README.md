@@ -11,7 +11,8 @@ A highly scalable and easy to use environment for hosting modern HTML5 web, mobi
 ## Key Features
 - Component-based design paradigm while keeping things flexible.
 - Multi-core / Multi-threaded server side operations.
-- No database, just Redis. Each Avian component is responsible for managing its own storage objects.
+- No database, just Redis.
+- Each Avian component is responsible for managing its own storage objects.
 
 Host an HTML5 application using Avian...
 
@@ -21,7 +22,7 @@ Host an HTML5 application using Avian...
 Avian can easily be installed using various methods.
 
 ## System Requirements
-Avian uses Redis Server for fast retrieval of storage objects and template caching. Because of this, and other lower-level requirements, the following tools must reside on the installation system.
+Avian uses Redis Server for fast loading component templates and component storage objects. Because of this, and other lower-level goodies, the following software must be available to the installation environment.
 
 - macOS/Linux
     - Redis Server
@@ -51,13 +52,11 @@ The source code is available on GitHub. Though every build is verified through T
 ## Clone
     git clone https://github.com/ispyhumanfly/avian.git
 
-# Examples
-Yes, eventually, and soon, we will have *real* documentation. For now, I'm working to create example Avian applications using popular frameworks.
+# Documentation
+    docs/README.md
 
-## Avian w/ Vuetify
-    examples/vuetify/README.md
-## Avian w/ jQuery
-    examples/jquery/README.md
+# Examples
+    docs/examples/README.md
 
 # Author
 Dan Stephenson (ispyhumanfly@gmail.com)
