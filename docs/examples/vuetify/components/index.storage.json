@@ -8,11 +8,11 @@
         },
         {
             "containers": [
-                1,
-                2,
-                3,
-                4,
-                5
+                "Container 1",
+                "Container 2",
+                "Container 3",
+                "Container 4",
+                "Container 5"
             ]
         }
     ]

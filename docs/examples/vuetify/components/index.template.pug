@@ -15,7 +15,7 @@ html(lang="en")
 
         // Index Vuetfiy Application
 
-        avian-vuetify-example#index
+        index#component
 
             v-app(dark)
                 v-toolbar.blue
@@ -27,13 +27,13 @@ html(lang="en")
                     li(v-for="object in objects")
                         p {{ object }}
 
-                    // Server-Side Storage Object Rendering
+                    // Pug's Server-Side Storage Object Rendering
                     if objects
                         each object, index in objects
                             if object.containers
                                 each container, index in object.containers
                                     v-container
-                                        h1(style="color:white;") hello
+                                        h1(style="color:white;") #{object.containers[index]}
 
                 v-footer(fluid)
 
