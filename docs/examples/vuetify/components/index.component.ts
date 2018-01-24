@@ -1,22 +1,17 @@
 // Inbox Vue Component
 
-new Vue(
+const Index = new Vue(
     {
-        el: "#app",
+        el: "#index",
         data: {
-            storage: {}
+            objects: {}
         },
-        mounted: () => {
-            let index = this;
-            $.ajax({
-                url: "/index/storage/objects.json",
-                method: 'GET',
-                success: (objects) => {
-                    index.storage = objects;
-                },
-                error: function (error) {
-                    console.log(error);
-                }
-            });
+        created () {
+            fetch("/index/storage/objects.json")
+            .then(response =>response.json())
+            .then(json => {
+                this.objects = json.objects
+            })
+
         }
     })

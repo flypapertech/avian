@@ -15,13 +15,17 @@ html(lang="en")
 
         // Index Vuetfiy Application
 
-        avian-vuetify-example#app
+        avian-vuetify-example#index
 
             v-app(dark)
                 v-toolbar.blue
                     h1 Avian Vuetify Example
 
                 v-content(fluid)
+
+                    // Vue's Client-Side Object Rendering
+                    li(v-for="object in objects")
+                        p {{ object }}
 
                     // Server-Side Storage Object Rendering
                     if objects
@@ -34,7 +38,6 @@ html(lang="en")
                 v-footer(fluid)
 
     // Index Component
-    script(src="/node_modules/jquery/dist/jquery.min.js")
     script(src="/node_modules/vue/dist/vue.js")
     script(src="/node_modules/vuetify/dist/vuetify.js")
     script
