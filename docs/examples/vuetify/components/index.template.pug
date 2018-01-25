@@ -25,11 +25,13 @@ html(lang="en")
 
                     // Vue's Client-Side Object Rendering
                     li(v-for="object in objects")
-                        p {{ object }}
+                        p {{ object.links }}
 
                     // Pug's Server-Side Storage Object Rendering
                     if objects
                         each object, index in objects
+
+                            // Show Only Container Data
                             if object.containers
                                 each container, index in object.containers
                                     v-container
