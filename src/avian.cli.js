@@ -18,6 +18,8 @@ var os = require("os");
 
 var fs = require("fs");
 
+var cors = require("cors");
+
 var session = require("express-session");
 
 var jsonfile = require("jsonfile");
@@ -63,6 +65,7 @@ if (cluster.isMaster) {
     avian.use("/node_modules", express.static(home + "/node_modules"));
     avian.use("/bower_modules", express.static(home + "/bower_modules"));
     avian.use("/", express.static(home + "/assets"));
+    avian.use("cors");
     avian.set("view engine", "pug");
     avian.set("views", home);
     if (mode === "production") {
