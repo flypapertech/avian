@@ -13,7 +13,6 @@ import * as parser from "body-parser"
 import * as os from "os"
 import * as fs from "fs"
 
-const cors = require("cors")
 const session = require("express-session")
 const jsonfile = require("jsonfile")
 const compression = require("compression")
@@ -57,8 +56,6 @@ if (cluster.isMaster) {
     avian.use("/bower_modules", express.static(home + "/bower_modules"))
     avian.use("/avian_modules", express.static(home + "/avian_modules"))
     avian.use("/sandbox", express.static(home + "/sandbox"))
-
-    // avian.use("cors")
 
     avian.set("view engine", "pug")
     avian.set("views", home)

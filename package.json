@@ -1,7 +1,7 @@
 {
   "name": "avian",
   "version": "0.0.20",
-  "description": "Easily power your HTML5 web, mobile or desktop application.",
+  "description": "Create Enterprise-class component driven applications that scale.",
   "repository": {
     "type": "git",
     "url": "https://github.com/ispyhumanfly/avian.git"
@@ -28,7 +28,6 @@
     "compression": "^1.6.2",
     "connect-redis": "^3.1.0",
     "connect-redis-crypto": "^3.3.3",
-    "cors": "^2.8.4",
     "errorhandler": "^1.5.0",
     "events": "^1.1.1",
     "express": "^4.16.1",
@@ -51,7 +50,6 @@
     "jstransformer-jsx": "0.0.2",
     "jstransformer-less": "^2.1.0",
     "jstransformer-markdown-it": "^2.0.0",
-    "jstransformer-posthtml": "^0.1.0",
     "jstransformer-stylus": "^1.4.0",
     "jstransformer-typescript": "^1.0.0",
     "jstransformer-uglify-js": "^1.1.1",
