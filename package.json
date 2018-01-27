@@ -1,6 +1,6 @@
 {
   "name": "avian",
-  "version": "0.0.19",
+  "version": "0.0.20",
   "description": "Easily power your HTML5 web, mobile or desktop application.",
   "repository": {
     "type": "git",
@@ -18,7 +18,7 @@
     "test": "node node_modules/.bin/jasmine -w",
     "start": "node dist/avian.cli.js"
   },
-  "author": "Dan Stephenson",
+  "author": "Dan Stephenson (ispyhumanfly)",
   "license": "MIT",
   "dependencies": {
     "@types/express": "^4.0.37",
@@ -38,7 +38,6 @@
     "express-redis-cache": "^0.5.0",
     "express-redis-session": "^1.0.0",
     "express-session": "^1.14.1",
-    "express-view-cache": "^0.1.6",
     "highlight.js": "^9.7.0",
     "highlightjs": "^9.10.0",
     "inversify": "^3.3.0",
