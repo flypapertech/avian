@@ -11,7 +11,7 @@ A highly scalable and easy to use environment for hosting modern HTML5 web, mobi
 ## Key Features
 - Enterprise-class application server that meets infinitely scalable demands.
 - A unique and easy to use component-based model that is flexible with popular
-frameworks such as Angular, Vue.js, Vuetify, ReactJS, x-tag, SkateJS, Ember, and much more simple tasks.
+frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
 - Multi-core / Multi-threaded application host operations remove the burden of such considerations from the application developer.
 
 Host an HTML5 application using Avian...
