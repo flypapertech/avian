@@ -26,7 +26,7 @@ Avian uses Redis Server for fast loading component templates and component stora
 
 - macOS/Linux
     - Redis Server
-    - GCC 4.8+ / Python 2.x
+    - GCC 4.8+ / G++5 / Python 2.x
 - Windows
     - Redis Server
     - Visual Studio, Windows SDK, .NET and Python 2.x.
