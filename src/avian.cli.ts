@@ -14,6 +14,7 @@ import * as os from "os"
 import * as fs from "fs"
 
 const session = require("express-session")
+
 const jsonfile = require("jsonfile")
 const compression = require("compression")
 const shx = require("shelljs")
@@ -24,6 +25,19 @@ const name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || 
 const home = argv.home || process.env.AVIAN_APP_HOME || shx.pwd()
 const port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 const mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
+
+
+/*
+fs.readdir(`${home}/components`, (err, items) => {
+    for (let i = 0; i < items.length; i++) {
+        if (!items[i].search(/.*router/g)) {
+
+            let path = `${home}/components/${items[i]}`
+            import path
+        }
+    }
+})
+*/
 
 if (cluster.isMaster) {
 
@@ -126,6 +140,23 @@ if (cluster.isMaster) {
         req.cache.get(req.params.component, (err, storage) => {
             res.json(JSON.parse(storage))
         })
+    })
+
+    // Include individual component servers...
+    /*
+        This is a super crewed implementation. I'll improve this as we test further.
+    */
+
+    fs.readdir(`${home}/components`, (err, items) => {
+        for (let i = 0; i < items.length; i++) {
+            if (!items[i].search(/.*router/g)) {
+
+                let ComponentRouter = require(`${home}/components/${items[i]}`)// import(`${home}/components/${items[i]}`)
+
+                avian.use("/api", ComponentRouter)
+                // console.log(items[i])
+            }
+        }
     })
 
     avian.all("*", (req, res, next) => {
