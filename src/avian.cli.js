@@ -61,9 +61,7 @@ if (cluster.isMaster) {
     avian_1.use("/assets", express.static(home + "/assets"));
     avian_1.use("/static", express.static(home + "/static"));
     avian_1.use("/node_modules", express.static(home + "/node_modules"));
-    avian_1.use("/bower_modules", express.static(home + "/bower_modules"));
-    avian_1.use("/avian_modules", express.static(home + "/avian_modules"));
-    avian_1.use("/sandbox", express.static(home + "/sandbox"));
+    avian_1.use("/bower_components", express.static(home + "/bower_components"));
     avian_1.set("view engine", "pug");
     avian_1.set("views", home);
     if (mode === "production") {
