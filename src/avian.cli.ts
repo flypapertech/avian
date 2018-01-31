@@ -68,8 +68,6 @@ if (cluster.isMaster) {
     avian.use("/static", express.static(home + "/static"))
     avian.use("/node_modules", express.static(home + "/node_modules"))
     avian.use("/bower_components", express.static(home + "/bower_components"))
-    avian.use("/avian_modules", express.static(home + "/avian_modules"))
-    avian.use("/sandbox", express.static(home + "/sandbox"))
 
     avian.set("view engine", "pug")
     avian.set("views", home)
