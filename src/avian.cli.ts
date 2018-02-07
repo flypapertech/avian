@@ -25,7 +25,7 @@ const name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || 
 const home = argv.home || process.env.AVIAN_APP_HOME || shx.pwd()
 const port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 const mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
-
+const temp = argv.temp || process.env.AVIAN_APP_TEMP || process.env.TMP || process.env.TEMP || shx.pwd()
 
 /*
 fs.readdir(`${home}/components`, (err, items) => {
@@ -71,6 +71,8 @@ if (cluster.isMaster) {
 
     avian.set("view engine", "pug")
     avian.set("views", home)
+
+    // if (!fs.existsSync(home + "/temp/")) shx.mkdir(home + "/temp/")
 
     if (mode === "production") {
 
@@ -147,11 +149,11 @@ if (cluster.isMaster) {
 
     fs.readdir(`${home}/components`, (err, items) => {
         for (let i = 0; i < items.length; i++) {
-            if (!items[i].search(/.*router/g)) {
+            if (!items[i].search(/.*service/g)) {
 
-                let ComponentRouter = require(`${home}/components/${items[i]}`)// import(`${home}/components/${items[i]}`)
+                // let ComponentRouter = require(`${home}/components/${items[i]}`)// import(`${home}/components/${items[i]}`)
 
-                avian.use("/api", ComponentRouter)
+                // avian.use("/api", ComponentRouter)
                 // console.log(items[i])
             }
         }
