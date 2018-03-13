@@ -5,15 +5,19 @@ html(lang="en")
 
         title Avian React Example
 
-        // Style
+        // React Style
         style
             include:less index.style.less
 
     body
 
-        // Template
+        // React Application
         #root
 
-    // Component
+    // React Component
+
+    script(crossorigin, src="./node_modules/react/umd/react.development.js")
+    script(crossorigin, src="./node_modules/react-dom/umd/react-dom.development.js")
+
     script
-        include:typescript index.component.ts
+        include:babel index.component.babel
