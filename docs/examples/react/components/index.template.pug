@@ -5,19 +5,19 @@ html(lang="en")
 
         title Avian React Example
 
-        // React Style
+        // React Less Style
         style
             include:less index.style.less
 
     body
 
-        // React Application
+        // React Root Element
         #root
 
-    // React Component
+    // React Babel Component
 
     script(crossorigin, src="./node_modules/react/umd/react.development.js")
     script(crossorigin, src="./node_modules/react-dom/umd/react-dom.development.js")
 
     script
-        include:babel index.component.jsx
+        include:babel index.component.js
