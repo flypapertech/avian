@@ -1,1 +1,0 @@
-# Avian jQuery Example
