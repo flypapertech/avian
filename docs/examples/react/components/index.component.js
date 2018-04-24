@@ -53,7 +53,6 @@ class Example extends React.Component {
     return(
       <div>
         <button onClick={this.startTimer}>Start</button>
-        <button>Clear</button>
 
         h: {this.state.time.h} m: {this.state.time.m} s: {this.state.time.s}
       </div>
