@@ -21,8 +21,9 @@
   "author": "Dan Stephenson (ispyhumanfly)",
   "license": "MIT",
   "dependencies": {
-    "@types/express": "^4.0.37",
-    "@types/jasmine": "^2.8.3",
+    "@types/express": "^4.11.1",
+    "@types/jasmine": "^2.8.6",
+    "@types/node": "^10.0.3",
     "body-parser": "^1.15.2",
     "bunyan": "^1.8.4",
     "compression": "^1.6.2",
