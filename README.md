@@ -58,9 +58,9 @@ The source code is available on GitHub. Though every build is verified through T
 # Examples
     docs/examples/README.md
 
-# Authors
-Dan Stephenson (dan@flypaper.com)
-Nick Fredricks (nick@flypaper.com)
+# Contributors
+Dan Stephenson
+Nick Fredricks
 
 # License
 MIT

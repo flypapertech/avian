@@ -18,7 +18,7 @@
     "test": "node node_modules/.bin/jasmine -w",
     "start": "node dist/avian.cli.js"
   },
-  "author": "Dan Stephenson (ispyhumanfly)",
+  "contributors": ["Dan Stephenson", "Nick Fredricks"],
   "license": "MIT",
   "dependencies": {
     "@types/express": "^4.11.1",
