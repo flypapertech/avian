@@ -97,23 +97,25 @@ if (cluster.isMaster) {
     avian.get("/:component", parser.urlencoded({
         extended: true
     }), function(req, res, next) {
+        var reqWithCache = req;
         if (fs.existsSync(home + "/components/" + req.params.component)) component_root_1 = home + "/components/" + req.params.component; else component_root_1 = home + "/components";
         try {
-            event_1.emit("synch", req.cache.set(name, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".storage.json"))));
+            event_1.emit("synch", reqWithCache.cache.set(name, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".config.json"))));
         } catch (err) {
             if (err) if (component_root_1 + "/" + req.params.component) res.redirect("/error");
         }
         try {
-            req.cache.get("" + req.params.component, function(err, storage) {
+            reqWithCache.cache.get("" + req.params.component, function(err, storage) {
                 res.render(component_root_1 + "/" + req.params.component + ".view.pug", JSON.parse(storage));
             });
         } catch (err) {
             if (err) res.redirect("/error");
         }
     });
-    avian.get("/:component/storage/objects.json", function(req, res, next) {
-        event_1.emit("synch", req.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".storage.json"))));
-        req.cache.get(req.params.component, function(err, storage) {
+    avian.get("/:component/storage/config.json", function(req, res, next) {
+        var reqWithCache = req;
+        event_1.emit("synch", reqWithCache.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".config.json"))));
+        reqWithCache.cache.get(req.params.component, function(err, storage) {
             res.json(JSON.parse(storage));
         });
     });
