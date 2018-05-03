@@ -18,7 +18,10 @@
     "test": "node node_modules/.bin/jasmine -w",
     "start": "node dist/avian.cli.js"
   },
-  "contributors": ["Dan Stephenson", "Nick Fredricks"],
+  "contributors": [
+    "Dan Stephenson",
+    "Nick Fredricks"
+  ],
   "license": "MIT",
   "dependencies": {
     "@types/express": "^4.11.1",
@@ -78,6 +81,7 @@
     "ts-dependency-injection": "^1.2.2",
     "ts-node": "^3.0.2",
     "tslint": "^5.9.1",
+    "typescript": "^2.8.3",
     "typescript-compiler": "^1.4.1-2",
     "uglify": "^0.1.5",
     "uglify-js": "^2.7.4",
