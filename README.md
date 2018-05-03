@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ispyhumanfly/avian.svg?branch=master)](https://travis-ci.org/ispyhumanfly/avian)
+[![Build Status](https://travis-ci.org/flypapertech/avian.svg?branch=master)](https://travis-ci.org/flypapertech/avian)
 
 [![NPM](https://nodei.co/npm/avian.png)](https://npmjs.org/package/avian)
 
@@ -44,13 +44,13 @@ The latest stable release of Avian is available via the Node Package Manager.
 The source code is available on GitHub. Though every build is verified through Travis, please consider installation directly from GitHub to be risky for new developers.
 
 ## Global
-    npm install https://github.com/ispyhumanfly/avian -g
+    npm install https://github.com/flypapertech/avian --global
 
 ## Local
-    npm install https://github.com/ispyhumanfly/avian --save
+    npm install https://github.com/flypapertech/avian --save
 
 ## Clone
-    git clone https://github.com/ispyhumanfly/avian.git
+    git clone https://github.com/flypapertech/avian.git
 
 # Documentation
     docs/README.md
@@ -58,8 +58,12 @@ The source code is available on GitHub. Though every build is verified through T
 # Examples
     docs/examples/README.md
 
-# Author
-Dan Stephenson (ispyhumanfly@gmail.com)
+# Authors
+Dan Stephenson (dan@flypaper.com)
+Nick Fredricks (nick@flypaper.com)
 
 # License
 MIT
+
+# Copyright
+2017 - 2018 FlyPaper Technologies, LLC
