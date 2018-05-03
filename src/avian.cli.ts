@@ -123,7 +123,7 @@ if (cluster.isMaster) {
         try {
             event.emit("synch",
                 reqWithCache.cache.set(name,
-                    JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.storage.json`))))
+                    JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
         }
         catch (err) {
             if (err)
@@ -142,12 +142,12 @@ if (cluster.isMaster) {
         }
     })
 
-    avian.get("/:component/storage/objects.json", (req, res, next) => {
+    avian.get("/:component/storage/config.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache;
 
         event.emit("synch",
             reqWithCache.cache.set(req.params.component,
-                JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.storage.json`))))
+                JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
 
         reqWithCache.cache.get(req.params.component, (err, storage) => {
             res.json(JSON.parse(storage))
