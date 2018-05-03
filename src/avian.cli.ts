@@ -25,7 +25,8 @@ const name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || 
 const home = argv.home || process.env.AVIAN_APP_HOME || shx.pwd()
 const port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 const mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
-const temp = argv.temp || process.env.AVIAN_APP_TEMP || process.env.TMP || process.env.TEMP || shx.pwd()
+
+// const temp = argv.temp || process.env.AVIAN_APP_TEMP || process.env.TMP || process.env.TEMP || shx.pwd()
 
 /*
 fs.readdir(`${home}/components`, (err, items) => {
@@ -108,27 +109,35 @@ if (cluster.isMaster) {
     let event = new events.EventEmitter()
     event.on("synch", () => {this})
 
+
+    let component_root: string
+
     avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
+
+        if (fs.existsSync(`${home}/components/${req.params.component}`))
+            component_root = `${home}/components/${req.params.component}`
+        else
+            component_root = `${home}/components`
 
         try {
             event.emit("synch",
                 req.cache.set(name,
-                    JSON.stringify(jsonfile.readFileSync(home + `/components/${req.params.component}.storage.json`))))
+                    JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.storage.json`))))
         }
         catch (err) {
             if (err)
-                if (home + `/components/${req.params.component}`)
-                    res.redirect("/errors")
+                if (`${component_root}/${req.params.component}`)
+                    res.redirect("/error")
         }
 
         try {
             req.cache.get(`${req.params.component}`, (err, storage) => {
-                res.render(home + `/components/${req.params.component}.template.pug`, JSON.parse(storage))
+                res.render(`${component_root}/${req.params.component}.view.pug`, JSON.parse(storage))
             })
         }
         catch (err) {
             if (err)
-                res.redirect("/errors")
+                res.redirect("/error")
         }
     })
 
@@ -136,7 +145,7 @@ if (cluster.isMaster) {
 
         event.emit("synch",
             req.cache.set(req.params.component,
-                JSON.stringify(jsonfile.readFileSync(home + `/components/${req.params.component}.storage.json`))))
+                JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.storage.json`))))
 
         req.cache.get(req.params.component, (err, storage) => {
             res.json(JSON.parse(storage))
@@ -148,7 +157,7 @@ if (cluster.isMaster) {
         This is a super crewed implementation. I'll improve this as we test further.
     */
 
-    fs.readdir(`${home}/components`, (err, items) => {
+    /* fs.readdir(`${component_root}`, (err, items) => {
         for (let i = 0; i < items.length; i++) {
             if (!items[i].search(/.*service/g)) {
 
@@ -158,7 +167,7 @@ if (cluster.isMaster) {
                 // console.log(items[i])
             }
         }
-    })
+    })*/
 
     avian.all("*", (req, res, next) => {
         res.redirect("/index")
