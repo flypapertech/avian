@@ -36,8 +36,6 @@ var port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 
 var mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 
-var temp = argv.temp || process.env.AVIAN_APP_TEMP || process.env.TMP || process.env.TEMP || shx.pwd();
-
 if (cluster.isMaster) {
     var cores = os.cpus();
     for (var i = 0; i < cores.length; i++) {
@@ -95,32 +93,29 @@ if (cluster.isMaster) {
     event_1.on("synch", function() {
         _this;
     });
+    var component_root_1;
     avian.get("/:component", parser.urlencoded({
         extended: true
     }), function(req, res, next) {
+        if (fs.existsSync(home + "/components/" + req.params.component)) component_root_1 = home + "/components/" + req.params.component; else component_root_1 = home + "/components";
         try {
-            event_1.emit("synch", req.cache.set(name, JSON.stringify(jsonfile.readFileSync(home + ("/components/" + req.params.component + ".storage.json")))));
+            event_1.emit("synch", req.cache.set(name, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".storage.json"))));
         } catch (err) {
-            if (err) if (home + ("/components/" + req.params.component)) res.redirect("/errors");
+            if (err) if (component_root_1 + "/" + req.params.component) res.redirect("/error");
         }
         try {
             req.cache.get("" + req.params.component, function(err, storage) {
-                res.render(home + ("/components/" + req.params.component + ".template.pug"), JSON.parse(storage));
+                res.render(component_root_1 + "/" + req.params.component + ".view.pug", JSON.parse(storage));
             });
         } catch (err) {
-            if (err) res.redirect("/errors");
+            if (err) res.redirect("/error");
         }
     });
     avian.get("/:component/storage/objects.json", function(req, res, next) {
-        event_1.emit("synch", req.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(home + ("/components/" + req.params.component + ".storage.json")))));
+        event_1.emit("synch", req.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".storage.json"))));
         req.cache.get(req.params.component, function(err, storage) {
             res.json(JSON.parse(storage));
         });
-    });
-    fs.readdir(home + "/components", function(err, items) {
-        for (var i = 0; i < items.length; i++) {
-            if (!items[i].search(/.*service/g)) {}
-        }
     });
     avian.all("*", function(req, res, next) {
         res.redirect("/index");
