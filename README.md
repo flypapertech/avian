@@ -59,8 +59,8 @@ The source code is available on GitHub. Though every build is verified through T
     docs/examples/README.md
 
 # Contributors
-Dan Stephenson
-Nick Fredricks
+    Dan Stephenson
+    Nick Fredricks
 
 # License
 MIT
