@@ -4,7 +4,7 @@
   "description": "Create Enterprise-class component driven applications that scale.",
   "repository": {
     "type": "git",
-    "url": "https://github.com/ispyhumanfly/avian.git"
+    "url": "https://github.com/flypapertech/avian.git"
   },
   "preferGlobal": true,
   "main": "./dist/avian.cli.js",
