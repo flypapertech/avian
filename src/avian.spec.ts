@@ -1,17 +1,17 @@
 "use strict";
 
 import * as fs from "fs"
-import * as jasmine from "jasmine"
+import "jasmine"
 
-jasmine.describe("Avian Distribution Files", () => {
+describe("Avian Distribution Files", () => {
     let avian
 
-    jasmine.beforeEach (() => {
+    beforeEach (() => {
         avian.cli("./dist/avian.cli.js")
         avian.lib("./dist/avian.lib.js")
     })
 
-    jasmine.it("Checks to see if all distribution files have been built.", () => {
+    it("Checks to see if all distribution files have been built.", () => {
 
     })
 })
