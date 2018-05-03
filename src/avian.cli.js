@@ -36,6 +36,8 @@ var port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 
 var mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 
+var temp = argv.temp || process.env.AVIAN_APP_TEMP || process.env.TMP || process.env.TEMP || shx.pwd();
+
 if (cluster.isMaster) {
     var cores = os.cpus();
     for (var i = 0; i < cores.length; i++) {
@@ -45,9 +47,9 @@ if (cluster.isMaster) {
         cluster.fork();
     });
 } else {
-    var avian_1 = express();
+    var avian = express();
     var redisStore = require("connect-redis-crypto")(session);
-    avian_1.use(session({
+    avian.use(session({
         store: new redisStore({
             host: "127.0.0.1"
         }),
@@ -55,19 +57,20 @@ if (cluster.isMaster) {
         resave: false,
         saveUninitialized: false
     }));
-    avian_1.use(require("express-redis")(6379, "127.0.0.1", {
+    avian.use(require("express-redis")(6379, "127.0.0.1", {
         return_buffers: true
     }, "cache"));
-    avian_1.use("/assets", express.static(home + "/assets"));
-    avian_1.use("/static", express.static(home + "/static"));
-    avian_1.use("/node_modules", express.static(home + "/node_modules"));
-    avian_1.use("/bower_components", express.static(home + "/bower_components"));
-    avian_1.set("view engine", "pug");
-    avian_1.set("views", home);
+    avian.use("/assets", express.static(home + "/assets"));
+    avian.use("/static", express.static(home + "/static"));
+    avian.use("/node_modules", express.static(home + "/node_modules"));
+    avian.use("/bower_components", express.static(home + "/bower_components"));
+    avian.use("/jspm_packages", express.static(home + "/jspm_packages"));
+    avian.set("view engine", "pug");
+    avian.set("views", home);
     if (mode === "production") {
         if (!fs.existsSync(home + "/cache/")) shx.mkdir(home + "/cache/");
         if (!fs.existsSync(home + "/logs/")) shx.mkdir(home + "/logs/");
-        avian_1.use(require("express-bunyan-logger")({
+        avian.use(require("express-bunyan-logger")({
             name: name,
             streams: [ {
                 level: "info",
@@ -83,16 +86,16 @@ if (cluster.isMaster) {
                 count: 365
             } ]
         }));
-        avian_1.use(require("express-minify")({
+        avian.use(require("express-minify")({
             cache: home + "/cache"
         }));
-        avian_1.use(compression());
+        avian.use(compression());
     }
     var event_1 = new events.EventEmitter();
     event_1.on("synch", function() {
         _this;
     });
-    avian_1.get("/:component", parser.urlencoded({
+    avian.get("/:component", parser.urlencoded({
         extended: true
     }), function(req, res, next) {
         try {
@@ -108,7 +111,7 @@ if (cluster.isMaster) {
             if (err) res.redirect("/errors");
         }
     });
-    avian_1.get("/:component/storage/objects.json", function(req, res, next) {
+    avian.get("/:component/storage/objects.json", function(req, res, next) {
         event_1.emit("synch", req.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(home + ("/components/" + req.params.component + ".storage.json")))));
         req.cache.get(req.params.component, function(err, storage) {
             res.json(JSON.parse(storage));
@@ -116,16 +119,13 @@ if (cluster.isMaster) {
     });
     fs.readdir(home + "/components", function(err, items) {
         for (var i = 0; i < items.length; i++) {
-            if (!items[i].search(/.*router/g)) {
-                var ComponentRouter = require(home + "/components/" + items[i]);
-                avian_1.use("/api", ComponentRouter);
-            }
+            if (!items[i].search(/.*service/g)) {}
         }
     });
-    avian_1.all("*", function(req, res, next) {
+    avian.all("*", function(req, res, next) {
         res.redirect("/index");
     });
-    var portal = avian_1.listen(port, function() {
+    var portal = avian.listen(port, function() {
         console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, name, home, port);
     });
 }
