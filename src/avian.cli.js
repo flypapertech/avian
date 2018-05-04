@@ -112,7 +112,7 @@ if (cluster.isMaster) {
             if (err) res.redirect("/error");
         }
     });
-    avian.get("/:component/storage/config.json", function(req, res, next) {
+    avian.get("/:component/config/objects.json", function(req, res, next) {
         var reqWithCache = req;
         event_1.emit("synch", reqWithCache.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".config.json"))));
         reqWithCache.cache.get(req.params.component, function(err, storage) {

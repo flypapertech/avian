@@ -142,7 +142,7 @@ if (cluster.isMaster) {
         }
     })
 
-    avian.get("/:component/storage/config.json", (req, res, next) => {
+    avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache;
 
         event.emit("synch",
