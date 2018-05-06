@@ -46,6 +46,7 @@ if (cluster.isMaster) {
     });
 } else {
     var avian = express();
+    avian.locals.mode = mode;
     var redisStore = require("connect-redis-crypto")(session);
     avian.use(session({
         store: new redisStore({
