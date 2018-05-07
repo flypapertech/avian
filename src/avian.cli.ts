@@ -147,6 +147,10 @@ if (cluster.isMaster) {
 
     avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache;
+        if (fs.existsSync(`${home}/components/${req.params.component}`))
+            component_root = `${home}/components/${req.params.component}`
+        else
+            component_root = `${home}/components`
 
         event.emit("synch",
             reqWithCache.cache.set(req.params.component,

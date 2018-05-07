@@ -115,6 +115,7 @@ if (cluster.isMaster) {
     });
     avian.get("/:component/config/objects.json", function(req, res, next) {
         var reqWithCache = req;
+        if (fs.existsSync(home + "/components/" + req.params.component)) component_root_1 = home + "/components/" + req.params.component; else component_root_1 = home + "/components";
         event_1.emit("synch", reqWithCache.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".config.json"))));
         reqWithCache.cache.get(req.params.component, function(err, storage) {
             res.json(JSON.parse(storage));
