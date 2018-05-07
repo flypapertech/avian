@@ -131,8 +131,11 @@ if (cluster.isMaster) {
                 reqWithCache.cache.set(req.params.component,
                     JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
 
-            reqWithCache.cache.get(`${req.params.component}`, (err, storage) => {
-                res.render(`${component_root}/${req.params.component}.view.pug`, JSON.parse(storage))
+            reqWithCache.cache.get(`${req.params.component}`, (err, config) => {
+
+                res.locals.params = req.params
+
+                res.render(`${component_root}/${req.params.component}.view.pug`, JSON.parse(config))
             })
         }
         catch (err) {
@@ -149,8 +152,8 @@ if (cluster.isMaster) {
                 reqWithCache.cache.set(req.params.component,
                     JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
 
-            reqWithCache.cache.get(req.params.component, (err, storage) => {
-                res.json(JSON.parse(storage))
+            reqWithCache.cache.get(req.params.component, (err, config) => {
+                res.json(JSON.parse(config))
             })
         }
         catch (err) {
