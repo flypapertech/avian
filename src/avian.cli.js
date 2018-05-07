@@ -101,7 +101,7 @@ if (cluster.isMaster) {
         var reqWithCache = req;
         if (fs.existsSync(home + "/components/" + req.params.component)) component_root_1 = home + "/components/" + req.params.component; else component_root_1 = home + "/components";
         try {
-            event_1.emit("synch", reqWithCache.cache.set(name, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".config.json"))));
+            event_1.emit("synch", reqWithCache.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".config.json"))));
         } catch (err) {
             if (err) if (component_root_1 + "/" + req.params.component) res.redirect("/error");
         }

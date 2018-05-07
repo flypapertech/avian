@@ -125,7 +125,7 @@ if (cluster.isMaster) {
 
         try {
             event.emit("synch",
-                reqWithCache.cache.set(name,
+                reqWithCache.cache.set(req.params.component,
                     JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
         }
         catch (err) {
