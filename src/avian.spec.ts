@@ -1,4 +1,4 @@
-"use strict";
+"use strict"
 
 import * as fs from "fs"
 import "jasmine"

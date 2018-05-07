@@ -22,6 +22,17 @@ const home = argv.home || process.env.AVIAN_APP_HOME || shx.pwd()
 const port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 const mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
 
+class AvianUtils {
+    getComponentRoot(component: string): string {
+        if (fs.existsSync(`${home}/components/${component}`))
+            return `${home}/components/${component}`
+        else
+            return `${home}/components`
+    }
+}
+
+const avianUtils = new AvianUtils();
+
 interface RequestWithCache extends express.Request {
     cache: RedisClient;
 }
@@ -112,17 +123,9 @@ if (cluster.isMaster) {
     let event = new events.EventEmitter()
     event.on("synch", () => {this})
 
-
-    let component_root: string
-
     avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
-        let reqWithCache = req as RequestWithCache;
-
-        if (fs.existsSync(`${home}/components/${req.params.component}`))
-            component_root = `${home}/components/${req.params.component}`
-        else
-            component_root = `${home}/components`
-
+        let reqWithCache = req as RequestWithCache
+        let component_root = avianUtils.getComponentRoot(req.params.component)
         try {
             event.emit("synch",
                 reqWithCache.cache.set(req.params.component,
@@ -146,12 +149,8 @@ if (cluster.isMaster) {
     })
 
     avian.get("/:component/config/objects.json", (req, res, next) => {
-        let reqWithCache = req as RequestWithCache;
-        if (fs.existsSync(`${home}/components/${req.params.component}`))
-            component_root = `${home}/components/${req.params.component}`
-        else
-            component_root = `${home}/components`
-
+        let reqWithCache = req as RequestWithCache
+        let component_root = avianUtils.getComponentRoot(req.params.component)
         event.emit("synch",
             reqWithCache.cache.set(req.params.component,
                 JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
