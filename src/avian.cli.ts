@@ -1,4 +1,4 @@
-"use strict";
+"use strict"
 
 import * as events from "events"
 import * as crypto from "crypto"
@@ -7,7 +7,7 @@ import * as express from "express"
 import * as parser from "body-parser"
 import * as os from "os"
 import * as fs from "fs"
-import { RedisClient } from "redis";
+import { RedisClient } from "redis"
 
 const session = require("express-session")
 
@@ -31,10 +31,10 @@ class AvianUtils {
     }
 }
 
-const avianUtils = new AvianUtils();
+const avianUtils = new AvianUtils()
 
 interface RequestWithCache extends express.Request {
-    cache: RedisClient;
+    cache: RedisClient
 }
 
 // const temp = argv.temp || process.env.AVIAN_APP_TEMP || process.env.TMP || process.env.TEMP || shx.pwd()
@@ -68,7 +68,7 @@ if (cluster.isMaster) {
 
     avian.locals.mode = mode
 
-    let redisStore = require("connect-redis-crypto")(session);
+    let redisStore = require("connect-redis-crypto")(session)
 
     avian.use(session({
         store: new redisStore({host: "127.0.0.1"}),
@@ -130,14 +130,7 @@ if (cluster.isMaster) {
             event.emit("synch",
                 reqWithCache.cache.set(req.params.component,
                     JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
-        }
-        catch (err) {
-            if (err)
-                if (`${component_root}/${req.params.component}`)
-                    res.redirect("/error")
-        }
 
-        try {
             reqWithCache.cache.get(`${req.params.component}`, (err, storage) => {
                 res.render(`${component_root}/${req.params.component}.view.pug`, JSON.parse(storage))
             })
@@ -151,13 +144,19 @@ if (cluster.isMaster) {
     avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache
         let component_root = avianUtils.getComponentRoot(req.params.component)
-        event.emit("synch",
-            reqWithCache.cache.set(req.params.component,
-                JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
+        try {
+            event.emit("synch",
+                reqWithCache.cache.set(req.params.component,
+                    JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
 
-        reqWithCache.cache.get(req.params.component, (err, storage) => {
-            res.json(JSON.parse(storage))
-        })
+            reqWithCache.cache.get(req.params.component, (err, storage) => {
+                res.json(JSON.parse(storage))
+            })
+        }
+        catch (err) {
+            res.status(404)
+                .send("Not Found")
+        }
     })
 
     // Include individual component servers...

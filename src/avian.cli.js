@@ -36,6 +36,16 @@ var port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 
 var mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 
+var AvianUtils = function() {
+    function AvianUtils() {}
+    AvianUtils.prototype.getComponentRoot = function(component) {
+        if (fs.existsSync(home + "/components/" + component)) return home + "/components/" + component; else return home + "/components";
+    };
+    return AvianUtils;
+}();
+
+var avianUtils = new AvianUtils();
+
 if (cluster.isMaster) {
     var cores = os.cpus();
     for (var i = 0; i < cores.length; i++) {
@@ -94,20 +104,15 @@ if (cluster.isMaster) {
     event_1.on("synch", function() {
         _this;
     });
-    var component_root_1;
     avian.get("/:component", parser.urlencoded({
         extended: true
     }), function(req, res, next) {
         var reqWithCache = req;
-        if (fs.existsSync(home + "/components/" + req.params.component)) component_root_1 = home + "/components/" + req.params.component; else component_root_1 = home + "/components";
+        var component_root = avianUtils.getComponentRoot(req.params.component);
         try {
-            event_1.emit("synch", reqWithCache.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".config.json"))));
-        } catch (err) {
-            if (err) if (component_root_1 + "/" + req.params.component) res.redirect("/error");
-        }
-        try {
+            event_1.emit("synch", reqWithCache.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root + "/" + req.params.component + ".config.json"))));
             reqWithCache.cache.get("" + req.params.component, function(err, storage) {
-                res.render(component_root_1 + "/" + req.params.component + ".view.pug", JSON.parse(storage));
+                res.render(component_root + "/" + req.params.component + ".view.pug", JSON.parse(storage));
             });
         } catch (err) {
             if (err) res.redirect("/error");
@@ -115,11 +120,15 @@ if (cluster.isMaster) {
     });
     avian.get("/:component/config/objects.json", function(req, res, next) {
         var reqWithCache = req;
-        if (fs.existsSync(home + "/components/" + req.params.component)) component_root_1 = home + "/components/" + req.params.component; else component_root_1 = home + "/components";
-        event_1.emit("synch", reqWithCache.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root_1 + "/" + req.params.component + ".config.json"))));
-        reqWithCache.cache.get(req.params.component, function(err, storage) {
-            res.json(JSON.parse(storage));
-        });
+        var component_root = avianUtils.getComponentRoot(req.params.component);
+        try {
+            event_1.emit("synch", reqWithCache.cache.set(req.params.component, JSON.stringify(jsonfile.readFileSync(component_root + "/" + req.params.component + ".config.json"))));
+            reqWithCache.cache.get(req.params.component, function(err, storage) {
+                res.json(JSON.parse(storage));
+            });
+        } catch (err) {
+            res.status(404).send("Not Found");
+        }
     });
     avian.all("*", function(req, res, next) {
         res.redirect("/index");
