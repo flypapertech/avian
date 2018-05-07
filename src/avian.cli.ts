@@ -133,7 +133,7 @@ if (cluster.isMaster) {
 
             reqWithCache.cache.get(`${req.params.component}`, (err, config) => {
 
-                avian.locals.params = req.params
+                res.locals.params = req.params
 
                 res.render(`${component_root}/${req.params.component}.view.pug`, JSON.parse(config))
             })
