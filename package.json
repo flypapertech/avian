@@ -16,7 +16,8 @@
     "build_cli": "node_modules/.bin/tsc ./src/avian.cli.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.cli.js -b -o ./src/avian.cli.js ; node_modules/.bin/uglifyjs ./src/avian.cli.js -o ./dist/avian.cli.js",
     "build_spec": "node_modules/.bin/tsc ./src/avian.spec.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.spec.js -b -o ./src/avian.spec.js ; node_modules/.bin/uglifyjs ./src/avian.spec.js -o ./spec/avian.spec.js",
     "test": "jasmine",
-    "start": "node dist/avian.cli.js"
+    "start": "node dist/avian.cli.js",
+    "snyk-protect": "snyk protect"
   },
   "contributors": [
     "Dan Stephenson",
@@ -71,7 +72,6 @@
     "reflect-metadata": "^0.1.8",
     "semver": "^5.3.0",
     "serve-favicon": "^2.4.5",
-    "shx": "^0.2.0",
     "stylus": "^0.54.5",
     "symbol": "^0.3.0",
     "ts-dependency-injection": "^1.2.2",
@@ -84,6 +84,10 @@
     "yargs": "^11.1.0"
   },
   "resolutions": {
-    "*/**/hoek": "^4.2.0"
+    "*/**/hoek": "^4.2.0",
+    "*/**/fresh": "^0.5.2"
+  },
+  "devDependencies": {
+    "shx": "^0.2.2"
   }
 }
