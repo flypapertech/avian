@@ -45,7 +45,7 @@
     "highlightjs": "^9.10.0",
     "inversify": "^3.3.0",
     "jasmine": "^2.5.2",
-    "jsonfile": "^2.4.0",
+    "jsonfile": "^4.0.0",
     "jstransformer": "^1.0.0",
     "jstransformer-babel": "^2.1.0",
     "jstransformer-browserify": "^0.4.0",
