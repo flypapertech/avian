@@ -57,7 +57,7 @@
     "jstransformer-stylus": "^1.4.0",
     "jstransformer-typescript": "^1.0.0",
     "jstransformer-uglify-js": "^1.1.1",
-    "less": "^2.7.1",
+    "less": "^3.0.4",
     "line-reader": "^0.4.0",
     "markdown-it": "^8.1.0",
     "markdown-it-table-of-contents": "^0.3.2",
