@@ -15,7 +15,7 @@
     "prepare": "npm run build_cli && npm run build_spec && npm run test",
     "build_cli": "node_modules/.bin/tsc ./src/avian.cli.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.cli.js -b -o ./src/avian.cli.js ; node_modules/.bin/uglifyjs ./src/avian.cli.js -o ./dist/avian.cli.js",
     "build_spec": "node_modules/.bin/tsc ./src/avian.spec.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.spec.js -b -o ./src/avian.spec.js ; node_modules/.bin/uglifyjs ./src/avian.spec.js -o ./spec/avian.spec.js",
-    "test": "node node_modules/.bin/jasmine -w",
+    "test": "jasmine",
     "start": "node dist/avian.cli.js"
   },
   "contributors": [
@@ -25,7 +25,7 @@
   "license": "MIT",
   "dependencies": {
     "@types/express": "^4.11.1",
-    "@types/jasmine": "^2.8.6",
+    "@types/jasmine": "^2.8.7",
     "@types/node": "^10.0.3",
     "@types/redis": "^2.8.6",
     "body-parser": "^1.15.2",
@@ -42,7 +42,7 @@
     "express-session": "^1.14.1",
     "highlight.js": "^9.7.0",
     "highlightjs": "^9.10.0",
-    "jasmine": "^2.5.2",
+    "jasmine": "^3.1.0",
     "jsonfile": "^4.0.0",
     "jstransformer": "^1.0.0",
     "jstransformer-babel": "^2.1.0",
