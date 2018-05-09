@@ -82,7 +82,7 @@
     "tslint": "^5.9.1",
     "typescript": "^2.8.3",
     "typescript-compiler": "^1.4.1",
-    "uglify-js": "^2.8.29",
+    "uglify-js": "3.3.24",
     "watch": "^1.0.1",
     "yargs": "^7.0.2"
   }
