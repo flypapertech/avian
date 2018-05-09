@@ -15,5 +15,3 @@ bower_components
 *.log
 npm-debug*
 *.map
-package-lock.json
-
