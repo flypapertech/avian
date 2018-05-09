@@ -40,8 +40,6 @@
     "express-file-router": "0.0.8",
     "express-minify": "^0.2.0",
     "express-redis": "^2.0.0",
-    "express-redis-cache": "^0.5.0",
-    "express-redis-session": "^1.0.0",
     "express-session": "^1.14.1",
     "highlight.js": "^9.7.0",
     "highlightjs": "^9.10.0",
@@ -83,7 +81,7 @@
     "ts-node": "^6.0.2",
     "tslint": "^5.9.1",
     "typescript": "^2.8.3",
-    "typescript-compiler": "^1.4.1-2",
+    "typescript-compiler": "^1.4.1",
     "uglify-js": "^2.8.29",
     "watch": "^1.0.1",
     "yargs": "^7.0.2"
