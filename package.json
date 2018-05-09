@@ -43,7 +43,6 @@
     "express-session": "^1.14.1",
     "highlight.js": "^9.7.0",
     "highlightjs": "^9.10.0",
-    "inversify": "^3.3.0",
     "jasmine": "^2.5.2",
     "jsonfile": "^4.0.0",
     "jstransformer": "^1.0.0",
