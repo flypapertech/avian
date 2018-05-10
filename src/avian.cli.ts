@@ -28,6 +28,20 @@ class AvianUtils {
         else
             return `${home}/components`
     }
+
+    cacheConfigObject(component: string, reqWithCache: RequestWithCache) {
+        let component_root = this.getComponentRoot(component)
+        let configStringJSON: string
+        try {
+            configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${component}.config.json`))
+        } catch (err) {
+            configStringJSON = JSON.stringify({})
+        }
+
+        let event = new events.EventEmitter()
+        event.emit("synch",
+            reqWithCache.cache.set(component, configStringJSON))
+    }
 }
 
 const avianUtils = new AvianUtils()
@@ -126,14 +140,9 @@ if (cluster.isMaster) {
         let reqWithCache = req as RequestWithCache
         let component_root = avianUtils.getComponentRoot(req.params.component)
         try {
-            event.emit("synch",
-                reqWithCache.cache.set(req.params.component,
-                    JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
-
+            avianUtils.cacheConfigObject(req.params.component, reqWithCache)
             reqWithCache.cache.get(`${req.params.component}`, (err, config) => {
-
                 res.locals.params = req.params
-
                 res.render(`${component_root}/${req.params.component}.view.pug`, JSON.parse(config))
             })
         }
@@ -147,10 +156,7 @@ if (cluster.isMaster) {
         let reqWithCache = req as RequestWithCache
         let component_root = avianUtils.getComponentRoot(req.params.component)
         try {
-            event.emit("synch",
-                reqWithCache.cache.set(req.params.component,
-                    JSON.stringify(jsonfile.readFileSync(`${component_root}/${req.params.component}.config.json`))))
-
+            avianUtils.cacheConfigObject(req.params.component, reqWithCache)
             reqWithCache.cache.get(req.params.component, (err, config) => {
                 res.json(JSON.parse(config))
             })
