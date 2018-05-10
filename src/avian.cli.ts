@@ -4,9 +4,11 @@ import * as events from "events"
 import * as crypto from "crypto"
 import * as cluster from "cluster"
 import * as express from "express"
+import * as glob from "glob"
 import * as parser from "body-parser"
 import * as os from "os"
 import * as fs from "fs"
+import * as path from "path"
 import { RedisClient } from "redis"
 
 const session = require("express-session")
@@ -49,20 +51,6 @@ const avianUtils = new AvianUtils()
 interface RequestWithCache extends express.Request {
     cache: RedisClient
 }
-
-// const temp = argv.temp || process.env.AVIAN_APP_TEMP || process.env.TMP || process.env.TEMP || shx.pwd()
-
-/*
-fs.readdir(`${home}/components`, (err, items) => {
-    for (let i = 0; i < items.length; i++) {
-        if (!items[i].search(/.*router/g)) {
-
-            let path = `${home}/components/${items[i]}`
-            import path
-        }
-    }
-})
-*/
 
 if (cluster.isMaster) {
 
@@ -169,21 +157,13 @@ if (cluster.isMaster) {
     })
 
     // Include individual component servers...
-    /*
-        This is a super crewed implementation. I'll improve this as we test further.
-    */
-
-    /* fs.readdir(`${component_root}`, (err, items) => {
-        for (let i = 0; i < items.length; i++) {
-            if (!items[i].search(/.*service/g)) {
-
-                // let ComponentRouter = require(`${home}/components/${items[i]}`)// import(`${home}/components/${items[i]}`)
-
-                // avian.use("/api", ComponentRouter)
-                // console.log(items[i])
-            }
-        }
-    })*/
+    let services = glob.sync(`${argv.home}/components/**/*service*`)
+    for (let i = 0; i < services.length; i++) {
+        let serviceFilename = path.basename(services[i])
+        let ComponentRouter: express.Router = require(`${services[i]}`)
+        let routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."))
+        avian.use(`/${routeBase}`, ComponentRouter)
+    }
 
     avian.all("*", (req, res, next) => {
         res.redirect("/index")

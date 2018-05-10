@@ -12,11 +12,15 @@ var cluster = require("cluster");
 
 var express = require("express");
 
+var glob = require("glob");
+
 var parser = require("body-parser");
 
 var os = require("os");
 
 var fs = require("fs");
+
+var path = require("path");
 
 var session = require("express-session");
 
@@ -141,6 +145,13 @@ if (cluster.isMaster) {
             res.status(404).send("Not Found");
         }
     });
+    var services = glob.sync(argv.home + "/components/**/*service*");
+    for (var i = 0; i < services.length; i++) {
+        var serviceFilename = path.basename(services[i]);
+        var ComponentRouter = require("" + services[i]);
+        var routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."));
+        avian.use("/" + routeBase, ComponentRouter);
+    }
     avian.all("*", function(req, res, next) {
         res.redirect("/index");
     });
