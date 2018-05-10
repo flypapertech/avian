@@ -29,7 +29,7 @@ class AvianUtils {
             return `${argv.home}/components`
     }
 
-    cacheConfigObject(component: string, reqWithCache: RequestWithCache) {
+    setConfigObjectCache(component: string, reqWithCache: RequestWithCache) {
         let component_root = this.getComponentRoot(component)
         let configStringJSON: string
         try {
@@ -140,7 +140,7 @@ if (cluster.isMaster) {
         let reqWithCache = req as RequestWithCache
         let component_root = avianUtils.getComponentRoot(req.params.component)
         try {
-            avianUtils.cacheConfigObject(req.params.component, reqWithCache)
+            avianUtils.setConfigObjectCache(req.params.component, reqWithCache)
             reqWithCache.cache.get(`${req.params.component}`, (err, config) => {
                 res.locals.params = req.params
                 res.locals.query = req.query
@@ -157,7 +157,7 @@ if (cluster.isMaster) {
         let reqWithCache = req as RequestWithCache
         let component_root = avianUtils.getComponentRoot(req.params.component)
         try {
-            avianUtils.cacheConfigObject(req.params.component, reqWithCache)
+            avianUtils.setConfigObjectCache(req.params.component, reqWithCache)
             reqWithCache.cache.get(req.params.component, (err, config) => {
                 res.json(JSON.parse(config))
             })

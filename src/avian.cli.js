@@ -39,7 +39,7 @@ var AvianUtils = function() {
     AvianUtils.prototype.getComponentRoot = function(component) {
         if (fs.existsSync(argv.home + "/components/" + component)) return argv.home + "/components/" + component; else return argv.home + "/components";
     };
-    AvianUtils.prototype.cacheConfigObject = function(component, reqWithCache) {
+    AvianUtils.prototype.setConfigObjectCache = function(component, reqWithCache) {
         var component_root = this.getComponentRoot(component);
         var configStringJSON;
         try {
@@ -119,7 +119,7 @@ if (cluster.isMaster) {
         var reqWithCache = req;
         var component_root = avianUtils.getComponentRoot(req.params.component);
         try {
-            avianUtils.cacheConfigObject(req.params.component, reqWithCache);
+            avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get("" + req.params.component, function(err, config) {
                 res.locals.params = req.params;
                 res.locals.query = req.query;
@@ -133,7 +133,7 @@ if (cluster.isMaster) {
         var reqWithCache = req;
         var component_root = avianUtils.getComponentRoot(req.params.component);
         try {
-            avianUtils.cacheConfigObject(req.params.component, reqWithCache);
+            avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get(req.params.component, function(err, config) {
                 res.json(JSON.parse(config));
             });
