@@ -16,17 +16,17 @@ const compression = require("compression")
 
 const argv = require("yargs").argv
 
-const name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
-const home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
-const port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
-const mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
+argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
+argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
+argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
+argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
 
 class AvianUtils {
     getComponentRoot(component: string): string {
-        if (fs.existsSync(`${home}/components/${component}`))
-            return `${home}/components/${component}`
+        if (fs.existsSync(`${argv.home}/components/${component}`))
+            return `${argv.home}/components/${component}`
         else
-            return `${home}/components`
+            return `${argv.home}/components`
     }
 
     cacheConfigObject(component: string, reqWithCache: RequestWithCache) {
@@ -79,7 +79,7 @@ if (cluster.isMaster) {
 
     const avian = express()
 
-    avian.locals.mode = mode
+    avian.locals.argv = argv
 
     let redisStore = require("connect-redis")(session)
 
@@ -92,24 +92,24 @@ if (cluster.isMaster) {
 
     avian.use(require("express-redis")(6379, "127.0.0.1", {return_buffers: true}, "cache"))
 
-    avian.use("/assets", express.static(home + "/assets"))
-    avian.use("/static", express.static(home + "/static"))
-    avian.use("/node_modules", express.static(home + "/node_modules"))
-    avian.use("/bower_components", express.static(home + "/bower_components"))
-    avian.use("/jspm_packages", express.static(home + "/jspm_packages"))
+    avian.use("/assets", express.static(argv.home + "/assets"))
+    avian.use("/static", express.static(argv.home + "/static"))
+    avian.use("/node_modules", express.static(argv.home + "/node_modules"))
+    avian.use("/bower_components", express.static(argv.home + "/bower_components"))
+    avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))
 
     avian.set("view engine", "pug")
-    avian.set("views", home)
+    avian.set("views", argv.home)
 
     // if (!fs.existsSync(home + "/temp/")) shx.mkdir(home + "/temp/")
 
-    if (mode === "production") {
+    if (argv.mode === "production") {
 
-        fs.mkdirSync(home + "/cache/")
-        fs.mkdirSync(home + "/logs/")
+        fs.mkdirSync(argv.home + "/cache/")
+        fs.mkdirSync(argv.home + "/logs/")
 
         avian.use(require("express-bunyan-logger")({
-            name: name,
+            name: argv.name,
             streams: [
                 {
                     level: "info",
@@ -122,14 +122,14 @@ if (cluster.isMaster) {
                 {
                     level: "info",
                     type: "rotating-file",
-                    path: home + `/logs/${name}.${process.pid}.json`,
+                    path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
                     period: "1d",
                     count: 365
                 }
             ],
         }))
 
-        avian.use(require("express-minify")({cache: home + "/cache"}))
+        avian.use(require("express-minify")({cache: argv.home + "/cache"}))
         avian.use(compression())
     }
 
@@ -188,14 +188,14 @@ if (cluster.isMaster) {
         res.redirect("/index")
     })
 
-    const portal = avian.listen(port, () => {
+    const portal = avian.listen(argv.port, () => {
 
         console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d",
             cluster.worker.id,
             process.pid,
-            name,
-            home,
-            port
+            argv.name,
+            argv.home,
+            argv.port
         )
     })
 }

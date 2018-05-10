@@ -26,18 +26,18 @@ var compression = require("compression");
 
 var argv = require("yargs").argv;
 
-var name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost";
+argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost";
 
-var home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
+argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
 
-var port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
+argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 
-var mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
+argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 
 var AvianUtils = function() {
     function AvianUtils() {}
     AvianUtils.prototype.getComponentRoot = function(component) {
-        if (fs.existsSync(home + "/components/" + component)) return home + "/components/" + component; else return home + "/components";
+        if (fs.existsSync(argv.home + "/components/" + component)) return argv.home + "/components/" + component; else return argv.home + "/components";
     };
     AvianUtils.prototype.cacheConfigObject = function(component, reqWithCache) {
         var component_root = this.getComponentRoot(component);
@@ -65,7 +65,7 @@ if (cluster.isMaster) {
     });
 } else {
     var avian = express();
-    avian.locals.mode = mode;
+    avian.locals.argv = argv;
     var redisStore = require("connect-redis")(session);
     avian.use(session({
         store: new redisStore({
@@ -78,18 +78,18 @@ if (cluster.isMaster) {
     avian.use(require("express-redis")(6379, "127.0.0.1", {
         return_buffers: true
     }, "cache"));
-    avian.use("/assets", express.static(home + "/assets"));
-    avian.use("/static", express.static(home + "/static"));
-    avian.use("/node_modules", express.static(home + "/node_modules"));
-    avian.use("/bower_components", express.static(home + "/bower_components"));
-    avian.use("/jspm_packages", express.static(home + "/jspm_packages"));
+    avian.use("/assets", express.static(argv.home + "/assets"));
+    avian.use("/static", express.static(argv.home + "/static"));
+    avian.use("/node_modules", express.static(argv.home + "/node_modules"));
+    avian.use("/bower_components", express.static(argv.home + "/bower_components"));
+    avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"));
     avian.set("view engine", "pug");
-    avian.set("views", home);
-    if (mode === "production") {
-        fs.mkdirSync(home + "/cache/");
-        fs.mkdirSync(home + "/logs/");
+    avian.set("views", argv.home);
+    if (argv.mode === "production") {
+        fs.mkdirSync(argv.home + "/cache/");
+        fs.mkdirSync(argv.home + "/logs/");
         avian.use(require("express-bunyan-logger")({
-            name: name,
+            name: argv.name,
             streams: [ {
                 level: "info",
                 stream: process.stdout
@@ -99,13 +99,13 @@ if (cluster.isMaster) {
             }, {
                 level: "info",
                 type: "rotating-file",
-                path: home + ("/logs/" + name + "." + process.pid + ".json"),
+                path: argv.home + ("/logs/" + argv.name + "." + process.pid + ".json"),
                 period: "1d",
                 count: 365
             } ]
         }));
         avian.use(require("express-minify")({
-            cache: home + "/cache"
+            cache: argv.home + "/cache"
         }));
         avian.use(compression());
     }
@@ -143,7 +143,7 @@ if (cluster.isMaster) {
     avian.all("*", function(req, res, next) {
         res.redirect("/index");
     });
-    var portal = avian.listen(port, function() {
-        console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, name, home, port);
+    var portal = avian.listen(argv.port, function() {
+        console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);
     });
 }
