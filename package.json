@@ -12,7 +12,7 @@
     "avian": "./dist/avian.cli.js"
   },
   "scripts": {
-    "prepare": "npm run build_cli && npm run build_spec && npm run test && snyk test && npm run snyk-protect",
+    "build": "npm run build_cli && npm run build_spec && npm run test && snyk test && npm run snyk-protect",
     "build_cli": "node_modules/.bin/tsc ./src/avian.cli.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.cli.js -b -o ./src/avian.cli.js ; node_modules/.bin/uglifyjs ./src/avian.cli.js -o ./dist/avian.cli.js",
     "build_spec": "node_modules/.bin/tsc ./src/avian.spec.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.spec.js -b -o ./src/avian.spec.js ; node_modules/.bin/uglifyjs ./src/avian.spec.js -o ./spec/avian.spec.js",
     "test": "jasmine",
