@@ -28,7 +28,7 @@ var argv = require("yargs").argv;
 
 var name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost";
 
-var home = argv.home || process.env.AVIAN_APP_HOME || process.env.pwd;
+var home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
 
 var port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 

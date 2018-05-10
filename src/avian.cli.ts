@@ -17,7 +17,7 @@ const compression = require("compression")
 const argv = require("yargs").argv
 
 const name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
-const home = argv.home || process.env.AVIAN_APP_HOME || process.env.pwd
+const home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 const port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 const mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
 
