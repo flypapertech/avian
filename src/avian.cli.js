@@ -122,6 +122,7 @@ if (cluster.isMaster) {
             avianUtils.cacheConfigObject(req.params.component, reqWithCache);
             reqWithCache.cache.get("" + req.params.component, function(err, config) {
                 res.locals.params = req.params;
+                res.locals.query = req.query;
                 res.render(component_root + "/" + req.params.component + ".view.pug", JSON.parse(config));
             });
         } catch (err) {
