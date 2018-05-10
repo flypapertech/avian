@@ -24,13 +24,11 @@ var jsonfile = require("jsonfile");
 
 var compression = require("compression");
 
-var shx = require("shelljs");
-
 var argv = require("yargs").argv;
 
 var name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost";
 
-var home = argv.home || process.env.AVIAN_APP_HOME || shx.pwd();
+var home = argv.home || process.env.AVIAN_APP_HOME || process.env.pwd;
 
 var port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 
@@ -77,8 +75,8 @@ if (cluster.isMaster) {
     avian.set("view engine", "pug");
     avian.set("views", home);
     if (mode === "production") {
-        if (!fs.existsSync(home + "/cache/")) shx.mkdir(home + "/cache/");
-        if (!fs.existsSync(home + "/logs/")) shx.mkdir(home + "/logs/");
+        fs.mkdirSync(home + "/cache/");
+        fs.mkdirSync(home + "/logs/");
         avian.use(require("express-bunyan-logger")({
             name: name,
             streams: [ {
