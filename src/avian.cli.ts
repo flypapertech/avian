@@ -67,7 +67,7 @@ if (cluster.isMaster) {
 
     avian.locals.mode = mode
 
-    let redisStore = require("connect-redis-crypto")(session)
+    let redisStore = require("connect-redis")(session)
 
     avian.use(session({
         store: new redisStore({host: "127.0.0.1"}),
