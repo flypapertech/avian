@@ -22,6 +22,8 @@ var fs = require("fs");
 
 var path = require("path");
 
+var webpack = require("webpack");
+
 var session = require("express-session");
 
 var jsonfile = require("jsonfile");
@@ -37,6 +39,20 @@ argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
+
+var componentJss = glob.sync(argv.home + "/components/**/*.component.*");
+
+console.log(argv.home + "/components/**/*.component.*");
+
+console.log(componentJss);
+
+var compiler = webpack({
+    entry: componentJss,
+    output: {
+        path: argv.home + "/static",
+        filename: "bundle.js"
+    }
+});
 
 var AvianUtils = function() {
     function AvianUtils() {}
@@ -69,6 +85,12 @@ if (cluster.isMaster) {
     });
 } else {
     var avian = express();
+    var watching = compiler.watch({
+        aggregateTimeout: 300,
+        poll: undefined
+    }, function(err, stats) {
+        console.log(stats);
+    });
     avian.locals.argv = argv;
     var redisStore = require("connect-redis")(session);
     avian.use(session({
@@ -83,7 +105,7 @@ if (cluster.isMaster) {
         return_buffers: true
     }, "cache"));
     avian.use("/assets", express.static(argv.home + "/assets"));
-    avian.use("/static", express.static(argv.home + "/static"));
+    avian.use("/", express.static(argv.home + "/static"));
     avian.use("/node_modules", express.static(argv.home + "/node_modules"));
     avian.use("/bower_components", express.static(argv.home + "/bower_components"));
     avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"));

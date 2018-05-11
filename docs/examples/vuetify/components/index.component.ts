@@ -1,4 +1,6 @@
 // Inbox Vue Component
+import Vue from "vue/dist/vue"
+import Vuetify from "vuetify/dist/vuetify"
 
 const Index = new Vue(
     {
@@ -11,7 +13,7 @@ const Index = new Vue(
 
             // Retrieve All Objects Example
 
-            fetch("/index/storage/objects.json")
+            fetch("/index/config/objects.json")
             .then(response => response.json())
             .then(json => {
                 this.objects = json.objects
@@ -19,7 +21,7 @@ const Index = new Vue(
 
             // Retrieve Links Object
 
-            fetch("/index/storage/objects.json")
+            fetch("/index/config/objects.json")
             .then(response => response.json())
             .then(json => {
                 this.links = json.objects

@@ -18,7 +18,7 @@ html(lang="en")
         index#component
 
             v-app(dark)
-                v-toolbar.blue
+                v-toolbar.red
                     h1 Avian Vuetify Example
 
                 v-content(fluid)
@@ -40,10 +40,5 @@ html(lang="en")
                 v-footer(fluid)
 
     // Index Component
-    script(src="/node_modules/vue/dist/vue.js")
     script(src="/node_modules/vuetify/dist/vuetify.js")
-    script
-        include:typescript index.component.ts
-
-
-
+    script(src="bundle.js" type="text/javascript")

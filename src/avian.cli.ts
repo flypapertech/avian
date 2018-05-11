@@ -9,6 +9,7 @@ import * as parser from "body-parser"
 import * as os from "os"
 import * as fs from "fs"
 import * as path from "path"
+import * as webpack from "webpack"
 import { RedisClient } from "redis"
 
 const session = require("express-session")
@@ -17,11 +18,21 @@ const jsonfile = require("jsonfile")
 const compression = require("compression")
 
 const argv = require("yargs").argv
-
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
+
+const componentJss = glob.sync(`${argv.home}/components/**/*.component.*`)
+console.log(`${argv.home}/components/**/*.component.*`)
+console.log(componentJss)
+const compiler = webpack({
+    entry: componentJss,
+    output: {
+        path: `${argv.home}/static`,
+        filename: "bundle.js",
+    }
+})
 
 class AvianUtils {
     getComponentRoot(component: string): string {
@@ -66,6 +77,13 @@ if (cluster.isMaster) {
 } else {
 
     const avian = express()
+    const watching = compiler.watch({
+        aggregateTimeout: 300,
+        poll: undefined
+    }, (err, stats) => {
+
+        console.log(stats)
+    })
 
     avian.locals.argv = argv
 
@@ -81,7 +99,7 @@ if (cluster.isMaster) {
     avian.use(require("express-redis")(6379, "127.0.0.1", {return_buffers: true}, "cache"))
 
     avian.use("/assets", express.static(argv.home + "/assets"))
-    avian.use("/static", express.static(argv.home + "/static"))
+    avian.use("/", express.static(argv.home + "/static"))
     avian.use("/node_modules", express.static(argv.home + "/node_modules"))
     avian.use("/bower_components", express.static(argv.home + "/bower_components"))
     avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))

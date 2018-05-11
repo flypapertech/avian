@@ -13,6 +13,7 @@
   },
   "scripts": {
     "build": "npm run build_cli && npm run build_spec && npm run test && npm run snyk-protect && snyk test",
+    "unsafe-build": "npm run build_cli && npm run build_spec && npm run test",
     "build_cli": "node_modules/.bin/tsc ./src/avian.cli.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.cli.js -b -o ./src/avian.cli.js ; node_modules/.bin/uglifyjs ./src/avian.cli.js -o ./dist/avian.cli.js",
     "build_spec": "node_modules/.bin/tsc ./src/avian.spec.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.spec.js -b -o ./src/avian.spec.js ; node_modules/.bin/uglifyjs ./src/avian.spec.js -o ./spec/avian.spec.js",
     "test": "jasmine",
@@ -30,6 +31,7 @@
     "@types/jasmine": "^2.8.7",
     "@types/node": "^10.0.3",
     "@types/redis": "^2.8.6",
+    "@types/webpack": "^4.1.5",
     "body-parser": "^1.15.2",
     "bunyan": "^1.8.4",
     "compression": "^1.6.2",
@@ -80,6 +82,7 @@
     "typescript-compiler": "^1.4.1",
     "uglify-js": "3.3.24",
     "watch": "^1.0.1",
+    "webpack": "^4.8.1",
     "yargs": "^11.1.0"
   },
   "resolutions": {
