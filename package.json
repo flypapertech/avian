@@ -88,7 +88,8 @@
   },
   "resolutions": {
     "*/**/hoek": "^4.2.0",
-    "*/**/fresh": "^0.5.2"
+    "*/**/fresh": "^0.5.2",
+    "*/**/deep-extend": "^0.5.1"
   },
   "devDependencies": {
     "snyk": "^1.80.0"
