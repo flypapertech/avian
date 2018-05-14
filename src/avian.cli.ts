@@ -14,6 +14,7 @@ import { RedisClient } from "redis"
 
 const mkdirp = require("mkdirp")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
+const VueLoaderPlugin = require("vue-loader/lib/plugin")
 const session = require("express-session")
 const jsonfile = require("jsonfile")
 const compression = require("compression")
@@ -38,7 +39,8 @@ const compiler = webpack({
         }
     },
     plugins: [
-        new WebpackWatchedGlobEntries()
+        new WebpackWatchedGlobEntries(),
+        new VueLoaderPlugin()
     ],
     module : {
         rules: [
