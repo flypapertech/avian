@@ -51,6 +51,11 @@ var compiler = webpack({
     output: {
         path: argv.home + "/static",
         filename: "bundle.js"
+    },
+    resolve: {
+        alias: {
+            vue: "vue/dist/vue.js"
+        }
     }
 });
 
