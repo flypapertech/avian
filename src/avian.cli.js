@@ -55,7 +55,31 @@ var compiler = webpack({
             vue: "vue/dist/vue.js"
         }
     },
-    plugins: [ new WebpackWatchedGlobEntries() ]
+    plugins: [ new WebpackWatchedGlobEntries() ],
+    module: {
+        rules: [ {
+            test: /\.jsx$/,
+            use: {
+                loader: "babel-loader",
+                options: {
+                    presets: [ "babel-preset-react" ]
+                }
+            }
+        }, {
+            test: /\.vue$/,
+            use: {
+                loader: "vue-loader"
+            }
+        }, {
+            test: /\.js$/,
+            use: {
+                loader: "babel-loader",
+                options: {
+                    presets: [ "babel-preset-env" ]
+                }
+            }
+        } ]
+    }
 });
 
 var AvianUtils = function() {
@@ -123,10 +147,7 @@ if (cluster.isMaster) {
         avian.use(require("express-bunyan-logger")({
             name: argv.name,
             streams: [ {
-                level: "info",
-                stream: process.stdout
-            }, {
-                level: "info",
+                level: "error",
                 stream: process.stderr
             }, {
                 level: "info",
