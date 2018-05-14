@@ -46,7 +46,7 @@ var compiler = webpack({
     entry: WebpackWatchedGlobEntries.getEntries(argv.home + "/components/**/*.component.*"),
     output: {
         path: argv.home + "/static",
-        filename: "components.bundle.js"
+        filename: "[name].bundle.js"
     },
     resolve: {
         alias: {
