@@ -30,7 +30,7 @@ const compiler = webpack({
     entry: componentJss,
     output: {
         path: `${argv.home}/static`,
-        filename: "bundle.js",
+        filename: "components.bundle.js",
     },
     resolve: {
         alias: {

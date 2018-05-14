@@ -15,4 +15,4 @@ bower_components
 *.log
 npm-debug*
 *.map
-*bundle.js
+*bundle.*
