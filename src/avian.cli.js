@@ -24,6 +24,8 @@ var path = require("path");
 
 var webpack = require("webpack");
 
+var mkdirp = require("mkdirp");
+
 var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
 
 var session = require("express-session");
@@ -78,6 +80,14 @@ var AvianUtils = function() {
 var avianUtils = new AvianUtils();
 
 if (cluster.isMaster) {
+    var watching = compiler.watch({
+        aggregateTimeout: 300,
+        poll: undefined
+    }, function(err, stats) {
+        if (argv.mode === "development") {
+            console.log(stats);
+        }
+    });
     var cores = os.cpus();
     for (var i = 0; i < cores.length; i++) {
         cluster.fork();
@@ -87,12 +97,6 @@ if (cluster.isMaster) {
     });
 } else {
     var avian = express();
-    var watching = compiler.watch({
-        aggregateTimeout: 300,
-        poll: undefined
-    }, function(err, stats) {
-        console.log(stats);
-    });
     avian.locals.argv = argv;
     var redisStore = require("connect-redis")(session);
     avian.use(session({
@@ -114,8 +118,8 @@ if (cluster.isMaster) {
     avian.set("view engine", "pug");
     avian.set("views", argv.home);
     if (argv.mode === "production") {
-        fs.mkdirSync(argv.home + "/cache/");
-        fs.mkdirSync(argv.home + "/logs/");
+        mkdirp.sync(argv.home + "/cache/");
+        mkdirp.sync(argv.home + "/logs/");
         avian.use(require("express-bunyan-logger")({
             name: argv.name,
             streams: [ {

@@ -12,6 +12,7 @@ import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
 
+const mkdirp = require("mkdirp")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 const session = require("express-session")
 const jsonfile = require("jsonfile")
@@ -116,12 +117,10 @@ if (cluster.isMaster) {
     avian.set("view engine", "pug")
     avian.set("views", argv.home)
 
-    // if (!fs.existsSync(home + "/temp/")) shx.mkdir(home + "/temp/")
-
     if (argv.mode === "production") {
 
-        fs.mkdirSync(argv.home + "/cache/")
-        fs.mkdirSync(argv.home + "/logs/")
+        mkdirp.sync(argv.home + "/cache/")
+        mkdirp.sync(argv.home + "/logs/")
 
         avian.use(require("express-bunyan-logger")({
             name: argv.name,
