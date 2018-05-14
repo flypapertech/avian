@@ -28,8 +28,6 @@ var mkdirp = require("mkdirp");
 
 var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
 
-var VueLoaderPlugin = require("vue-loader/lib/plugin");
-
 var session = require("express-session");
 
 var jsonfile = require("jsonfile");
@@ -57,7 +55,7 @@ var compiler = webpack({
             vue: "vue/dist/vue.js"
         }
     },
-    plugins: [ new WebpackWatchedGlobEntries(), new VueLoaderPlugin() ],
+    plugins: [ new WebpackWatchedGlobEntries() ],
     module: {
         rules: [ {
             test: /\.jsx$/,
