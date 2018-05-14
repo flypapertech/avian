@@ -15,4 +15,11 @@ ignore:
     - jstransformer-less > less > request > hawk > cryptiles > boom > hoek:
         reason: Fixed via package.json resolutions & yarn.lock
         expires: '2018-06-09T15:11:41.489Z'
+  'npm:macaddress:20180511':
+    - css-loader > cssnano > postcss-filter-plugins > uniqid > macaddress:
+        reason: Fixed by yarn package resolution and our own patch of macaddress
+        expires: '2018-06-13T22:03:52.153Z'
+    - vue-loader > css-loader > cssnano > postcss-filter-plugins > uniqid > macaddress:
+        reason: Fixed by yarn package resolution and our own patch of macaddress
+        expires: '2018-06-13T22:03:52.153Z'
 patch: {}

@@ -97,7 +97,8 @@
   "resolutions": {
     "*/**/hoek": "^4.2.0",
     "*/**/fresh": "^0.5.2",
-    "*/**/deep-extend": "^0.5.1"
+    "*/**/deep-extend": "^0.5.1",
+    "*/**/macaddress": "https://github.com/flypapertech/node-macaddress.git"
   },
   "devDependencies": {
     "snyk": "^1.80.0"
