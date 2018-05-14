@@ -1,10 +1,13 @@
 // Inbox Vue Component
 import Vue from "vue/dist/vue"
-import Vuetify from "vuetify/dist/vuetify"
+import Vuetify from "vuetify"
+
+Vue.use(Vuetify)
 
 const Index = new Vue(
     {
-        el: "#component",
+        // el must be unique across components
+        el: "#indexComponent",
         data: {
             objects: {},
             links: {}
