@@ -71,12 +71,21 @@ interface RequestWithCache extends express.Request {
 }
 
 if (cluster.isMaster) {
+    const watching = compiler.watch({
+        aggregateTimeout: 300,
+        poll: undefined
+    }, (err, stats) => {
+        if (argv.mode === "development") {
+            console.log(stats)
+        }
+    })
 
     let cores = os.cpus()
 
     for (let i = 0; i < cores.length; i++) {
         cluster.fork()
     }
+
     cluster.on("exit", worker => {
         cluster.fork()
     })
@@ -84,13 +93,6 @@ if (cluster.isMaster) {
 } else {
 
     const avian = express()
-    const watching = compiler.watch({
-        aggregateTimeout: 300,
-        poll: undefined
-    }, (err, stats) => {
-
-        console.log(stats)
-    })
 
     avian.locals.argv = argv
 
