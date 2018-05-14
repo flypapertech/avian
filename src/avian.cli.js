@@ -24,6 +24,8 @@ var path = require("path");
 
 var webpack = require("webpack");
 
+var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
+
 var session = require("express-session");
 
 var jsonfile = require("jsonfile");
@@ -40,14 +42,8 @@ argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 
-var componentJss = glob.sync(argv.home + "/components/**/*.component.*");
-
-console.log(argv.home + "/components/**/*.component.*");
-
-console.log(componentJss);
-
 var compiler = webpack({
-    entry: componentJss,
+    entry: WebpackWatchedGlobEntries.getEntries(path.resolve(argv.home, "components/**/*.components.*")),
     output: {
         path: argv.home + "/static",
         filename: "components.bundle.js"
@@ -56,7 +52,8 @@ var compiler = webpack({
         alias: {
             vue: "vue/dist/vue.js"
         }
-    }
+    },
+    plugins: [ new WebpackWatchedGlobEntries() ]
 });
 
 var AvianUtils = function() {

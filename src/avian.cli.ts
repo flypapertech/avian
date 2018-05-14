@@ -12,8 +12,8 @@ import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
 
+const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 const session = require("express-session")
-
 const jsonfile = require("jsonfile")
 const compression = require("compression")
 
@@ -23,11 +23,10 @@ argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
 
-const componentJss = glob.sync(`${argv.home}/components/**/*.component.*`)
-console.log(`${argv.home}/components/**/*.component.*`)
-console.log(componentJss)
 const compiler = webpack({
-    entry: componentJss,
+    entry: WebpackWatchedGlobEntries.getEntries(
+        path.resolve(argv.home, "components/**/*.components.*")
+    ),
     output: {
         path: `${argv.home}/static`,
         filename: "components.bundle.js",
@@ -36,7 +35,10 @@ const compiler = webpack({
         alias: {
             vue: "vue/dist/vue.js"
         }
-    }
+    },
+    plugins: [
+        new WebpackWatchedGlobEntries()
+    ]
 })
 
 class AvianUtils {
