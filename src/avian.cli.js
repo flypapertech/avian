@@ -43,7 +43,7 @@ argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 
 var compiler = webpack({
-    entry: WebpackWatchedGlobEntries.getEntries(path.resolve(argv.home, "components/**/*.components.*")),
+    entry: WebpackWatchedGlobEntries.getEntries(argv.home + "/components/**/*.component.*"),
     output: {
         path: argv.home + "/static",
         filename: "components.bundle.js"
