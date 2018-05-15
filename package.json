@@ -67,6 +67,7 @@
     "jstransformer-uglify-js": "^1.1.1",
     "less": "^3.0.4",
     "line-reader": "^0.4.0",
+    "macaddress": "https://github.com/flypapertech/node-macaddress.git",
     "markdown-it": "^8.1.0",
     "markdown-it-video": "^0.6.2",
     "mkdirp": "^0.5.1",
@@ -100,7 +101,9 @@
     "*/**/hoek": "^4.2.0",
     "*/**/fresh": "^0.5.2",
     "*/**/deep-extend": "^0.5.1",
-    "*/**/macaddress": "https://github.com/flypapertech/node-macaddress.git"
+    "*/**/macaddress": "https://github.com/flypapertech/node-macaddress.git",
+    "*/**/micromatch": "^3.0.0",
+    "*/**/request": "^2.86.0" 
   },
   "devDependencies": {
     "snyk": "^1.80.0"
