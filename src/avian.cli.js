@@ -53,7 +53,7 @@ var compiler = webpack({
     resolve: {
         extensions: [ ".ts", ".js", ".vue", ".json" ],
         alias: {
-            vue$: "vue/dist/vue.esm.js"
+            vue$: "vue/dist/vue.js"
         }
     },
     plugins: [ new WebpackWatchedGlobEntries() ],
@@ -78,13 +78,6 @@ var compiler = webpack({
                 options: {
                     presets: [ "@babel/preset-env" ]
                 }
-            }
-        }, {
-            test: /\.tsx?$/,
-            loader: "ts-loader",
-            exclude: /node_modules/,
-            options: {
-                appendTsSuffixTo: [ /\.vue$/ ]
             }
         } ]
     }
@@ -209,9 +202,6 @@ if (cluster.isMaster) {
         var routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."));
         avian.use("/" + routeBase, ComponentRouter);
     }
-    avian.all("*", function(req, res, next) {
-        res.redirect("/index");
-    });
     var portal = avian.listen(argv.port, function() {
         console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);
     });
