@@ -148,6 +148,7 @@ if (cluster.isMaster) {
 
     if (argv.mode === "production") {
 
+
         mkdirp.sync(argv.home + "/cache/")
         mkdirp.sync(argv.home + "/logs/")
 
