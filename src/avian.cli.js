@@ -47,7 +47,7 @@ argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || 
 var compiler = webpack({
     entry: WebpackWatchedGlobEntries.getEntries(argv.home + "/components/**/*.component.*"),
     output: {
-        path: argv.home + "/static",
+        path: argv.home + "/public",
         filename: "[name].bundle.js"
     },
     resolve: {
@@ -136,7 +136,7 @@ if (cluster.isMaster) {
         return_buffers: true
     }, "cache"));
     avian.use("/assets", express.static(argv.home + "/assets"));
-    avian.use("/", express.static(argv.home + "/static"));
+    avian.use("/", express.static(argv.home + "/public"));
     avian.use("/node_modules", express.static(argv.home + "/node_modules"));
     avian.use("/bower_components", express.static(argv.home + "/bower_components"));
     avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"));
