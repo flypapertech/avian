@@ -5,6 +5,7 @@ import * as crypto from "crypto"
 import * as cluster from "cluster"
 import * as express from "express"
 import * as glob from "glob"
+import * as globArray from "glob-array"
 import * as parser from "body-parser"
 import * as os from "os"
 import * as fs from "fs"
@@ -234,7 +235,12 @@ if (cluster.isMaster) {
     })
 
     // Include individual component servers...
-    let services = glob.sync(`${argv.home}/components/**/*service*`)
+    let services = globArray.sync(
+        [
+            `${argv.home}/components/**/*service*`,
+            `${argv.home}/layouts/**/*service*`,
+        ])
+
     for (let i = 0; i < services.length; i++) {
         let serviceFilename = path.basename(services[i])
         let ComponentRouter: express.Router = require(`${services[i]}`)

@@ -49,6 +49,7 @@
     "express-redis": "^2.0.0",
     "express-session": "^1.14.1",
     "glob": "^7.1.2",
+    "glob-array": "^1.0.0",
     "highlight.js": "^9.7.0",
     "highlightjs": "^9.10.0",
     "jasmine": "^3.1.0",
@@ -103,7 +104,7 @@
     "*/**/deep-extend": "^0.5.1",
     "*/**/macaddress": "https://github.com/flypapertech/node-macaddress.git",
     "*/**/micromatch": "^3.0.0",
-    "*/**/request": "^2.86.0" 
+    "*/**/request": "^2.86.0"
   },
   "devDependencies": {
     "snyk": "^1.80.0"

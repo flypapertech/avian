@@ -12,7 +12,7 @@ var cluster = require("cluster");
 
 var express = require("express");
 
-var glob = require("glob");
+var globArray = require("glob-array");
 
 var parser = require("body-parser");
 
@@ -210,7 +210,7 @@ if (cluster.isMaster) {
             res.status(404).send("Not Found");
         }
     });
-    var services = glob.sync(argv.home + "/components/**/*service*");
+    var services = globArray.sync([ argv.home + "/components/**/*service*", argv.home + "/layouts/**/*service*" ]);
     for (var i = 0; i < services.length; i++) {
         var serviceFilename = path.basename(services[i]);
         var ComponentRouter = require("" + services[i]);
