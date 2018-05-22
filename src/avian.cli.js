@@ -12,7 +12,7 @@ var cluster = require("cluster");
 
 var express = require("express");
 
-var globArray = require("glob-array");
+var glob = require("glob");
 
 var parser = require("body-parser");
 
@@ -45,7 +45,7 @@ argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 
 var compiler = webpack({
-    entry: WebpackWatchedGlobEntries.getEntries([ argv.home + "/components/**/*.component.*", argv.home + "/layouts/**/*.component.*" ]),
+    entry: WebpackWatchedGlobEntries.getEntries(argv.home + "/components/**/*.component.*"),
     output: {
         path: argv.home + "/public",
         filename: "[name].bundle.js"
@@ -87,9 +87,6 @@ var AvianUtils = function() {
     function AvianUtils() {}
     AvianUtils.prototype.getComponentRoot = function(component) {
         if (fs.existsSync(argv.home + "/components/" + component)) return argv.home + "/components/" + component; else return argv.home + "/components";
-    };
-    AvianUtils.prototype.getLayoutRoot = function(component) {
-        if (fs.existsSync(argv.home + "/layouts/" + component)) return argv.home + "/layouts/" + component; else return argv.home + "/layouts";
     };
     AvianUtils.prototype.setConfigObjectCache = function(component, reqWithCache) {
         var component_root = this.getComponentRoot(component);
@@ -198,19 +195,7 @@ if (cluster.isMaster) {
             res.status(404).send("Not Found");
         }
     });
-    avian.get("/:layout/config/objects.json", function(req, res, next) {
-        var reqWithCache = req;
-        var layout_root = avianUtils.getLayoutRoot(req.params.layout);
-        try {
-            avianUtils.setConfigObjectCache(req.params.layout, reqWithCache);
-            reqWithCache.cache.get(req.params.layout, function(err, config) {
-                res.json(JSON.parse(config));
-            });
-        } catch (err) {
-            res.status(404).send("Not Found");
-        }
-    });
-    var services = globArray.sync([ argv.home + "/components/**/*service*", argv.home + "/layouts/**/*service*" ]);
+    var services = glob.sync(argv.home + "/components/**/*service*");
     for (var i = 0; i < services.length; i++) {
         var serviceFilename = path.basename(services[i]);
         var ComponentRouter = require("" + services[i]);

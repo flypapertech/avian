@@ -1710,10 +1710,6 @@ code-point-at@^1.0.0:
   version "1.1.0"
   resolved "https://registry.yarnpkg.com/code-point-at/-/code-point-at-1.1.0.tgz#0d070b4d043a5bea33a2f1a40e2edb3d9a4ccf77"
 
-coffee-script@~1.12.7:
-  version "1.12.7"
-  resolved "https://registry.yarnpkg.com/coffee-script/-/coffee-script-1.12.7.tgz#c05dae0cb79591d05b3070a8433a98c9a89ccc53"
-
 coffee-script@~1.8.0:
   version "1.8.0"
   resolved "https://registry.yarnpkg.com/coffee-script/-/coffee-script-1.8.0.tgz#9c9f1d2b4a52a000ded15b659791703648263c1d"
@@ -2802,12 +2798,6 @@ getpass@^0.1.1:
   dependencies:
     assert-plus "^1.0.0"
 
-glob-array@^1.0.0:
-  version "1.0.0"
-  resolved "https://registry.yarnpkg.com/glob-array/-/glob-array-1.0.0.tgz#7666dd1c9ba5fdaf68556180de3bbd008103b3c1"
-  dependencies:
-    glob "7.1.1"
-
 glob-base@^0.3.0:
   version "0.3.0"
   resolved "https://registry.yarnpkg.com/glob-base/-/glob-base-0.3.0.tgz#dbb164f6221b1c0b1ccf82aea328b497df0ea3c4"
@@ -2831,17 +2821,6 @@ glob-parent@^3.1.0:
 glob@7.0.x:
   version "7.0.6"
   resolved "https://registry.yarnpkg.com/glob/-/glob-7.0.6.tgz#211bafaf49e525b8cd93260d14ab136152b3f57a"
-  dependencies:
-    fs.realpath "^1.0.0"
-    inflight "^1.0.4"
-    inherits "2"
-    minimatch "^3.0.2"
-    once "^1.3.0"
-    path-is-absolute "^1.0.0"
-
-glob@7.1.1:
-  version "7.1.1"
-  resolved "https://registry.yarnpkg.com/glob/-/glob-7.1.1.tgz#805211df04faaf1c63a3600306cdf5ade50b2ec8"
   dependencies:
     fs.realpath "^1.0.0"
     inflight "^1.0.4"
@@ -3549,13 +3528,6 @@ jstransformer-clean-css@^2.0.0:
   dependencies:
     clean-css "^4.0.5"
 
-jstransformer-coffee-script@^1.1.0:
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/jstransformer-coffee-script/-/jstransformer-coffee-script-1.1.1.tgz#6455eb2f8b26fdff2abeb1b3c9875e6b1f4f8fa6"
-  dependencies:
-    coffee-script "~1.12.7"
-    merge "^1.2.0"
-
 jstransformer-highlight@^1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/jstransformer-highlight/-/jstransformer-highlight-1.0.1.tgz#c078b503d02128905caa58be76705146d7d947b1"
@@ -3896,7 +3868,7 @@ merge-descriptors@1.0.1:
   version "1.0.1"
   resolved "https://registry.yarnpkg.com/merge-descriptors/-/merge-descriptors-1.0.1.tgz#b00aaa556dd8b44568150ec9d1b953f3f90cbb61"
 
-merge@^1.1.3, merge@^1.2.0:
+merge@^1.1.3:
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/merge/-/merge-1.2.0.tgz#7531e39d4949c281a66b8c5a6e0265e8b05894da"
 
