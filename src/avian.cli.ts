@@ -26,8 +26,10 @@ argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || 
 
 const compiler = webpack({
     entry: WebpackWatchedGlobEntries.getEntries(
-        `${argv.home}/components/**/*.component.*`,
-        `${argv.home}/layouts/**/*.component.*`,
+        [
+            `${argv.home}/components/**/*.component.*`,
+            `${argv.home}/layouts/**/*.component.*`
+        ]
     ),
     output: {
         path: `${argv.home}/public`,
@@ -78,6 +80,13 @@ class AvianUtils {
             return `${argv.home}/components/${component}`
         else
             return `${argv.home}/components`
+    }
+
+    getLayoutRoot(component: string): string {
+        if (fs.existsSync(`${argv.home}/layouts/${component}`))
+            return `${argv.home}/layouts/${component}`
+        else
+            return `${argv.home}/layouts`
     }
 
     setConfigObjectCache(component: string, reqWithCache: RequestWithCache) {
@@ -200,6 +209,21 @@ if (cluster.isMaster) {
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache)
             reqWithCache.cache.get(req.params.component, (err, config) => {
+                res.json(JSON.parse(config))
+            })
+        }
+        catch (err) {
+            res.status(404)
+                .send("Not Found")
+        }
+    })
+
+    avian.get("/:layout/config/objects.json", (req, res, next) => {
+        let reqWithCache = req as RequestWithCache
+        let layout_root = avianUtils.getLayoutRoot(req.params.layout)
+        try {
+            avianUtils.setConfigObjectCache(req.params.layout, reqWithCache)
+            reqWithCache.cache.get(req.params.layout, (err, config) => {
                 res.json(JSON.parse(config))
             })
         }
