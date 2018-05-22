@@ -45,7 +45,7 @@ argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 
 var compiler = webpack({
-    entry: WebpackWatchedGlobEntries.getEntries(argv.home + "/components/**/*.component.*"),
+    entry: WebpackWatchedGlobEntries.getEntries(argv.home + "/components/**/*.component.*", argv.home + "/layouts/**/*.component.*"),
     output: {
         path: argv.home + "/public",
         filename: "[name].bundle.js"

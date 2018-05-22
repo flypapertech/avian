@@ -26,7 +26,8 @@ argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || 
 
 const compiler = webpack({
     entry: WebpackWatchedGlobEntries.getEntries(
-        `${argv.home}/components/**/*.component.*`
+        `${argv.home}/components/**/*.component.*`,
+        `${argv.home}/layouts/**/*.component.*`,
     ),
     output: {
         path: `${argv.home}/public`,
