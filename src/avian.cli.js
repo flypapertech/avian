@@ -195,6 +195,9 @@ if (cluster.isMaster) {
             res.status(404).send("Not Found");
         }
     });
+    avian.all("/", function(req, res, next) {
+        res.redirect("/index");
+    });
     var services = glob.sync(argv.home + "/components/**/*service*");
     for (var i = 0; i < services.length; i++) {
         var serviceFilename = path.basename(services[i]);
