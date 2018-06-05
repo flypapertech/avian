@@ -207,6 +207,10 @@ if (cluster.isMaster) {
         }
     })
 
+    avian.all("/", (req, res, next) => {
+        res.redirect("/index")
+    })
+
     // Include individual component servers...
     let services = glob.sync(`${argv.home}/components/**/*service*`)
     for (let i = 0; i < services.length; i++) {
