@@ -211,16 +211,22 @@ if (cluster.isMaster) {
         res.redirect("/index")
     })
 
-    // Include individual component servers...
     let services = glob.sync(`${argv.home}/components/**/*service*`)
     for (let i = 0; i < services.length; i++) {
-        let serviceFilename = path.basename(services[i])
-        let ComponentRouter: express.Router = require(`${services[i]}`)
-        let routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."))
-        avian.use(`/${routeBase}`, ComponentRouter)
+
+        let serviceName = path.basename(services[i])
+        let componentName = serviceName.substring(0, serviceName.indexOf("."))
+
+        let tsc = require("typescript-compiler")
+        tsc.compile([services[i]], ["--out", `/private/${componentName}/${componentName}.service.compiled.js`])
+
+        let serviceCompiled = `/private/${componentName}/${componentName}.service.compiled.js`
+
+        let componentRouter: express.Router = require(`${serviceCompiled}`)
+        avian.use(`/${componentName}`, componentRouter)
     }
 
-    const portal = avian.listen(argv.port, () => {
+    const server = avian.listen(argv.port, () => {
 
         console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d",
             cluster.worker.id,
