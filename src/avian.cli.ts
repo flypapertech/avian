@@ -215,10 +215,14 @@ if (cluster.isMaster) {
     for (let i = 0; i < services.length; i++) {
 
         let serviceName = path.basename(services[i])
+
+        console.log(serviceName)
+        console.log(services[i])
+
         let componentName = serviceName.substring(0, serviceName.indexOf("."))
 
         let tsc = require("typescript-compiler")
-        tsc.compile([services[i]], ["--out", `/private/${componentName}/${componentName}.service.compiled.js`])
+        tsc.compile(services[i], [`--out ${argv.home}/private/${componentName}/${componentName}.service.compiled.js`])
 
         let serviceCompiled = `/private/${componentName}/${componentName}.service.compiled.js`
 
