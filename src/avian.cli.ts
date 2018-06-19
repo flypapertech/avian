@@ -222,7 +222,7 @@ if (cluster.isMaster) {
         let componentName = serviceName.substring(0, serviceName.indexOf("."))
 
         let tsc = require("typescript-compiler")
-        tsc.compile(services[i], [`--out ${argv.home}/private/${componentName}/${componentName}.service.compiled.js`])
+        tsc.compile(services[i], [`--outFile ${argv.home}/private/${componentName}/${componentName}.service.compiled.js`])
 
         let serviceCompiled = `/private/${componentName}/${componentName}.service.compiled.js`
 
