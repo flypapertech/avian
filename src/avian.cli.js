@@ -200,15 +200,12 @@ if (cluster.isMaster) {
     });
     var services = glob.sync(argv.home + "/components/**/*service*");
     for (var i = 0; i < services.length; i++) {
-        var serviceName = path.basename(services[i]);
-        var componentName = serviceName.substring(0, serviceName.indexOf("."));
-        var tsc = require("typescript-compiler");
-        tsc.compile([ services[i] ], [ "--out", "/private/" + componentName + "/" + componentName + ".service.compiled.js" ]);
-        var serviceCompiled = "/private/" + componentName + "/" + componentName + ".service.compiled.js";
-        var componentRouter = require("" + serviceCompiled);
-        avian.use("/" + componentName, componentRouter);
+        var serviceFilename = path.basename(services[i]);
+        var ComponentRouter = require("" + services[i]);
+        var routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."));
+        avian.use("/" + routeBase, ComponentRouter);
     }
-    var portal = avian.listen(argv.port, function() {
+    var server = avian.listen(argv.port, function() {
         console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);
     });
 }
