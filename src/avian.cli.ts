@@ -213,21 +213,10 @@ if (cluster.isMaster) {
 
     let services = glob.sync(`${argv.home}/components/**/*service*`)
     for (let i = 0; i < services.length; i++) {
-
-        let serviceName = path.basename(services[i])
-
-        console.log(serviceName)
-        console.log(services[i])
-
-        let componentName = serviceName.substring(0, serviceName.indexOf("."))
-
-        let tsc = require("typescript-compiler")
-        tsc.compile(services[i], [`--outFile ${argv.home}/private/${componentName}/${componentName}.service.compiled.js`])
-
-        let serviceCompiled = `/private/${componentName}/${componentName}.service.compiled.js`
-
-        let componentRouter: express.Router = require(`${serviceCompiled}`)
-        avian.use(`/${componentName}`, componentRouter)
+        let serviceFilename = path.basename(services[i])
+        let ComponentRouter: express.Router = require(`${services[i]}`)
+        let routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."))
+        avian.use(`/${routeBase}`, ComponentRouter)
     }
 
     const server = avian.listen(argv.port, () => {
