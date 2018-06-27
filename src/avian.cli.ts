@@ -184,7 +184,6 @@ if (cluster.isMaster) {
                 res.locals.params = req.params
                 res.locals.query = req.query
                 res.locals.session = req.session
-
                 res.setHeader("X-Powered-By", "Avian")
                 res.render(`${component_root}/${req.params.component}.view.pug`, JSON.parse(config))
             })
