@@ -4,6 +4,7 @@ import * as events from "events"
 import * as crypto from "crypto"
 import * as cluster from "cluster"
 import * as express from "express"
+import * as session from "express-session"
 import * as glob from "glob"
 import * as parser from "body-parser"
 import * as os from "os"
@@ -14,7 +15,6 @@ import { RedisClient } from "redis"
 
 const mkdirp = require("mkdirp")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
-const session = require("express-session")
 const jsonfile = require("jsonfile")
 const compression = require("compression")
 
