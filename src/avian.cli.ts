@@ -183,11 +183,15 @@ if (cluster.isMaster) {
             reqWithCache.cache.get(`${req.params.component}`, (err, config) => {
                 res.locals.params = req.params
                 res.locals.query = req.query
+
+                res.setHeader("X-Powered-By", "Avian")
                 res.render(`${component_root}/${req.params.component}.view.pug`, JSON.parse(config))
             })
         }
         catch (err) {
             if (err)
+
+                res.setHeader("X-Powered-By", "Avian")
                 res.redirect("/error")
         }
     })
@@ -198,16 +202,21 @@ if (cluster.isMaster) {
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache)
             reqWithCache.cache.get(req.params.component, (err, config) => {
+
+                res.setHeader("X-Powered-By", "Avian")
                 res.json(JSON.parse(config))
             })
         }
         catch (err) {
+
+            res.setHeader("X-Powered-By", "Avian")
             res.status(404)
                 .send("Not Found")
         }
     })
 
     avian.all("/", (req, res, next) => {
+        res.setHeader("X-Powered-By", "Avian")
         res.redirect("/index")
     })
 
