@@ -132,7 +132,7 @@ if (cluster.isMaster) {
         store: new redisStore({host: "127.0.0.1"}),
         secret: crypto.createHash("sha512").digest("hex"),
         resave: false,
-        saveUninitialized: false
+        saveUninitialized: true
     }))
 
     avian.use(require("express-redis")(6379, "127.0.0.1", {return_buffers: true}, "cache"))
