@@ -70,6 +70,7 @@
     "macaddress": "https://github.com/flypapertech/node-macaddress.git",
     "markdown-it": "^8.1.0",
     "markdown-it-video": "^0.6.2",
+    "md5": "^2.2.1",
     "mkdirp": "^0.5.1",
     "node-redis": "^0.1.7",
     "path-exists": "^3.0.0",
