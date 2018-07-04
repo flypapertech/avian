@@ -12,6 +12,8 @@ var cluster = require("cluster");
 
 var express = require("express");
 
+var session = require("express-session");
+
 var glob = require("glob");
 
 var parser = require("body-parser");
@@ -27,8 +29,6 @@ var webpack = require("webpack");
 var mkdirp = require("mkdirp");
 
 var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
-
-var session = require("express-session");
 
 var jsonfile = require("jsonfile");
 
@@ -130,7 +130,7 @@ if (cluster.isMaster) {
         }),
         secret: crypto.createHash("sha512").digest("hex"),
         resave: false,
-        saveUninitialized: false
+        saveUninitialized: true
     }));
     avian.use(require("express-redis")(6379, "127.0.0.1", {
         return_buffers: true
@@ -175,8 +175,8 @@ if (cluster.isMaster) {
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get("" + req.params.component, function(err, config) {
-                res.locals.params = req.params;
-                res.locals.query = req.query;
+                res.locals.req = req;
+                res.setHeader("X-Powered-By", "Avian");
                 res.render(component_root + "/" + req.params.component + ".view.pug", JSON.parse(config));
             });
         } catch (err) {
@@ -189,9 +189,11 @@ if (cluster.isMaster) {
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get(req.params.component, function(err, config) {
+                res.setHeader("X-Powered-By", "Avian");
                 res.json(JSON.parse(config));
             });
         } catch (err) {
+            res.setHeader("X-Powered-By", "Avian");
             res.status(404).send("Not Found");
         }
     });
