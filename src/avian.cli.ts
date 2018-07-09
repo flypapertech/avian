@@ -12,6 +12,7 @@ import * as fs from "fs"
 import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
+import * as ts from "typescript"
 
 const mkdirp = require("mkdirp")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
@@ -216,9 +217,35 @@ if (cluster.isMaster) {
     })
 
     let services = glob.sync(`${argv.home}/components/**/*service*`)
-    for (let i = 0; i < services.length; i++) {
-        let serviceFilename = path.basename(services[i])
-        let ComponentRouter: express.Router = require(`${services[i]}`)
+    let program = ts.createProgram(services, {
+        noEmitOnError: true,
+        noImplicityAny: true,
+        target: ts.ScriptTarget.ES5,
+        modules: ts.ModuleKind.CommonJS,
+        outDir: `${argv.home}/private`,
+        skipLibCheck: true,
+        lib: [
+            "lib.es2015.d.ts"
+        ]
+    })
+    let emitResult = program.emit()
+
+    let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
+    allDiagnostics.forEach(diagnostic => {
+        if (diagnostic.file) {
+            let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
+            let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
+            console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
+        }
+        else {
+            console.log(`${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`)
+        }
+    })
+
+    let compiledServices = glob.sync(`${argv.home}/private/**/*service*`)
+    for (let i = 0; i < compiledServices.length; i++) {
+        let serviceFilename = path.basename(compiledServices[i])
+        let ComponentRouter: express.Router = require(`${compiledServices[i]}`)
         let routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."))
         avian.use(`/${routeBase}`, ComponentRouter)
     }

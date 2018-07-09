@@ -12,6 +12,8 @@ var cluster = require("cluster");
 
 var express = require("express");
 
+var session = require("express-session");
+
 var glob = require("glob");
 
 var parser = require("body-parser");
@@ -24,11 +26,11 @@ var path = require("path");
 
 var webpack = require("webpack");
 
+var ts = require("typescript");
+
 var mkdirp = require("mkdirp");
 
 var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
-
-var session = require("express-session");
 
 var jsonfile = require("jsonfile");
 
@@ -130,7 +132,7 @@ if (cluster.isMaster) {
         }),
         secret: crypto.createHash("sha512").digest("hex"),
         resave: false,
-        saveUninitialized: false
+        saveUninitialized: true
     }));
     avian.use(require("express-redis")(6379, "127.0.0.1", {
         return_buffers: true
@@ -175,8 +177,8 @@ if (cluster.isMaster) {
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get("" + req.params.component, function(err, config) {
-                res.locals.params = req.params;
-                res.locals.query = req.query;
+                res.locals.req = req;
+                res.setHeader("X-Powered-By", "Avian");
                 res.render(component_root + "/" + req.params.component + ".view.pug", JSON.parse(config));
             });
         } catch (err) {
@@ -189,9 +191,11 @@ if (cluster.isMaster) {
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get(req.params.component, function(err, config) {
+                res.setHeader("X-Powered-By", "Avian");
                 res.json(JSON.parse(config));
             });
         } catch (err) {
+            res.setHeader("X-Powered-By", "Avian");
             res.status(404).send("Not Found");
         }
     });
@@ -199,9 +203,30 @@ if (cluster.isMaster) {
         res.redirect("/index");
     });
     var services = glob.sync(argv.home + "/components/**/*service*");
-    for (var i = 0; i < services.length; i++) {
-        var serviceFilename = path.basename(services[i]);
-        var ComponentRouter = require("" + services[i]);
+    var program = ts.createProgram(services, {
+        noEmitOnError: true,
+        noImplicityAny: true,
+        target: ts.ScriptTarget.ES5,
+        modules: ts.ModuleKind.CommonJS,
+        outDir: argv.home + "/private",
+        skipLibCheck: true,
+        lib: [ "lib.es2015.d.ts" ]
+    });
+    var emitResult = program.emit();
+    var allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+    allDiagnostics.forEach(function(diagnostic) {
+        if (diagnostic.file) {
+            var _a = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start), line = _a.line, character = _a.character;
+            var message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
+            console.log(diagnostic.file.fileName + " (" + (line + 1) + "," + (character + 1) + "): " + message);
+        } else {
+            console.log("" + ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"));
+        }
+    });
+    var compiledServices = glob.sync(argv.home + "/private/**/*service*");
+    for (var i = 0; i < compiledServices.length; i++) {
+        var serviceFilename = path.basename(compiledServices[i]);
+        var ComponentRouter = require("" + compiledServices[i]);
         var routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."));
         avian.use("/" + routeBase, ComponentRouter);
     }
