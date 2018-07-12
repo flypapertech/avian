@@ -28,6 +28,8 @@ var webpack = require("webpack");
 
 var ts = require("typescript");
 
+var cpx = require("cpx");
+
 var mkdirp = require("mkdirp");
 
 var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
@@ -203,6 +205,7 @@ if (cluster.isMaster) {
         res.redirect("/index");
     });
     var services = glob.sync(argv.home + "/components/**/*service*");
+    cpx.copySync(argv.home + "/components/**/*schema.json", argv.home + "/private");
     var program = ts.createProgram(services, {
         noEmitOnError: true,
         noImplicityAny: true,

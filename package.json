@@ -42,6 +42,7 @@
     "bunyan": "^1.8.4",
     "compression": "^1.6.2",
     "connect-redis": "^3.3.3",
+    "cpx": "^1.5.0",
     "css-loader": "^0.28.11",
     "errorhandler": "^1.5.0",
     "express": "^4.16.1",
@@ -107,6 +108,7 @@
     "*/**/request": "^2.86.0"
   },
   "devDependencies": {
+    "@types/cpx": "^1.5.0",
     "snyk": "^1.80.0"
   }
 }

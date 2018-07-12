@@ -13,6 +13,7 @@ import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
 import * as ts from "typescript"
+import * as cpx from "cpx"
 
 const mkdirp = require("mkdirp")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
@@ -217,6 +218,7 @@ if (cluster.isMaster) {
     })
 
     let services = glob.sync(`${argv.home}/components/**/*service*`)
+    cpx.copySync(`${argv.home}/components/**/*schema.json`, `${argv.home}/private`)
     let program = ts.createProgram(services, {
         noEmitOnError: true,
         noImplicityAny: true,
