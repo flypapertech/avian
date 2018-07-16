@@ -14,6 +14,7 @@ import * as webpack from "webpack"
 import { RedisClient } from "redis"
 import * as ts from "typescript"
 
+
 const mkdirp = require("mkdirp")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 const jsonfile = require("jsonfile")
@@ -42,6 +43,10 @@ const compiler = webpack({
     plugins: [
         new WebpackWatchedGlobEntries()
     ],
+    externals: {
+        vue: "Vue",
+        vuetify: "Vuetify"
+    },
     module : {
         rules: [
             {

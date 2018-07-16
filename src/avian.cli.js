@@ -59,6 +59,10 @@ var compiler = webpack({
         }
     },
     plugins: [ new WebpackWatchedGlobEntries() ],
+    externals: {
+        vue: "Vue",
+        vuetify: "Vuetify"
+    },
     module: {
         rules: [ {
             test: /\.jsx$/,
@@ -175,13 +179,10 @@ if (cluster.isMaster) {
         var componentRoot = avianUtils.getComponentRoot(req.params.component);
         var subComponentPath = componentRoot + "/" + req.params.subcomponent;
         var cacheKey = req.params.component + "/" + req.params.subcomponent;
-        console.log(subComponentPath);
         if (!fs.existsSync("" + subComponentPath)) {
-            console.log("subcomponent doesn't exist");
             next();
             return;
         }
-        console.log("subcomponent exists");
         var reqWithCache = req;
         try {
             avianUtils.setConfigObjectCache(cacheKey, reqWithCache);
