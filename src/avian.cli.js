@@ -28,8 +28,6 @@ var webpack = require("webpack");
 
 var ts = require("typescript");
 
-var cpx = require("cpx");
-
 var mkdirp = require("mkdirp");
 
 var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
@@ -174,14 +172,23 @@ if (cluster.isMaster) {
     avian.get("/:component/:subcomponent", parser.urlencoded({
         extended: true
     }), function(req, res, next) {
+        var componentRoot = avianUtils.getComponentRoot(req.params.component);
+        var subComponentPath = componentRoot + "/" + req.params.subcomponent;
+        var cacheKey = req.params.component + "/" + req.params.subcomponent;
+        console.log(subComponentPath);
+        if (!fs.existsSync("" + subComponentPath)) {
+            console.log("subcomponent doesn't exist");
+            next();
+            return;
+        }
+        console.log("subcomponent exists");
         var reqWithCache = req;
-        var component_root = avianUtils.getComponentRoot(req.params.component);
         try {
-            avianUtils.setConfigObjectCache(req.params.component + "/" + req.params.subcomponent, reqWithCache);
-            reqWithCache.cache.get(req.params.component + "/" + req.params.subcomponent, function(err, config) {
+            avianUtils.setConfigObjectCache(cacheKey, reqWithCache);
+            reqWithCache.cache.get(cacheKey, function(err, config) {
                 res.locals.req = req;
                 res.setHeader("X-Powered-By", "Avian");
-                res.render(component_root + "/" + req.params.component + "/" + req.params.subcomponent + ".view.pug", JSON.parse(config));
+                res.render(subComponentPath + "/" + req.params.subcomponent + ".view.pug", JSON.parse(config));
             });
         } catch (err) {
             if (err) res.redirect("/error");
@@ -191,13 +198,13 @@ if (cluster.isMaster) {
         extended: true
     }), function(req, res, next) {
         var reqWithCache = req;
-        var component_root = avianUtils.getComponentRoot(req.params.component);
+        var componentRoot = avianUtils.getComponentRoot(req.params.component);
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get("" + req.params.component, function(err, config) {
                 res.locals.req = req;
                 res.setHeader("X-Powered-By", "Avian");
-                res.render(component_root + "/" + req.params.component + ".view.pug", JSON.parse(config));
+                res.render(componentRoot + "/" + req.params.component + ".view.pug", JSON.parse(config));
             });
         } catch (err) {
             if (err) res.redirect("/error");
@@ -218,9 +225,10 @@ if (cluster.isMaster) {
     });
     avian.get("/:component/:subcomponent/config/objects.json", function(req, res, next) {
         var reqWithCache = req;
+        var cacheKey = req.params.component + "/" + req.params.subcomponent;
         try {
-            avianUtils.setConfigObjectCache(req.params.component + "/" + req.params.subcomponent, reqWithCache);
-            reqWithCache.cache.get(req.params.component + "/" + req.params.subcomponent, function(err, config) {
+            avianUtils.setConfigObjectCache(cacheKey, reqWithCache);
+            reqWithCache.cache.get(cacheKey, function(err, config) {
                 res.setHeader("X-Powered-By", "Avian");
                 res.json(JSON.parse(config));
             });
@@ -233,7 +241,6 @@ if (cluster.isMaster) {
         res.redirect("/index");
     });
     var services = glob.sync(argv.home + "/components/**/*service*");
-    cpx.copySync(argv.home + "/components/**/*schema.json", argv.home + "/private");
     var program = ts.createProgram(services, {
         noEmitOnError: true,
         noImplicityAny: true,

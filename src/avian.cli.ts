@@ -13,7 +13,6 @@ import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
 import * as ts from "typescript"
-import * as cpx from "cpx"
 
 const mkdirp = require("mkdirp")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
@@ -178,14 +177,23 @@ if (cluster.isMaster) {
     event.on("synch", () => {this})
 
     avian.get("/:component/:subcomponent", parser.urlencoded({ extended: true }), (req, res, next) => {
+        let componentRoot = avianUtils.getComponentRoot(req.params.component)
+        let subComponentPath = `${componentRoot}/${req.params.subcomponent}`
+        let cacheKey = `${req.params.component}/${req.params.subcomponent}`
+
+        // if the subcomponent directory doesn't exist, move on
+        if (!fs.existsSync(`${subComponentPath}`)) {
+            next()
+            return
+        }
+
         let reqWithCache = req as RequestWithCache
-        let component_root = avianUtils.getComponentRoot(req.params.component)
         try {
-            avianUtils.setConfigObjectCache(`${req.params.component}/${req.params.subcomponent}`, reqWithCache)
-            reqWithCache.cache.get(`${req.params.component}/${req.params.subcomponent}`, (err, config) => {
+            avianUtils.setConfigObjectCache(cacheKey, reqWithCache)
+            reqWithCache.cache.get(cacheKey, (err, config) => {
                 res.locals.req = req
                 res.setHeader("X-Powered-By", "Avian")
-                res.render(`${component_root}/${req.params.component}/${req.params.subcomponent}.view.pug`, JSON.parse(config))
+                res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, JSON.parse(config))
             })
         }
         catch (err) {
@@ -196,13 +204,13 @@ if (cluster.isMaster) {
 
     avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
         let reqWithCache = req as RequestWithCache
-        let component_root = avianUtils.getComponentRoot(req.params.component)
+        let componentRoot = avianUtils.getComponentRoot(req.params.component)
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache)
             reqWithCache.cache.get(`${req.params.component}`, (err, config) => {
                 res.locals.req = req
                 res.setHeader("X-Powered-By", "Avian")
-                res.render(`${component_root}/${req.params.component}.view.pug`, JSON.parse(config))
+                res.render(`${componentRoot}/${req.params.component}.view.pug`, JSON.parse(config))
             })
         }
         catch (err) {
@@ -231,9 +239,10 @@ if (cluster.isMaster) {
 
     avian.get("/:component/:subcomponent/config/objects.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache
+        let cacheKey = `${req.params.component}/${req.params.subcomponent}`
         try {
-            avianUtils.setConfigObjectCache(`${req.params.component}/${req.params.subcomponent}`, reqWithCache)
-            reqWithCache.cache.get(`${req.params.component}/${req.params.subcomponent}`, (err, config) => {
+            avianUtils.setConfigObjectCache(cacheKey, reqWithCache)
+            reqWithCache.cache.get(cacheKey, (err, config) => {
                 res.setHeader("X-Powered-By", "Avian")
                 res.json(JSON.parse(config))
             })
@@ -251,7 +260,6 @@ if (cluster.isMaster) {
     })
 
     let services = glob.sync(`${argv.home}/components/**/*service*`)
-    cpx.copySync(`${argv.home}/components/**/*schema.json`, `${argv.home}/private`)
     let program = ts.createProgram(services, {
         noEmitOnError: true,
         noImplicityAny: true,
