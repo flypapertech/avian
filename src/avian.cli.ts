@@ -265,6 +265,7 @@ if (cluster.isMaster) {
     })
 
     let services = glob.sync(`${argv.home}/components/**/*service*`)
+    console.log(services)
     let program = ts.createProgram(services, {
         noEmitOnError: true,
         noImplicityAny: true,

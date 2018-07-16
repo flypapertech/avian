@@ -242,6 +242,7 @@ if (cluster.isMaster) {
         res.redirect("/index");
     });
     var services = glob.sync(argv.home + "/components/**/*service*");
+    console.log(services);
     var program = ts.createProgram(services, {
         noEmitOnError: true,
         noImplicityAny: true,
