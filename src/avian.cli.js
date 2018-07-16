@@ -171,6 +171,22 @@ if (cluster.isMaster) {
     event_1.on("synch", function() {
         _this;
     });
+    avian.get("/:component/:subcomponent", parser.urlencoded({
+        extended: true
+    }), function(req, res, next) {
+        var reqWithCache = req;
+        var component_root = avianUtils.getComponentRoot(req.params.component);
+        try {
+            avianUtils.setConfigObjectCache(req.params.component + "/" + req.params.subcomponent, reqWithCache);
+            reqWithCache.cache.get(req.params.component + "/" + req.params.subcomponent, function(err, config) {
+                res.locals.req = req;
+                res.setHeader("X-Powered-By", "Avian");
+                res.render(component_root + "/" + req.params.component + "/" + req.params.subcomponent + ".view.pug", JSON.parse(config));
+            });
+        } catch (err) {
+            if (err) res.redirect("/error");
+        }
+    });
     avian.get("/:component", parser.urlencoded({
         extended: true
     }), function(req, res, next) {
@@ -189,10 +205,22 @@ if (cluster.isMaster) {
     });
     avian.get("/:component/config/objects.json", function(req, res, next) {
         var reqWithCache = req;
-        var component_root = avianUtils.getComponentRoot(req.params.component);
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get(req.params.component, function(err, config) {
+                res.setHeader("X-Powered-By", "Avian");
+                res.json(JSON.parse(config));
+            });
+        } catch (err) {
+            res.setHeader("X-Powered-By", "Avian");
+            res.status(404).send("Not Found");
+        }
+    });
+    avian.get("/:component/:subcomponent/config/objects.json", function(req, res, next) {
+        var reqWithCache = req;
+        try {
+            avianUtils.setConfigObjectCache(req.params.component + "/" + req.params.subcomponent, reqWithCache);
+            reqWithCache.cache.get(req.params.component + "/" + req.params.subcomponent, function(err, config) {
                 res.setHeader("X-Powered-By", "Avian");
                 res.json(JSON.parse(config));
             });
@@ -228,10 +256,20 @@ if (cluster.isMaster) {
     });
     var compiledServices = glob.sync(argv.home + "/private/**/*service*");
     for (var i = 0; i < compiledServices.length; i++) {
-        var serviceFilename = path.basename(compiledServices[i]);
+        var dirname = path.dirname(compiledServices[i]);
+        var directories = dirname.split("/");
+        var routeArray = [];
+        for (var j = directories.length - 1; j >= 0; j--) {
+            if (directories[j] !== "private") {
+                routeArray.unshift(directories[j]);
+            } else {
+                break;
+            }
+        }
+        var routeBase = "/" + routeArray.join("/");
         var ComponentRouter = require("" + compiledServices[i]);
-        var routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."));
-        avian.use("/" + routeBase, ComponentRouter);
+        console.log(routeBase);
+        avian.use("" + routeBase, ComponentRouter);
     }
     var server = avian.listen(argv.port, function() {
         console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);

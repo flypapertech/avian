@@ -177,6 +177,23 @@ if (cluster.isMaster) {
     let event = new events.EventEmitter()
     event.on("synch", () => {this})
 
+    avian.get("/:component/:subcomponent", parser.urlencoded({ extended: true }), (req, res, next) => {
+        let reqWithCache = req as RequestWithCache
+        let component_root = avianUtils.getComponentRoot(req.params.component)
+        try {
+            avianUtils.setConfigObjectCache(`${req.params.component}/${req.params.subcomponent}`, reqWithCache)
+            reqWithCache.cache.get(`${req.params.component}/${req.params.subcomponent}`, (err, config) => {
+                res.locals.req = req
+                res.setHeader("X-Powered-By", "Avian")
+                res.render(`${component_root}/${req.params.component}/${req.params.subcomponent}.view.pug`, JSON.parse(config))
+            })
+        }
+        catch (err) {
+            if (err)
+                res.redirect("/error")
+        }
+    })
+
     avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
         let reqWithCache = req as RequestWithCache
         let component_root = avianUtils.getComponentRoot(req.params.component)
@@ -196,7 +213,6 @@ if (cluster.isMaster) {
 
     avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache
-        let component_root = avianUtils.getComponentRoot(req.params.component)
         try {
             avianUtils.setConfigObjectCache(req.params.component, reqWithCache)
             reqWithCache.cache.get(req.params.component, (err, config) => {
@@ -212,6 +228,23 @@ if (cluster.isMaster) {
                 .send("Not Found")
         }
     })
+
+    avian.get("/:component/:subcomponent/config/objects.json", (req, res, next) => {
+        let reqWithCache = req as RequestWithCache
+        try {
+            avianUtils.setConfigObjectCache(`${req.params.component}/${req.params.subcomponent}`, reqWithCache)
+            reqWithCache.cache.get(`${req.params.component}/${req.params.subcomponent}`, (err, config) => {
+                res.setHeader("X-Powered-By", "Avian")
+                res.json(JSON.parse(config))
+            })
+        }
+        catch (err) {
+            res.setHeader("X-Powered-By", "Avian")
+            res.status(404)
+                .send("Not Found")
+        }
+    })
+
 
     avian.all("/", (req, res, next) => {
         res.redirect("/index")
@@ -246,10 +279,22 @@ if (cluster.isMaster) {
 
     let compiledServices = glob.sync(`${argv.home}/private/**/*service*`)
     for (let i = 0; i < compiledServices.length; i++) {
-        let serviceFilename = path.basename(compiledServices[i])
+        let dirname = path.dirname(compiledServices[i])
+        let directories = dirname.split("/")
+        let routeArray = []
+        for (let j = directories.length - 1; j >= 0; j--) {
+            if (directories[j] !== "private") {
+                routeArray.unshift(directories[j])
+            }
+            else {
+                break
+            }
+        }
+
+        let routeBase = "/" + routeArray.join("/")
         let ComponentRouter: express.Router = require(`${compiledServices[i]}`)
-        let routeBase = serviceFilename.substring(0, serviceFilename.indexOf("."))
-        avian.use(`/${routeBase}`, ComponentRouter)
+        console.log(routeBase)
+        avian.use(`${routeBase}`, ComponentRouter)
     }
 
     const server = avian.listen(argv.port, () => {
