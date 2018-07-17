@@ -44,6 +44,7 @@ const compiler = webpack([{
         path: `${argv.home}/public`,
         filename: "[name].bundle.js",
     },
+    devtool: "cheap-eval-source-map",
     resolve: {
         extensions: [".ts", ".js", ".vue", ".json"],
         alias: {
@@ -82,6 +83,11 @@ const compiler = webpack([{
                         presets: ["@babel/preset-env"]
                     }
                 }
+            },
+            {
+                test: /\.ts$/,
+                // TODO switch to ts-loader and babel when ts v3.0 comes out end of july 2018
+                loader: "awesome-typescript-loader"
             }
         ]
     }
@@ -117,10 +123,8 @@ const compiler = webpack([{
             },
             {
                 test: /\.ts$/,
-                loader: "babel-loader",
-                options: {
-                    presets: ["@babel/preset-typescript"]
-                }
+                // TODO switch to ts-loader and babel when ts v3.0 comes out end of july 2018
+                loader: "awesome-typescript-loader"
             }
         ]
     }
@@ -385,7 +389,7 @@ if (cluster.isMaster) {
         }
 
         let routeBase = "/" + routeArray.join("/")
-        let ComponentRouter: express.Router = require(`${compiledServices[i]}`).default
+        let ComponentRouter: express.Router = require(`${compiledServices[i]}`)
         avian.use(`${routeBase}`, ComponentRouter)
     }
 

@@ -62,6 +62,7 @@ var compiler = webpack([ {
         path: argv.home + "/public",
         filename: "[name].bundle.js"
     },
+    devtool: "cheap-eval-source-map",
     resolve: {
         extensions: [ ".ts", ".js", ".vue", ".json" ],
         alias: {
@@ -95,6 +96,9 @@ var compiler = webpack([ {
                     presets: [ "@babel/preset-env" ]
                 }
             }
+        }, {
+            test: /\.ts$/,
+            loader: "awesome-typescript-loader"
         } ]
     }
 }, {
@@ -121,10 +125,7 @@ var compiler = webpack([ {
             }
         }, {
             test: /\.ts$/,
-            loader: "babel-loader",
-            options: {
-                presets: [ "@babel/preset-typescript" ]
-            }
+            loader: "awesome-typescript-loader"
         } ]
     }
 } ]);
@@ -341,7 +342,7 @@ if (cluster.isMaster) {
             }
         }
         var routeBase = "/" + routeArray.join("/");
-        var ComponentRouter = require("" + compiledServices[i])["default"];
+        var ComponentRouter = require("" + compiledServices[i]);
         avian.use("" + routeBase, ComponentRouter);
     }
     var server = avian.listen(argv.port, function() {
