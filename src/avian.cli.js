@@ -26,8 +26,6 @@ var path = require("path");
 
 var webpack = require("webpack");
 
-var ts = require("typescript");
-
 var mkdirp = require("mkdirp");
 
 var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
@@ -35,6 +33,8 @@ var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
 var jsonfile = require("jsonfile");
 
 var compression = require("compression");
+
+var nodeExternals = require("webpack-node-externals");
 
 var argv = require("yargs").argv;
 
@@ -89,6 +89,38 @@ var compiler = webpack({
     }
 });
 
+var servicesCompiler = webpack({
+    target: "node",
+    entry: WebpackWatchedGlobEntries.getEntries(argv.home + "/components/**/*.service.*"),
+    output: {
+        path: argv.home + "/private",
+        filename: "[name].js",
+        libraryTarget: "commonjs2"
+    },
+    resolve: {
+        extensions: [ ".ts", ".js", ".json" ]
+    },
+    plugins: [ new WebpackWatchedGlobEntries() ],
+    externals: [ nodeExternals() ],
+    module: {
+        rules: [ {
+            test: /\.js$/,
+            use: {
+                loader: "babel-loader",
+                options: {
+                    presets: [ "@babel/preset-env" ]
+                }
+            }
+        }, {
+            test: /\.ts$/,
+            loader: "babel-loader",
+            options: {
+                presets: [ "@babel/preset-typescript" ]
+            }
+        } ]
+    }
+});
+
 var AvianUtils = function() {
     function AvianUtils() {}
     AvianUtils.prototype.getComponentRoot = function(component) {
@@ -118,13 +150,18 @@ if (cluster.isMaster) {
         if (argv.mode === "development") {
             console.log(stats);
         }
-    });
-    var cores = os.cpus();
-    for (var i = 0; i < cores.length; i++) {
-        cluster.fork();
-    }
-    cluster.on("exit", function(worker) {
-        cluster.fork();
+        servicesCompiler.run(function(err, stats) {
+            if (argv.mode === "development") {
+                console.log(stats);
+            }
+            var cores = os.cpus();
+            for (var i = 0; i < cores.length; i++) {
+                cluster.fork();
+            }
+            cluster.on("exit", function(worker) {
+                cluster.fork();
+            });
+        });
     });
 } else {
     var avian = express();
@@ -241,29 +278,7 @@ if (cluster.isMaster) {
     avian.all("/", function(req, res, next) {
         res.redirect("/index");
     });
-    var services = glob.sync(argv.home + "/components/**/*service*");
-    console.log(services);
-    var program = ts.createProgram(services, {
-        noEmitOnError: true,
-        noImplicityAny: true,
-        target: ts.ScriptTarget.ES5,
-        modules: ts.ModuleKind.CommonJS,
-        outDir: argv.home + "/private",
-        skipLibCheck: true,
-        lib: [ "lib.es2015.d.ts" ]
-    });
-    var emitResult = program.emit();
-    var allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
-    allDiagnostics.forEach(function(diagnostic) {
-        if (diagnostic.file) {
-            var _a = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start), line = _a.line, character = _a.character;
-            var message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
-            console.log(diagnostic.file.fileName + " (" + (line + 1) + "," + (character + 1) + "): " + message);
-        } else {
-            console.log("" + ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n"));
-        }
-    });
-    var compiledServices = glob.sync(argv.home + "/private/**/*service*");
+    var compiledServices = glob.sync(argv.home + "/private/**/*service.js");
     for (var i = 0; i < compiledServices.length; i++) {
         var dirname = path.dirname(compiledServices[i]);
         var directories = dirname.split("/");
@@ -276,8 +291,7 @@ if (cluster.isMaster) {
             }
         }
         var routeBase = "/" + routeArray.join("/");
-        var ComponentRouter = require("" + compiledServices[i]);
-        console.log(routeBase);
+        var ComponentRouter = require("" + compiledServices[i])["default"];
         avian.use("" + routeBase, ComponentRouter);
     }
     var server = avian.listen(argv.port, function() {

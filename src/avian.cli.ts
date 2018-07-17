@@ -12,13 +12,15 @@ import * as fs from "fs"
 import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
-import * as ts from "typescript"
+import * as util from "util"
 
 
 const mkdirp = require("mkdirp")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 const jsonfile = require("jsonfile")
 const compression = require("compression")
+
+const nodeExternals = require("webpack-node-externals")
 
 const argv = require("yargs").argv
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
@@ -77,6 +79,45 @@ const compiler = webpack({
     }
 })
 
+const servicesCompiler = webpack({
+    target: "node",
+    entry: WebpackWatchedGlobEntries.getEntries(
+        `${argv.home}/components/**/*.service.*`
+    ),
+    output: {
+        path: `${argv.home}/private`,
+        filename: "[name].js",
+        libraryTarget: "commonjs2"
+    },
+    resolve: {
+        extensions: [".ts", ".js", ".json"],
+    },
+    plugins: [
+        new WebpackWatchedGlobEntries()
+    ],
+    externals: [nodeExternals()],
+    module : {
+        rules: [
+            {
+                test: /\.js$/,
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: ["@babel/preset-env"]
+                    }
+                }
+            },
+            {
+                test: /\.ts$/,
+                loader: "babel-loader",
+                options: {
+                    presets: ["@babel/preset-typescript"]
+                }
+            }
+        ]
+    }
+})
+
 class AvianUtils {
     getComponentRoot(component: string): string {
         if (fs.existsSync(`${argv.home}/components/${component}`))
@@ -100,6 +141,7 @@ class AvianUtils {
     }
 }
 
+
 const avianUtils = new AvianUtils()
 
 interface RequestWithCache extends express.Request {
@@ -114,17 +156,24 @@ if (cluster.isMaster) {
         if (argv.mode === "development") {
             console.log(stats)
         }
+
+        servicesCompiler.run((err, stats) => {
+            if (argv.mode === "development") {
+                console.log(stats)
+            }
+
+            let cores = os.cpus()
+
+            for (let i = 0; i < cores.length; i++) {
+                cluster.fork()
+            }
+
+            cluster.on("exit", worker => {
+                cluster.fork()
+            })
+        })
     })
 
-    let cores = os.cpus()
-
-    for (let i = 0; i < cores.length; i++) {
-        cluster.fork()
-    }
-
-    cluster.on("exit", worker => {
-        cluster.fork()
-    })
 
 } else {
 
@@ -264,34 +313,8 @@ if (cluster.isMaster) {
         res.redirect("/index")
     })
 
-    let services = glob.sync(`${argv.home}/components/**/*service*`)
-    console.log(services)
-    let program = ts.createProgram(services, {
-        noEmitOnError: true,
-        noImplicityAny: true,
-        target: ts.ScriptTarget.ES5,
-        modules: ts.ModuleKind.CommonJS,
-        outDir: `${argv.home}/private`,
-        skipLibCheck: true,
-        lib: [
-            "lib.es2015.d.ts"
-        ]
-    })
-    let emitResult = program.emit()
 
-    let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
-    allDiagnostics.forEach(diagnostic => {
-        if (diagnostic.file) {
-            let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
-            let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
-            console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
-        }
-        else {
-            console.log(`${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`)
-        }
-    })
-
-    let compiledServices = glob.sync(`${argv.home}/private/**/*service*`)
+    let compiledServices = glob.sync(`${argv.home}/private/**/*service.js`)
     for (let i = 0; i < compiledServices.length; i++) {
         let dirname = path.dirname(compiledServices[i])
         let directories = dirname.split("/")
@@ -306,8 +329,7 @@ if (cluster.isMaster) {
         }
 
         let routeBase = "/" + routeArray.join("/")
-        let ComponentRouter: express.Router = require(`${compiledServices[i]}`)
-        console.log(routeBase)
+        let ComponentRouter: express.Router = require(`${compiledServices[i]}`).default
         avian.use(`${routeBase}`, ComponentRouter)
     }
 
