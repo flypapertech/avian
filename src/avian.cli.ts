@@ -28,7 +28,15 @@ argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
 
-const compiler = webpack({
+const logWebpackErrors = (stats) => {
+    if (stats && stats.hasErrors()) {
+        stats.toJson().errors.forEach((err) => {
+            console.error(err)
+        })
+    }
+}
+
+const compiler = webpack([{
     entry: WebpackWatchedGlobEntries.getEntries(
         `${argv.home}/components/**/*.component.*`
     ),
@@ -77,9 +85,8 @@ const compiler = webpack({
             }
         ]
     }
-})
-
-const servicesCompiler = webpack({
+},
+{
     target: "node",
     entry: WebpackWatchedGlobEntries.getEntries(
         `${argv.home}/components/**/*.service.*`
@@ -117,7 +124,7 @@ const servicesCompiler = webpack({
             }
         ]
     }
-})
+}])
 
 class AvianUtils {
     getComponentRoot(component: string): string {
@@ -141,6 +148,22 @@ class AvianUtils {
             reqWithCache.cache.set(component, configStringJSON))
     }
 
+    killAllWorkers(): boolean {
+        let existingWorkers = false
+        for (const id in cluster.workers) {
+            existingWorkers = true
+            let worker = cluster.workers[id]
+            worker.kill()
+        }
+
+        return existingWorkers
+    }
+
+    setWorkersToAutoRestart() {
+        cluster.on("exit", worker => {
+            cluster.fork()
+        })
+    }
 }
 
 
@@ -156,48 +179,55 @@ if (cluster.isMaster) {
 
     if (argv.mode !== "development") {
         compiler.run((err, stats) => {
-            console.log(stats)
-            servicesCompiler.run((err, stats) => {
-                let cores = os.cpus()
-                for (let i = 0; i < cores.length; i++) {
-                    cluster.fork()
+            if (err || stats.hasErrors()) {
+                if (err) {
+                    console.error(err)
+                }
+                else if (stats) {
+                    stats.toJson().errors.forEach((err) => {
+                        console.error(err)
+                    })
                 }
 
-                cluster.on("exit", worker => {
-                    cluster.fork()
-                })
-            })
+                console.error("Avian - Encountered compile errors, please fix and restart")
+                avianUtils.killAllWorkers()
+                return
+            }
+
+            let cores = os.cpus()
+            for (let i = 0; i < cores.length; i++) {
+                cluster.fork()
+            }
+
+            avianUtils.setWorkersToAutoRestart()
         })
     }
     else {
-        const watching = compiler.watch({
+        compiler.watch({
             aggregateTimeout: 300,
-            poll: undefined
+            poll: undefined,
         }, (err, stats) => {
-            // console.log(stats)
-        })
-
-        const servicesWatching = servicesCompiler.watch({
-            aggregateTimeout: 300,
-            poll: undefined
-        }, (err, stats) => {
-            console.log(stats)
-            let existingWorkers = false
-            for (const id in cluster.workers) {
-                existingWorkers = true
-                let worker = cluster.workers[id]
-                worker.kill()
-            }
-
-            if (existingWorkers === false) {
-                let cores = os.cpus()
-                for (let i = 0; i < cores.length; i++) {
-                    cluster.fork()
+            if (err || stats.hasErrors()) {
+                if (err) {
+                    console.error(err)
+                }
+                else if (stats) {
+                    stats.toJson().errors.forEach((err) => {
+                        console.error(err)
+                    })
                 }
 
-                cluster.on("exit", worker => {
-                    cluster.fork()
-                })
+                console.error("Avian - Encountered compile errors, stopping server")
+                avianUtils.killAllWorkers()
+                console.error("Avian - Waiting for you to fix compile errors")
+                return
+            }
+
+            console.log("Avian - Restarting server")
+            avianUtils.killAllWorkers()
+            let cores = os.cpus()
+            for (let i = 0; i < cores.length; i++) {
+                cluster.fork()
             }
         })
     }

@@ -48,7 +48,15 @@ argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 
-var compiler = webpack({
+var logWebpackErrors = function(stats) {
+    if (stats && stats.hasErrors()) {
+        stats.toJson().errors.forEach(function(err) {
+            console.error(err);
+        });
+    }
+};
+
+var compiler = webpack([ {
     entry: WebpackWatchedGlobEntries.getEntries(argv.home + "/components/**/*.component.*"),
     output: {
         path: argv.home + "/public",
@@ -89,9 +97,7 @@ var compiler = webpack({
             }
         } ]
     }
-});
-
-var servicesCompiler = webpack({
+}, {
     target: "node",
     entry: WebpackWatchedGlobEntries.getEntries(argv.home + "/components/**/*.service.*"),
     output: {
@@ -121,7 +127,7 @@ var servicesCompiler = webpack({
             }
         } ]
     }
-});
+} ]);
 
 var AvianUtils = function() {
     function AvianUtils() {}
@@ -139,6 +145,20 @@ var AvianUtils = function() {
         var event = new events.EventEmitter();
         event.emit("synch", reqWithCache.cache.set(component, configStringJSON));
     };
+    AvianUtils.prototype.killAllWorkers = function() {
+        var existingWorkers = false;
+        for (var id in cluster.workers) {
+            existingWorkers = true;
+            var worker = cluster.workers[id];
+            worker.kill();
+        }
+        return existingWorkers;
+    };
+    AvianUtils.prototype.setWorkersToAutoRestart = function() {
+        cluster.on("exit", function(worker) {
+            cluster.fork();
+        });
+    };
     return AvianUtils;
 }();
 
@@ -149,41 +169,47 @@ if (cluster.isMaster) {
     rimraf.sync(argv.home + "/public/*");
     if (argv.mode !== "development") {
         compiler.run(function(err, stats) {
-            console.log(stats);
-            servicesCompiler.run(function(err, stats) {
-                var cores = os.cpus();
-                for (var i = 0; i < cores.length; i++) {
-                    cluster.fork();
+            if (err || stats.hasErrors()) {
+                if (err) {
+                    console.error(err);
+                } else if (stats) {
+                    stats.toJson().errors.forEach(function(err) {
+                        console.error(err);
+                    });
                 }
-                cluster.on("exit", function(worker) {
-                    cluster.fork();
-                });
-            });
+                console.error("Avian - Encountered compile errors, please fix and restart");
+                avianUtils.killAllWorkers();
+                return;
+            }
+            var cores = os.cpus();
+            for (var i = 0; i < cores.length; i++) {
+                cluster.fork();
+            }
+            avianUtils.setWorkersToAutoRestart();
         });
     } else {
-        var watching = compiler.watch({
-            aggregateTimeout: 300,
-            poll: undefined
-        }, function(err, stats) {});
-        var servicesWatching = servicesCompiler.watch({
+        compiler.watch({
             aggregateTimeout: 300,
             poll: undefined
         }, function(err, stats) {
-            console.log(stats);
-            var existingWorkers = false;
-            for (var id in cluster.workers) {
-                existingWorkers = true;
-                var worker = cluster.workers[id];
-                worker.kill();
-            }
-            if (existingWorkers === false) {
-                var cores = os.cpus();
-                for (var i = 0; i < cores.length; i++) {
-                    cluster.fork();
+            if (err || stats.hasErrors()) {
+                if (err) {
+                    console.error(err);
+                } else if (stats) {
+                    stats.toJson().errors.forEach(function(err) {
+                        console.error(err);
+                    });
                 }
-                cluster.on("exit", function(worker) {
-                    cluster.fork();
-                });
+                console.error("Avian - Encountered compile errors, stopping server");
+                avianUtils.killAllWorkers();
+                console.error("Avian - Waiting for you to fix compile errors");
+                return;
+            }
+            console.log("Avian - Restarting server");
+            avianUtils.killAllWorkers();
+            var cores = os.cpus();
+            for (var i = 0; i < cores.length; i++) {
+                cluster.fork();
             }
         });
     }
