@@ -143,26 +143,47 @@ var AvianUtils = function() {
 var avianUtils = new AvianUtils();
 
 if (cluster.isMaster) {
-    var watching = compiler.watch({
-        aggregateTimeout: 300,
-        poll: undefined
-    }, function(err, stats) {
-        if (argv.mode === "development") {
-            console.log(stats);
-        }
-        servicesCompiler.run(function(err, stats) {
-            if (argv.mode === "development") {
-                console.log(stats);
-            }
-            var cores = os.cpus();
-            for (var i = 0; i < cores.length; i++) {
-                cluster.fork();
-            }
-            cluster.on("exit", function(worker) {
-                cluster.fork();
+    if (argv.mode !== "development") {
+        compiler.run(function(err, stats) {
+            servicesCompiler.run(function(err, stats) {
+                var cores = os.cpus();
+                for (var i = 0; i < cores.length; i++) {
+                    cluster.fork();
+                }
+                cluster.on("exit", function(worker) {
+                    cluster.fork();
+                });
             });
         });
-    });
+    } else {
+        var watching = compiler.watch({
+            aggregateTimeout: 300,
+            poll: undefined
+        }, function(err, stats) {
+            console.log(stats);
+        });
+        var servicesWatching = servicesCompiler.watch({
+            aggregateTimeout: 300,
+            poll: undefined
+        }, function(err, stats) {
+            console.log(stats);
+            var existingWorkers = false;
+            for (var id in cluster.workers) {
+                existingWorkers = true;
+                var worker = cluster.workers[id];
+                worker.kill();
+            }
+            if (existingWorkers === false) {
+                var cores = os.cpus();
+                for (var i = 0; i < cores.length; i++) {
+                    cluster.fork();
+                }
+                cluster.on("exit", function(worker) {
+                    cluster.fork();
+                });
+            }
+        });
+    }
 } else {
     var avian = express();
     avian.locals.argv = argv;
@@ -295,6 +316,6 @@ if (cluster.isMaster) {
         avian.use("" + routeBase, ComponentRouter);
     }
     var server = avian.listen(argv.port, function() {
-        console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);
+        console.log("Avian - Worker Id: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);
     });
 }

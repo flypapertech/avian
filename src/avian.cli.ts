@@ -12,7 +12,6 @@ import * as fs from "fs"
 import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
-import * as util from "util"
 
 
 const mkdirp = require("mkdirp")
@@ -139,6 +138,7 @@ class AvianUtils {
         event.emit("synch",
             reqWithCache.cache.set(component, configStringJSON))
     }
+
 }
 
 
@@ -149,32 +149,53 @@ interface RequestWithCache extends express.Request {
 }
 
 if (cluster.isMaster) {
-    const watching = compiler.watch({
-        aggregateTimeout: 300,
-        poll: undefined
-    }, (err, stats) => {
-        if (argv.mode === "development") {
-            console.log(stats)
-        }
 
-        servicesCompiler.run((err, stats) => {
-            if (argv.mode === "development") {
-                console.log(stats)
-            }
+    if (argv.mode !== "development") {
+        compiler.run((err, stats) => {
+            servicesCompiler.run((err, stats) => {
+                let cores = os.cpus()
+                for (let i = 0; i < cores.length; i++) {
+                    cluster.fork()
+                }
 
-            let cores = os.cpus()
-
-            for (let i = 0; i < cores.length; i++) {
-                cluster.fork()
-            }
-
-            cluster.on("exit", worker => {
-                cluster.fork()
+                cluster.on("exit", worker => {
+                    cluster.fork()
+                })
             })
         })
-    })
+    }
+    else {
+        const watching = compiler.watch({
+            aggregateTimeout: 300,
+            poll: undefined
+        }, (err, stats) => {
+            console.log(stats)
+        })
 
+        const servicesWatching = servicesCompiler.watch({
+            aggregateTimeout: 300,
+            poll: undefined
+        }, (err, stats) => {
+            console.log(stats)
+            let existingWorkers = false
+            for (const id in cluster.workers) {
+                existingWorkers = true
+                let worker = cluster.workers[id]
+                worker.kill()
+            }
 
+            if (existingWorkers === false) {
+                let cores = os.cpus()
+                for (let i = 0; i < cores.length; i++) {
+                    cluster.fork()
+                }
+
+                cluster.on("exit", worker => {
+                    cluster.fork()
+                })
+            }
+        })
+    }
 } else {
 
     const avian = express()
@@ -335,7 +356,7 @@ if (cluster.isMaster) {
 
     const server = avian.listen(argv.port, () => {
 
-        console.log("Avian - Core: %s, Process: %sd, Name: %s, Home: %s, Port: %d",
+        console.log("Avian - Worker Id: %s, Process: %sd, Name: %s, Home: %s, Port: %d",
             cluster.worker.id,
             process.pid,
             argv.name,
