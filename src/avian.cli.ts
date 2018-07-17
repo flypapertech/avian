@@ -12,6 +12,7 @@ import * as fs from "fs"
 import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
+import * as rimraf from "rimraf"
 
 
 const mkdirp = require("mkdirp")
@@ -94,6 +95,7 @@ const servicesCompiler = webpack({
     plugins: [
         new WebpackWatchedGlobEntries()
     ],
+    // externals: [nodeExternals(), /\.pug$/, /\.less$/, /\.css$/],
     externals: [nodeExternals()],
     module : {
         rules: [
@@ -149,9 +151,12 @@ interface RequestWithCache extends express.Request {
 }
 
 if (cluster.isMaster) {
+    rimraf.sync(`${argv.home}/private/*`)
+    rimraf.sync(`${argv.home}/public/*`)
 
     if (argv.mode !== "development") {
         compiler.run((err, stats) => {
+            console.log(stats)
             servicesCompiler.run((err, stats) => {
                 let cores = os.cpus()
                 for (let i = 0; i < cores.length; i++) {
@@ -169,7 +174,7 @@ if (cluster.isMaster) {
             aggregateTimeout: 300,
             poll: undefined
         }, (err, stats) => {
-            console.log(stats)
+            // console.log(stats)
         })
 
         const servicesWatching = servicesCompiler.watch({

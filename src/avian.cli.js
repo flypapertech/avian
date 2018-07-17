@@ -26,6 +26,8 @@ var path = require("path");
 
 var webpack = require("webpack");
 
+var rimraf = require("rimraf");
+
 var mkdirp = require("mkdirp");
 
 var WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
@@ -143,8 +145,11 @@ var AvianUtils = function() {
 var avianUtils = new AvianUtils();
 
 if (cluster.isMaster) {
+    rimraf.sync(argv.home + "/private/*");
+    rimraf.sync(argv.home + "/public/*");
     if (argv.mode !== "development") {
         compiler.run(function(err, stats) {
+            console.log(stats);
             servicesCompiler.run(function(err, stats) {
                 var cores = os.cpus();
                 for (var i = 0; i < cores.length; i++) {
@@ -159,9 +164,7 @@ if (cluster.isMaster) {
         var watching = compiler.watch({
             aggregateTimeout: 300,
             poll: undefined
-        }, function(err, stats) {
-            console.log(stats);
-        });
+        }, function(err, stats) {});
         var servicesWatching = servicesCompiler.watch({
             aggregateTimeout: 300,
             poll: undefined
