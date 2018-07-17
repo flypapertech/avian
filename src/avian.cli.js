@@ -97,8 +97,8 @@ var compiler = webpack([ {
                 }
             }
         }, {
-            test: /\.ts$/,
-            loader: "awesome-typescript-loader"
+            test: /\.tsx?$/,
+            loaders: [ "babel-loader", "ts-loader" ]
         } ]
     }
 }, {
@@ -124,8 +124,8 @@ var compiler = webpack([ {
                 }
             }
         }, {
-            test: /\.ts$/,
-            loader: "awesome-typescript-loader"
+            test: /\.tsx?$/,
+            loaders: [ "babel-loader", "ts-loader" ]
         } ]
     }
 } ]);

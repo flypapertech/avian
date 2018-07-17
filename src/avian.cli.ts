@@ -85,9 +85,8 @@ const compiler = webpack([{
                 }
             },
             {
-                test: /\.ts$/,
-                // TODO switch to ts-loader and babel when ts v3.0 comes out end of july 2018
-                loader: "awesome-typescript-loader"
+                test: /\.tsx?$/,
+                loaders: ["babel-loader", "ts-loader"]
             }
         ]
     }
@@ -122,9 +121,8 @@ const compiler = webpack([{
                 }
             },
             {
-                test: /\.ts$/,
-                // TODO switch to ts-loader and babel when ts v3.0 comes out end of july 2018
-                loader: "awesome-typescript-loader"
+                test: /\.tsx?$/,
+                loaders: ["babel-loader", "ts-loader"]
             }
         ]
     }
