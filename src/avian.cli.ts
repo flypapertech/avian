@@ -94,6 +94,7 @@ if (cluster.isMaster) {
     rimraf.sync(`${argv.home}/public/*`)
 
     if (argv.mode !== "development") {
+        console.log("Avian - Starting Webpack")
         webpackCompiler.run((err, stats) => {
             if (err || stats.hasErrors()) {
                 if (err) {
@@ -119,6 +120,7 @@ if (cluster.isMaster) {
         })
     }
     else {
+        console.log("Avian - Starting Webpack Watcher")
         webpackCompiler.watch({
             aggregateTimeout: 300,
             poll: undefined,

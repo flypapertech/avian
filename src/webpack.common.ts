@@ -1,5 +1,7 @@
 import * as webpack from "webpack"
 import * as WebpackWatchedGlobEntries from "webpack-watched-glob-entries-plugin"
+import * as ProgressBarPlugin from "progress-bar-webpack-plugin"
+import chalk from "chalk"
 
 const nodeExternals = require("webpack-node-externals")
 const argv = require("yargs").argv
@@ -20,7 +22,11 @@ const componentsCommonConfig: webpack.Configuration = {
         }
     },
     plugins: [
-        new WebpackWatchedGlobEntries()
+        new WebpackWatchedGlobEntries(),
+        new ProgressBarPlugin({
+            format: "Compiling Component Files [:bar] " + chalk.green.bold(" :percent"),
+            clear: false
+        })
     ],
     externals: {
         vue: "Vue",
@@ -74,7 +80,11 @@ const servicesCommonConfig: webpack.Configuration = {
         extensions: [".ts", ".js", ".json"],
     },
     plugins: [
-        new WebpackWatchedGlobEntries()
+        new WebpackWatchedGlobEntries(),
+        new ProgressBarPlugin({
+            format: "Compiling Service Files [:bar] " + chalk.green.bold(" :percent"),
+            clear: false
+        })
     ],
     // externals: [nodeExternals(), /\.pug$/, /\.less$/, /\.css$/],
     externals: [nodeExternals()],

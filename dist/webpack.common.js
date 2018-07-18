@@ -1,6 +1,8 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
+const ProgressBarPlugin = require("progress-bar-webpack-plugin");
+const chalk_1 = require("chalk");
 const nodeExternals = require("webpack-node-externals");
 const argv = require("yargs").argv;
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
@@ -17,7 +19,11 @@ const componentsCommonConfig = {
         }
     },
     plugins: [
-        new WebpackWatchedGlobEntries()
+        new WebpackWatchedGlobEntries(),
+        new ProgressBarPlugin({
+            format: "Compiling Component Files [:bar] " + chalk_1.default.green.bold(" :percent"),
+            clear: false
+        })
     ],
     externals: {
         vue: "Vue",
@@ -68,7 +74,11 @@ const servicesCommonConfig = {
         extensions: [".ts", ".js", ".json"],
     },
     plugins: [
-        new WebpackWatchedGlobEntries()
+        new WebpackWatchedGlobEntries(),
+        new ProgressBarPlugin({
+            format: "Compiling Service Files [:bar] " + chalk_1.default.green.bold(" :percent"),
+            clear: false
+        })
     ],
     // externals: [nodeExternals(), /\.pug$/, /\.less$/, /\.css$/],
     externals: [nodeExternals()],
