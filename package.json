@@ -12,10 +12,9 @@
     "avian": "./dist/avian.cli.js"
   },
   "scripts": {
-    "build": "npm run build_cli && npm run build_spec && npm run test && npm run snyk-protect",
-    "build_cli": "node_modules/.bin/tsc ./src/avian.cli.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.cli.js -b -o ./src/avian.cli.js ; node_modules/.bin/uglifyjs ./src/avian.cli.js -o ./dist/avian.cli.js",
-    "build_spec": "node_modules/.bin/tsc ./src/avian.spec.ts &>/dev/null ; node_modules/.bin/uglifyjs ./src/avian.spec.js -b -o ./src/avian.spec.js ; node_modules/.bin/uglifyjs ./src/avian.spec.js -o ./spec/avian.spec.js",
-    "test": "jasmine",
+    "build": "npm run build_cli && npm run test && npm run snyk-protect",
+    "build_cli": "node_modules/.bin/tsc --outDir ./dist ./src/avian.cli.ts --target es6 --module commonjs;",
+    "test": "node_modules/.bin/jasmine-ts",
     "start": "node_modules/.bin/ts-node dist/avian.cli.ts",
     "snyk-protect": "snyk protect",
     "security-check": "snyk test"
@@ -36,7 +35,7 @@
     "@types/jasmine": "^2.8.7",
     "@types/node": "^10.0.3",
     "@types/redis": "^2.8.6",
-    "@types/webpack": "^4.1.5",
+    "@types/webpack": "^4.4.7",
     "babel-loader": "^8.0.0-beta",
     "body-parser": "^1.15.2",
     "bunyan": "^1.8.4",
@@ -53,7 +52,6 @@
     "glob": "^7.1.2",
     "highlight.js": "^9.7.0",
     "highlightjs": "^9.10.0",
-    "jasmine": "^3.1.0",
     "jsonfile": "^4.0.0",
     "jstransformer": "^1.0.0",
     "jstransformer-babel": "^2.1.0",
@@ -97,6 +95,7 @@
     "vue-template-compiler": "^2.5.16",
     "watch": "^1.0.1",
     "webpack": "^4.8.1",
+    "webpack-merge": "^4.1.3",
     "webpack-node-externals": "^1.7.2",
     "webpack-watched-glob-entries-plugin": "^2.1.2",
     "yargs": "^11.1.0"
@@ -111,6 +110,7 @@
   },
   "devDependencies": {
     "@types/cpx": "^1.5.0",
+    "jasmine-ts": "^0.2.1",
     "snyk": "^1.80.0"
   }
 }
