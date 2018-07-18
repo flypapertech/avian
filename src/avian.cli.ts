@@ -50,18 +50,41 @@ class AvianUtils {
             return `${argv.home}/components`
     }
 
-    setConfigObjectCache(component: string, reqWithCache: RequestWithCache) {
+    setComponentConfigObjectCache(component: string, reqWithCache: RequestWithCache) {
         let component_root = this.getComponentRoot(component)
         let configStringJSON: string
         try {
             configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${component}.config.json`))
         } catch (err) {
+            console.log(err)
             configStringJSON = JSON.stringify({})
         }
 
+        this.setConfigObjectCache(component, configStringJSON, reqWithCache)
+    }
+
+    setSubComponentConfigObjectCache(component: string, subcomponent: string, reqWithCache: RequestWithCache) {
+        let component_root = this.getComponentRoot(component)
+        let configStringJSON: string
+        try {
+            try {
+                configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${subcomponent}/${subcomponent}.config.json`))
+            }
+            catch {
+                configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${subcomponent}/${component}.${subcomponent}.config.json`))
+            }
+        } catch (err) {
+            console.log(err)
+            configStringJSON = JSON.stringify({})
+        }
+
+        this.setConfigObjectCache(`${component}/${subcomponent}`, configStringJSON, reqWithCache)
+    }
+
+    private setConfigObjectCache(componentKey: string, configStringJSON: string, reqWithCache: RequestWithCache) {
         let event = new events.EventEmitter()
         event.emit("synch",
-            reqWithCache.cache.set(component, configStringJSON))
+            reqWithCache.cache.set(componentKey, configStringJSON))
     }
 
     killAllWorkers(): boolean {
@@ -223,7 +246,7 @@ if (cluster.isMaster) {
 
         let reqWithCache = req as RequestWithCache
         try {
-            avianUtils.setConfigObjectCache(cacheKey, reqWithCache)
+            avianUtils.setSubComponentConfigObjectCache(req.params.component, req.params.subcomponent, reqWithCache)
             reqWithCache.cache.get(cacheKey, (err, config) => {
                 res.locals.req = req
                 res.setHeader("X-Powered-By", "Avian")
@@ -244,7 +267,7 @@ if (cluster.isMaster) {
         let reqWithCache = req as RequestWithCache
         let componentRoot = avianUtils.getComponentRoot(req.params.component)
         try {
-            avianUtils.setConfigObjectCache(req.params.component, reqWithCache)
+            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache)
             reqWithCache.cache.get(`${req.params.component}`, (err, config) => {
                 res.locals.req = req
                 res.setHeader("X-Powered-By", "Avian")
@@ -260,7 +283,7 @@ if (cluster.isMaster) {
     avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache
         try {
-            avianUtils.setConfigObjectCache(req.params.component, reqWithCache)
+            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache)
             reqWithCache.cache.get(req.params.component, (err, config) => {
 
                 res.setHeader("X-Powered-By", "Avian")
@@ -279,7 +302,7 @@ if (cluster.isMaster) {
         let reqWithCache = req as RequestWithCache
         let cacheKey = `${req.params.component}/${req.params.subcomponent}`
         try {
-            avianUtils.setConfigObjectCache(cacheKey, reqWithCache)
+            avianUtils.setSubComponentConfigObjectCache(req.params.component, req.params.subcomponent, reqWithCache)
             reqWithCache.cache.get(cacheKey, (err, config) => {
                 res.setHeader("X-Powered-By", "Avian")
                 res.json(JSON.parse(config))

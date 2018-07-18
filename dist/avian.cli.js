@@ -43,17 +43,38 @@ class AvianUtils {
         else
             return `${argv.home}/components`;
     }
-    setConfigObjectCache(component, reqWithCache) {
+    setComponentConfigObjectCache(component, reqWithCache) {
         let component_root = this.getComponentRoot(component);
         let configStringJSON;
         try {
             configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${component}.config.json`));
         }
         catch (err) {
+            console.log(err);
             configStringJSON = JSON.stringify({});
         }
+        this.setConfigObjectCache(component, configStringJSON, reqWithCache);
+    }
+    setSubComponentConfigObjectCache(component, subcomponent, reqWithCache) {
+        let component_root = this.getComponentRoot(component);
+        let configStringJSON;
+        try {
+            try {
+                configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${subcomponent}/${subcomponent}.config.json`));
+            }
+            catch (_a) {
+                configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${subcomponent}/${component}.${subcomponent}.config.json`));
+            }
+        }
+        catch (err) {
+            console.log(err);
+            configStringJSON = JSON.stringify({});
+        }
+        this.setConfigObjectCache(`${component}/${subcomponent}`, configStringJSON, reqWithCache);
+    }
+    setConfigObjectCache(componentKey, configStringJSON, reqWithCache) {
         let event = new events.EventEmitter();
-        event.emit("synch", reqWithCache.cache.set(component, configStringJSON));
+        event.emit("synch", reqWithCache.cache.set(componentKey, configStringJSON));
     }
     killAllWorkers() {
         let existingWorkers = false;
@@ -184,7 +205,7 @@ else {
         }
         let reqWithCache = req;
         try {
-            avianUtils.setConfigObjectCache(cacheKey, reqWithCache);
+            avianUtils.setSubComponentConfigObjectCache(req.params.component, req.params.subcomponent, reqWithCache);
             reqWithCache.cache.get(cacheKey, (err, config) => {
                 res.locals.req = req;
                 res.setHeader("X-Powered-By", "Avian");
@@ -204,7 +225,7 @@ else {
         let reqWithCache = req;
         let componentRoot = avianUtils.getComponentRoot(req.params.component);
         try {
-            avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
+            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get(`${req.params.component}`, (err, config) => {
                 res.locals.req = req;
                 res.setHeader("X-Powered-By", "Avian");
@@ -219,7 +240,7 @@ else {
     avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req;
         try {
-            avianUtils.setConfigObjectCache(req.params.component, reqWithCache);
+            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get(req.params.component, (err, config) => {
                 res.setHeader("X-Powered-By", "Avian");
                 res.json(JSON.parse(config));
@@ -235,7 +256,7 @@ else {
         let reqWithCache = req;
         let cacheKey = `${req.params.component}/${req.params.subcomponent}`;
         try {
-            avianUtils.setConfigObjectCache(cacheKey, reqWithCache);
+            avianUtils.setSubComponentConfigObjectCache(req.params.component, req.params.subcomponent, reqWithCache);
             reqWithCache.cache.get(cacheKey, (err, config) => {
                 res.setHeader("X-Powered-By", "Avian");
                 res.json(JSON.parse(config));
