@@ -13,14 +13,11 @@ import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
 import * as rimraf from "rimraf"
-
-
 const mkdirp = require("mkdirp")
-const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 const jsonfile = require("jsonfile")
 const compression = require("compression")
-
-const nodeExternals = require("webpack-node-externals")
+import {ComponentsProdConfig, ServicesProdConfig} from "./webpack.prod"
+import {ComponentsDevConfig, ServicesDevConfig} from "./webpack.dev"
 
 const argv = require("yargs").argv
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
@@ -28,105 +25,22 @@ argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
 
-const logWebpackErrors = (stats) => {
-    if (stats && stats.hasErrors()) {
-        stats.toJson().errors.forEach((err) => {
-            console.error(err)
-        })
-    }
-}
+// import after argv so they can us it
 
-const compiler = webpack([{
-    entry: WebpackWatchedGlobEntries.getEntries(
-        `${argv.home}/components/**/*.component.*`
-    ),
-    output: {
-        path: `${argv.home}/public`,
-        filename: "[name].bundle.js",
-    },
-    devtool: "cheap-eval-source-map",
-    resolve: {
-        extensions: [".ts", ".js", ".vue", ".json"],
-        alias: {
-            vue$: "vue/dist/vue.js"
-        }
-    },
-    plugins: [
-        new WebpackWatchedGlobEntries()
-    ],
-    externals: {
-        vue: "Vue",
-        vuetify: "Vuetify"
-    },
-    module : {
-        rules: [
-            {
-                test: /\.jsx$/,
-                use: {
-                    loader: "babel-loader",
-                    options: {
-                        presets: ["@babel/preset-react"]
-                    }
-                }
-            },
-            {
-                test: /\.vue$/,
-                use: {
-                    loader: "vue-loader"
-                }
-            },
-            {
-                test: /\.js$/,
-                use: {
-                    loader: "babel-loader",
-                    options: {
-                        presets: ["@babel/preset-env"]
-                    }
-                }
-            },
-            {
-                test: /\.tsx?$/,
-                loaders: ["babel-loader", "ts-loader"]
-            }
-        ]
-    }
-},
-{
-    target: "node",
-    entry: WebpackWatchedGlobEntries.getEntries(
-        `${argv.home}/components/**/*.service.*`
-    ),
-    output: {
-        path: `${argv.home}/private`,
-        filename: "[name].js",
-        libraryTarget: "commonjs2"
-    },
-    resolve: {
-        extensions: [".ts", ".js", ".json"],
-    },
-    plugins: [
-        new WebpackWatchedGlobEntries()
-    ],
-    // externals: [nodeExternals(), /\.pug$/, /\.less$/, /\.css$/],
-    externals: [nodeExternals()],
-    module : {
-        rules: [
-            {
-                test: /\.js$/,
-                use: {
-                    loader: "babel-loader",
-                    options: {
-                        presets: ["@babel/preset-env"]
-                    }
-                }
-            },
-            {
-                test: /\.tsx?$/,
-                loaders: ["babel-loader", "ts-loader"]
-            }
-        ]
-    }
-}])
+
+let webpackCompiler: webpack.MultiCompiler
+if (argv.mode === "development") {
+    webpackCompiler = webpack([
+        ComponentsDevConfig,
+        ServicesDevConfig
+    ])
+}
+else {
+    webpackCompiler = webpack([
+        ComponentsProdConfig,
+        ServicesProdConfig
+    ])
+}
 
 class AvianUtils {
     getComponentRoot(component: string): string {
@@ -180,7 +94,7 @@ if (cluster.isMaster) {
     rimraf.sync(`${argv.home}/public/*`)
 
     if (argv.mode !== "development") {
-        compiler.run((err, stats) => {
+        webpackCompiler.run((err, stats) => {
             if (err || stats.hasErrors()) {
                 if (err) {
                     console.error(err)
@@ -205,7 +119,7 @@ if (cluster.isMaster) {
         })
     }
     else {
-        compiler.watch({
+        webpackCompiler.watch({
             aggregateTimeout: 300,
             poll: undefined,
         }, (err, stats) => {
@@ -223,6 +137,12 @@ if (cluster.isMaster) {
                 avianUtils.killAllWorkers()
                 console.error("Avian - Waiting for you to fix compile errors")
                 return
+            }
+
+            if (stats.hasWarnings()) {
+                stats.toJson().warnings.forEach((warning) => {
+                    console.log(warning)
+                })
             }
 
             console.log("Avian - Restarting server")

@@ -1,0 +1,94 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
+const nodeExternals = require("webpack-node-externals");
+const argv = require("yargs").argv;
+argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
+const componentsCommonConfig = {
+    entry: WebpackWatchedGlobEntries.getEntries(`${argv.home}/components/**/*.component.*`),
+    output: {
+        path: `${argv.home}/public`,
+        filename: "[name].bundle.js",
+    },
+    resolve: {
+        extensions: [".ts", ".js", ".vue", ".json"],
+        alias: {
+            vue$: "vue/dist/vue.js"
+        }
+    },
+    plugins: [
+        new WebpackWatchedGlobEntries()
+    ],
+    externals: {
+        vue: "Vue",
+        vuetify: "Vuetify"
+    },
+    module: {
+        rules: [
+            {
+                test: /\.jsx$/,
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: ["@babel/preset-react"]
+                    }
+                }
+            },
+            {
+                test: /\.vue$/,
+                use: {
+                    loader: "vue-loader"
+                }
+            },
+            {
+                test: /\.js$/,
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: ["@babel/preset-env"]
+                    }
+                }
+            },
+            {
+                test: /\.tsx?$/,
+                loaders: ["babel-loader", "ts-loader"]
+            }
+        ]
+    }
+};
+const servicesCommonConfig = {
+    target: "node",
+    entry: WebpackWatchedGlobEntries.getEntries(`${argv.home}/components/**/*.service.*`),
+    output: {
+        path: `${argv.home}/private`,
+        filename: "[name].js",
+        libraryTarget: "commonjs2"
+    },
+    resolve: {
+        extensions: [".ts", ".js", ".json"],
+    },
+    plugins: [
+        new WebpackWatchedGlobEntries()
+    ],
+    // externals: [nodeExternals(), /\.pug$/, /\.less$/, /\.css$/],
+    externals: [nodeExternals()],
+    module: {
+        rules: [
+            {
+                test: /\.js$/,
+                use: {
+                    loader: "babel-loader",
+                    options: {
+                        presets: ["@babel/preset-env"]
+                    }
+                }
+            },
+            {
+                test: /\.tsx?$/,
+                loaders: ["babel-loader", "ts-loader"]
+            }
+        ]
+    }
+};
+exports.ComponentsCommmonConfg = componentsCommonConfig;
+exports.ServicesCommonConfig = servicesCommonConfig;
