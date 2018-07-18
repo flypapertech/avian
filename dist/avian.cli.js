@@ -188,7 +188,11 @@ else {
             reqWithCache.cache.get(cacheKey, (err, config) => {
                 res.locals.req = req;
                 res.setHeader("X-Powered-By", "Avian");
-                res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, JSON.parse(config));
+                res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, JSON.parse(config), function (err, html) {
+                    if (err) {
+                        res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, JSON.parse(config));
+                    }
+                });
             });
         }
         catch (err) {
