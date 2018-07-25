@@ -30,7 +30,9 @@ const componentsCommonConfig: webpack.Configuration = {
     ],
     externals: {
         vue: "Vue",
-        vuetify: "Vuetify"
+        vuetify: "Vuetify",
+        ajv: "Ajv",
+        axios: "axios"
     },
     module : {
         rules: [
