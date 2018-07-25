@@ -3,9 +3,6 @@ import * as merge from "webpack-merge"
 import {ComponentsCommmonConfg, ServicesCommonConfig} from "./webpack.common"
 
 const componentsProdSpecificConfig: webpack.Configuration = {
-    output: {
-        filename: "[name].bundle.[chunkhash].js"
-    },
     mode: "production"
 }
 
