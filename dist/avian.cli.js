@@ -285,8 +285,21 @@ else {
             }
         }
         let routeBase = "/" + routeArray.join("/");
-        let ComponentRouter = require(`${compiledServices[i]}`);
-        avian.use(`${routeBase}`, ComponentRouter);
+        Promise.resolve().then(() => require(`${compiledServices[i]}`)).then(service => {
+            try {
+                let compiledService;
+                if (service.default) {
+                    compiledService = service.default;
+                }
+                else {
+                    compiledService = service;
+                }
+                avian.use(`${routeBase}`, compiledService);
+            }
+            catch (err) {
+                console.error(err);
+            }
+        });
     }
     const server = avian.listen(argv.port, () => {
         console.log("Avian - Worker Id: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);

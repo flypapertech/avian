@@ -336,8 +336,23 @@ if (cluster.isMaster) {
         }
 
         let routeBase = "/" + routeArray.join("/")
-        let ComponentRouter: express.Router = require(`${compiledServices[i]}`)
-        avian.use(`${routeBase}`, ComponentRouter)
+        import (`${compiledServices[i]}`).then(service => {
+            try {
+                let compiledService: express.Router
+                if (service.default) {
+                    compiledService = service.default
+                }
+                else {
+                    compiledService = service
+                }
+
+                avian.use(`${routeBase}`, compiledService)
+
+            }
+            catch (err) {
+                console.error(err)
+            }
+        })
     }
 
     const server = avian.listen(argv.port, () => {
