@@ -11,5 +11,5 @@ const servicesDevSpecificConfig: webpack.Configuration = {
     mode: "development"
 }
 
-export let ComponentsDevConfig = merge(ComponentsCommmonConfg, componentsDevSpecificConfig)
-export let ServicesDevConfig = merge(ServicesCommonConfig, servicesDevSpecificConfig)
+export let ComponentsConfig = merge(ComponentsCommmonConfg, componentsDevSpecificConfig)
+export let ServicesConfig = merge(ServicesCommonConfig, servicesDevSpecificConfig)

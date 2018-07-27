@@ -8,5 +8,5 @@ const componentsProdSpecificConfig = {
 const servicesProdSpecificConfig = {
     mode: "production"
 };
-exports.ComponentsProdConfig = merge(webpack_common_1.ComponentsCommmonConfg, componentsProdSpecificConfig);
-exports.ServicesProdConfig = merge(webpack_common_1.ServicesCommonConfig, servicesProdSpecificConfig);
+exports.ComponentsConfig = merge(webpack_common_1.ComponentsCommmonConfg, componentsProdSpecificConfig);
+exports.ServicesConfig = merge(webpack_common_1.ServicesCommonConfig, servicesProdSpecificConfig);

@@ -1,5 +1,3 @@
-"use strict"
-
 import * as events from "events"
 import * as crypto from "crypto"
 import * as cluster from "cluster"
@@ -13,34 +11,21 @@ import * as path from "path"
 import * as webpack from "webpack"
 import { RedisClient } from "redis"
 import * as rimraf from "rimraf"
+import * as defaultWebpackDev from "./webpack.development"
+import * as defaultWebpackProd from "./webpack.production"
+import * as ts from "typescript"
 const mkdirp = require("mkdirp")
 const jsonfile = require("jsonfile")
 const compression = require("compression")
-import {ComponentsProdConfig, ServicesProdConfig} from "./webpack.prod"
-import {ComponentsDevConfig, ServicesDevConfig} from "./webpack.dev"
 
 const argv = require("yargs").argv
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
+argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home
 
 // import after argv so they can us it
-
-
-let webpackCompiler: webpack.MultiCompiler
-if (argv.mode === "development") {
-    webpackCompiler = webpack([
-        ComponentsDevConfig,
-        ServicesDevConfig
-    ])
-}
-else {
-    webpackCompiler = webpack([
-        ComponentsProdConfig,
-        ServicesProdConfig
-    ])
-}
 
 class AvianUtils {
     getComponentRoot(component: string): string {
@@ -105,81 +90,136 @@ class AvianUtils {
     }
 }
 
+function startDevWebpackWatcher(webpackDev) {
+    let webpackCompiler: webpack.MultiCompiler
+    webpackCompiler = webpack([
+        webpackDev.ComponentsConfig,
+        webpackDev.ServicesConfig
+    ])
 
-const avianUtils = new AvianUtils()
+    console.log("Avian - Starting Webpack Watcher")
+    webpackCompiler.watch({
+        aggregateTimeout: 300,
+        poll: undefined,
+    }, (err, stats) => {
+        if (err || stats.hasErrors()) {
+            if (err) {
+                console.error(err)
+            }
+            else if (stats) {
+                stats.toJson().errors.forEach((err) => {
+                    console.error(err)
+                })
+            }
+
+            console.error("Avian - Encountered compile errors, stopping server")
+            avianUtils.killAllWorkers()
+            console.error("Avian - Waiting for you to fix compile errors")
+            return
+        }
+
+        if (stats.hasWarnings()) {
+            stats.toJson().warnings.forEach((warning) => {
+                console.log(warning)
+            })
+        }
+
+        console.log("Avian - Restarting server")
+        avianUtils.killAllWorkers()
+        let cores = os.cpus()
+        for (let i = 0; i < cores.length; i++) {
+            cluster.fork()
+        }
+    })
+}
+
+function startProdWebpackCompiler(webpackProd) {
+    let webpackCompiler: webpack.MultiCompiler
+    webpackCompiler = webpack([
+        webpackProd.ComponentsConfig,
+        webpackProd.ServicesConfig
+    ])
+
+    console.log("Avian - Starting Webpack")
+    webpackCompiler.run((err, stats) => {
+        if (err || stats.hasErrors()) {
+            if (err) {
+                console.error(err)
+            }
+            else if (stats) {
+                stats.toJson().errors.forEach((err) => {
+                    console.error(err)
+                })
+            }
+
+            console.error("Avian - Encountered compile errors, please fix and restart")
+            avianUtils.killAllWorkers()
+            return
+        }
+
+        let cores = os.cpus()
+        for (let i = 0; i < cores.length; i++) {
+            cluster.fork()
+        }
+
+        avianUtils.setWorkersToAutoRestart()
+    })
+
+}
 
 interface RequestWithCache extends express.Request {
     cache: RedisClient
 }
-
+const avianUtils = new AvianUtils()
 if (cluster.isMaster) {
     rimraf.sync(`${argv.home}/private/*`)
     rimraf.sync(`${argv.home}/public/*`)
 
-    if (argv.mode !== "development") {
-        console.log("Avian - Starting Webpack")
-        webpackCompiler.run((err, stats) => {
-            if (err || stats.hasErrors()) {
-                if (err) {
-                    console.error(err)
-                }
-                else if (stats) {
-                    stats.toJson().errors.forEach((err) => {
-                        console.error(err)
-                    })
-                }
+    let webpackConfigs = glob.sync(`${argv.webpack}/webpack.development.*`)
+    webpackConfigs.push(...glob.sync(`${argv.webpack}/webpack.production.*`))
+    let program = ts.createProgram(webpackConfigs, {
+        noEmitOnError: true,
+        noImplicityAny: true,
+        target: ts.ScriptTarget.ES5,
+        modules: ts.ModuleKind.CommonJS,
+        outDir: `${argv.home}/private`,
+        skipLibCheck: true,
+        lib: [
+            "lib.es2015.d.ts"
+        ]
+    })
+    let emitResult = program.emit()
 
-                console.error("Avian - Encountered compile errors, please fix and restart")
-                avianUtils.killAllWorkers()
-                return
-            }
+    let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
+    allDiagnostics.forEach(diagnostic => {
+        if (diagnostic.file) {
+            let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
+            let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
+            console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
+        }
+        else {
+            console.log(`${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`)
+        }
+    })
 
-            let cores = os.cpus()
-            for (let i = 0; i < cores.length; i++) {
-                cluster.fork()
-            }
-
-            avianUtils.setWorkersToAutoRestart()
+    if (argv.mode === "development") {
+        import(argv.home + "/private/webpack.development").then(webpackDev => {
+            startDevWebpackWatcher(webpackDev)
+        }).catch(error => {
+            console.log("Avian - Falling back to default dev webpack config")
+            startDevWebpackWatcher(defaultWebpackDev)
         })
     }
     else {
-        console.log("Avian - Starting Webpack Watcher")
-        webpackCompiler.watch({
-            aggregateTimeout: 300,
-            poll: undefined,
-        }, (err, stats) => {
-            if (err || stats.hasErrors()) {
-                if (err) {
-                    console.error(err)
-                }
-                else if (stats) {
-                    stats.toJson().errors.forEach((err) => {
-                        console.error(err)
-                    })
-                }
-
-                console.error("Avian - Encountered compile errors, stopping server")
-                avianUtils.killAllWorkers()
-                console.error("Avian - Waiting for you to fix compile errors")
-                return
-            }
-
-            if (stats.hasWarnings()) {
-                stats.toJson().warnings.forEach((warning) => {
-                    console.log(warning)
-                })
-            }
-
-            console.log("Avian - Restarting server")
-            avianUtils.killAllWorkers()
-            let cores = os.cpus()
-            for (let i = 0; i < cores.length; i++) {
-                cluster.fork()
-            }
+        import(argv.home + "/private/webpack.production").then(webpackProd => {
+            startProdWebpackCompiler(webpackProd)
+        }).catch(error => {
+            console.log("Avian - Falling back to default prod webpack config")
+            startProdWebpackCompiler(defaultWebpackProd)
         })
     }
-} else {
-
+}
+else {
     const avian = express()
 
     avian.locals.argv = argv
@@ -347,7 +387,6 @@ if (cluster.isMaster) {
                 }
 
                 avian.use(`${routeBase}`, compiledService)
-
             }
             catch (err) {
                 console.error(err)

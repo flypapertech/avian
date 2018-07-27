@@ -28,12 +28,6 @@ const componentsCommonConfig: webpack.Configuration = {
             clear: false
         })
     ],
-    externals: {
-        vue: "Vue",
-        vuetify: "Vuetify",
-        ajv: "Ajv",
-        axios: "axios"
-    },
     module : {
         rules: [
             {

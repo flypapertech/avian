@@ -10,5 +10,5 @@ const servicesProdSpecificConfig: webpack.Configuration = {
     mode: "production"
 }
 
-export let ComponentsProdConfig = merge(ComponentsCommmonConfg, componentsProdSpecificConfig)
-export let ServicesProdConfig = merge(ServicesCommonConfig, servicesProdSpecificConfig)
+export let ComponentsConfig = merge(ComponentsCommmonConfg, componentsProdSpecificConfig)
+export let ServicesConfig = merge(ServicesCommonConfig, servicesProdSpecificConfig)

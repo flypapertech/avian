@@ -9,5 +9,5 @@ const componentsDevSpecificConfig = {
 const servicesDevSpecificConfig = {
     mode: "development"
 };
-exports.ComponentsDevConfig = merge(webpack_common_1.ComponentsCommmonConfg, componentsDevSpecificConfig);
-exports.ServicesDevConfig = merge(webpack_common_1.ServicesCommonConfig, servicesDevSpecificConfig);
+exports.ComponentsConfig = merge(webpack_common_1.ComponentsCommmonConfg, componentsDevSpecificConfig);
+exports.ServicesConfig = merge(webpack_common_1.ServicesCommonConfig, servicesDevSpecificConfig);

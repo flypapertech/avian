@@ -12,30 +12,19 @@ const fs = require("fs");
 const path = require("path");
 const webpack = require("webpack");
 const rimraf = require("rimraf");
+const defaultWebpackDev = require("./webpack.development");
+const defaultWebpackProd = require("./webpack.production");
+const ts = require("typescript");
 const mkdirp = require("mkdirp");
 const jsonfile = require("jsonfile");
 const compression = require("compression");
-const webpack_prod_1 = require("./webpack.prod");
-const webpack_dev_1 = require("./webpack.dev");
 const argv = require("yargs").argv;
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost";
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
+argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home;
 // import after argv so they can us it
-let webpackCompiler;
-if (argv.mode === "development") {
-    webpackCompiler = webpack([
-        webpack_dev_1.ComponentsDevConfig,
-        webpack_dev_1.ServicesDevConfig
-    ]);
-}
-else {
-    webpackCompiler = webpack([
-        webpack_prod_1.ComponentsProdConfig,
-        webpack_prod_1.ServicesProdConfig
-    ]);
-}
 class AvianUtils {
     getComponentRoot(component) {
         if (fs.existsSync(`${argv.home}/components/${component}`))
@@ -91,64 +80,115 @@ class AvianUtils {
         });
     }
 }
+function startDevWebpackWatcher(webpackDev) {
+    let webpackCompiler;
+    webpackCompiler = webpack([
+        webpackDev.ComponentsConfig,
+        webpackDev.ServicesConfig
+    ]);
+    console.log("Avian - Starting Webpack Watcher");
+    webpackCompiler.watch({
+        aggregateTimeout: 300,
+        poll: undefined,
+    }, (err, stats) => {
+        if (err || stats.hasErrors()) {
+            if (err) {
+                console.error(err);
+            }
+            else if (stats) {
+                stats.toJson().errors.forEach((err) => {
+                    console.error(err);
+                });
+            }
+            console.error("Avian - Encountered compile errors, stopping server");
+            avianUtils.killAllWorkers();
+            console.error("Avian - Waiting for you to fix compile errors");
+            return;
+        }
+        if (stats.hasWarnings()) {
+            stats.toJson().warnings.forEach((warning) => {
+                console.log(warning);
+            });
+        }
+        console.log("Avian - Restarting server");
+        avianUtils.killAllWorkers();
+        let cores = os.cpus();
+        for (let i = 0; i < cores.length; i++) {
+            cluster.fork();
+        }
+    });
+}
+function startProdWebpackCompiler(webpackProd) {
+    let webpackCompiler;
+    webpackCompiler = webpack([
+        webpackProd.ComponentsConfig,
+        webpackProd.ServicesConfig
+    ]);
+    console.log("Avian - Starting Webpack");
+    webpackCompiler.run((err, stats) => {
+        if (err || stats.hasErrors()) {
+            if (err) {
+                console.error(err);
+            }
+            else if (stats) {
+                stats.toJson().errors.forEach((err) => {
+                    console.error(err);
+                });
+            }
+            console.error("Avian - Encountered compile errors, please fix and restart");
+            avianUtils.killAllWorkers();
+            return;
+        }
+        let cores = os.cpus();
+        for (let i = 0; i < cores.length; i++) {
+            cluster.fork();
+        }
+        avianUtils.setWorkersToAutoRestart();
+    });
+}
 const avianUtils = new AvianUtils();
 if (cluster.isMaster) {
     rimraf.sync(`${argv.home}/private/*`);
     rimraf.sync(`${argv.home}/public/*`);
-    if (argv.mode !== "development") {
-        console.log("Avian - Starting Webpack");
-        webpackCompiler.run((err, stats) => {
-            if (err || stats.hasErrors()) {
-                if (err) {
-                    console.error(err);
-                }
-                else if (stats) {
-                    stats.toJson().errors.forEach((err) => {
-                        console.error(err);
-                    });
-                }
-                console.error("Avian - Encountered compile errors, please fix and restart");
-                avianUtils.killAllWorkers();
-                return;
-            }
-            let cores = os.cpus();
-            for (let i = 0; i < cores.length; i++) {
-                cluster.fork();
-            }
-            avianUtils.setWorkersToAutoRestart();
+    let webpackConfigs = glob.sync(`${argv.webpack}/webpack.development.*`);
+    webpackConfigs.push(...glob.sync(`${argv.webpack}/webpack.production.*`));
+    let program = ts.createProgram(webpackConfigs, {
+        noEmitOnError: true,
+        noImplicityAny: true,
+        target: ts.ScriptTarget.ES5,
+        modules: ts.ModuleKind.CommonJS,
+        outDir: `${argv.home}/private`,
+        skipLibCheck: true,
+        lib: [
+            "lib.es2015.d.ts"
+        ]
+    });
+    let emitResult = program.emit();
+    let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics);
+    allDiagnostics.forEach(diagnostic => {
+        if (diagnostic.file) {
+            let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start);
+            let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n");
+            console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`);
+        }
+        else {
+            console.log(`${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`);
+        }
+    });
+    if (argv.mode === "development") {
+        Promise.resolve().then(() => require(argv.home + "/private/webpack.development")).then(webpackDev => {
+            startDevWebpackWatcher(webpackDev);
+        }).catch(error => {
+            console.log("Avian - Falling back to default dev webpack config");
+            startDevWebpackWatcher(defaultWebpackDev);
         });
     }
     else {
-        console.log("Avian - Starting Webpack Watcher");
-        webpackCompiler.watch({
-            aggregateTimeout: 300,
-            poll: undefined,
-        }, (err, stats) => {
-            if (err || stats.hasErrors()) {
-                if (err) {
-                    console.error(err);
-                }
-                else if (stats) {
-                    stats.toJson().errors.forEach((err) => {
-                        console.error(err);
-                    });
-                }
-                console.error("Avian - Encountered compile errors, stopping server");
-                avianUtils.killAllWorkers();
-                console.error("Avian - Waiting for you to fix compile errors");
-                return;
-            }
-            if (stats.hasWarnings()) {
-                stats.toJson().warnings.forEach((warning) => {
-                    console.log(warning);
-                });
-            }
-            console.log("Avian - Restarting server");
-            avianUtils.killAllWorkers();
-            let cores = os.cpus();
-            for (let i = 0; i < cores.length; i++) {
-                cluster.fork();
-            }
+        Promise.resolve().then(() => require(argv.home + "/private/webpack.production")).then(webpackProd => {
+            startProdWebpackCompiler(webpackProd);
+        }).catch(error => {
+            console.log("Avian - Falling back to default prod webpack config");
+            startProdWebpackCompiler(defaultWebpackProd);
         });
     }
 }

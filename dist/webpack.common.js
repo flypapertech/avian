@@ -25,12 +25,6 @@ const componentsCommonConfig = {
             clear: false
         })
     ],
-    externals: {
-        vue: "Vue",
-        vuetify: "Vuetify",
-        ajv: "Ajv",
-        axios: "axios"
-    },
     module: {
         rules: [
             {
