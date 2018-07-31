@@ -65,7 +65,17 @@ const componentsCommonConfig = {
             },
             {
                 test: /\.tsx?$/,
-                loaders: ["babel-loader", "ts-loader"]
+                loaders: [
+                    {
+                        loader: "babel-loader"
+                    },
+                    {
+                        loader: "ts-loader",
+                        options: {
+                            appendTsSuffixTo: [/\.vue$/]
+                        }
+                    }
+                ]
             }
         ]
     }
