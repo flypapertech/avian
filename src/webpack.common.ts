@@ -1,6 +1,7 @@
 import * as webpack from "webpack"
 import * as WebpackWatchedGlobEntries from "webpack-watched-glob-entries-plugin"
 import * as ProgressBarPlugin from "progress-bar-webpack-plugin"
+import * as VueLoader from "vue-loader"
 import chalk from "chalk"
 
 const nodeExternals = require("webpack-node-externals")
@@ -26,7 +27,8 @@ const componentsCommonConfig: webpack.Configuration = {
         new ProgressBarPlugin({
             format: "Compiling Component Files [:bar] " + chalk.green.bold(" :percent"),
             clear: false
-        })
+        }),
+        new VueLoader.VueLoaderPlugin()
     ],
     module : {
         rules: [
@@ -44,6 +46,16 @@ const componentsCommonConfig: webpack.Configuration = {
                 use: {
                     loader: "vue-loader"
                 }
+            },
+            {
+                test: /\.pug$/,
+                oneOf: [
+                    // this applies to `<template lang="pug">` in Vue components
+                    {
+                        resourceQuery: /^\?vue/,
+                        use: ["pug-plain-loader"]
+                    }
+                ]
             },
             {
                 test: /\.js$/,

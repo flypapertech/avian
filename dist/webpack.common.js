@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
 const ProgressBarPlugin = require("progress-bar-webpack-plugin");
+const VueLoader = require("vue-loader");
 const chalk_1 = require("chalk");
 const nodeExternals = require("webpack-node-externals");
 const argv = require("yargs").argv;
@@ -23,7 +24,8 @@ const componentsCommonConfig = {
         new ProgressBarPlugin({
             format: "Compiling Component Files [:bar] " + chalk_1.default.green.bold(" :percent"),
             clear: false
-        })
+        }),
+        new VueLoader.VueLoaderPlugin()
     ],
     module: {
         rules: [
@@ -41,6 +43,16 @@ const componentsCommonConfig = {
                 use: {
                     loader: "vue-loader"
                 }
+            },
+            {
+                test: /\.pug$/,
+                oneOf: [
+                    // this applies to `<template lang="pug">` in Vue components
+                    {
+                        resourceQuery: /^\?vue/,
+                        use: ["pug-plain-loader"]
+                    }
+                ]
             },
             {
                 test: /\.js$/,
