@@ -41,7 +41,6 @@ class AvianUtils {
         try {
             configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${component}.config.json`))
         } catch (err) {
-            console.log(err)
             configStringJSON = JSON.stringify({})
         }
 

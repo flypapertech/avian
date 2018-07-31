@@ -39,7 +39,6 @@ class AvianUtils {
             configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${component}.config.json`));
         }
         catch (err) {
-            console.log(err);
             configStringJSON = JSON.stringify({});
         }
         this.setConfigObjectCache(component, configStringJSON, reqWithCache);

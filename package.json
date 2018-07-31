@@ -91,7 +91,7 @@
     "typescript": "^2.8.3",
     "typescript-compiler": "^1.4.1",
     "uglify-js": "3.3.24",
-    "vue-loader": "14.2.2",
+    "vue-loader": "^15.2.6",
     "vue-template-compiler": "^2.5.16",
     "watch": "^1.0.1",
     "webpack": "^4.8.1",
