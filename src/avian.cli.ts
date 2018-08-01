@@ -16,7 +16,6 @@ import * as defaultWebpackProd from "./webpack.production"
 import * as ts from "typescript"
 const mkdirp = require("mkdirp")
 const jsonfile = require("jsonfile")
-const compression = require("compression")
 
 const argv = require("yargs").argv
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
@@ -266,7 +265,6 @@ else {
         }))
 
         avian.use(require("express-minify")({cache: argv.home + "/cache"}))
-        avian.use(compression())
     }
 
     let event = new events.EventEmitter()
