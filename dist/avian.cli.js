@@ -228,6 +228,7 @@ else {
             ],
         }));
         avian.use(require("express-minify")({ cache: argv.home + "/cache" }));
+        avian.enable("view cache");
     }
     let event = new events.EventEmitter();
     event.on("synch", () => { this; });
