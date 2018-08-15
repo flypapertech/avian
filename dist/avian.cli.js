@@ -87,7 +87,7 @@ function startDevWebpackWatcher(webpackDev) {
     console.log("Avian - Starting Webpack Watcher");
     webpackCompiler.watch({
         aggregateTimeout: 300,
-        poll: undefined,
+        poll: 1000,
     }, (err, stats) => {
         if (err || stats.hasErrors()) {
             if (err) {

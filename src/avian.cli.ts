@@ -98,7 +98,7 @@ function startDevWebpackWatcher(webpackDev) {
     console.log("Avian - Starting Webpack Watcher")
     webpackCompiler.watch({
         aggregateTimeout: 300,
-        poll: undefined,
+        poll: 1000,
     }, (err, stats) => {
         if (err || stats.hasErrors()) {
             if (err) {
@@ -221,7 +221,6 @@ else {
     const avian = express()
 
     avian.locals.argv = argv
-
     let redisStore = require("connect-redis")(session)
 
     avian.use(session({
