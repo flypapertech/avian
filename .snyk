@@ -22,4 +22,14 @@ ignore:
     - vue-loader > css-loader > cssnano > postcss-filter-plugins > uniqid > macaddress:
         reason: Fixed by yarn package resolution and our own patch of macaddress
         expires: '2018-06-13T22:03:52.153Z'
-patch: {}
+# patches apply the minimum changes required to fix a vulnerability
+patch:
+  'npm:hoek:20180212':
+    - jstransformer-less > less > request > hawk > hoek:
+        patched: '2018-08-15T18:10:27.626Z'
+    - jstransformer-less > less > request > hawk > boom > hoek:
+        patched: '2018-08-15T18:10:27.626Z'
+    - jstransformer-less > less > request > hawk > sntp > hoek:
+        patched: '2018-08-15T18:10:27.626Z'
+    - jstransformer-less > less > request > hawk > cryptiles > boom > hoek:
+        patched: '2018-08-15T18:10:27.626Z'
