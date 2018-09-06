@@ -88,47 +88,88 @@ class AvianUtils {
     }
 }
 
-function startDevWebpackWatcher(webpackDev) {
-    let webpackCompiler: webpack.MultiCompiler
-    webpackCompiler = webpack([
-        webpackDev.ComponentsConfig,
-        webpackDev.ServicesConfig
-    ])
+const avianEmitter = new events.EventEmitter()
+let runningBuilds = []
+let completedBuilds = []
+avianEmitter.on("buildStarted", (buildName) => {
+    completedBuilds = completedBuilds.filter((item) => {
+        item !== buildName
+    })
 
-    console.log("Avian - Starting Webpack Watcher")
-    webpackCompiler.watch({
-        aggregateTimeout: 300,
-        poll: 1000,
-    }, (err, stats) => {
-        if (err || stats.hasErrors()) {
-            if (err) {
-                console.error(err)
-            }
-            else if (stats) {
-                stats.toJson().errors.forEach((err) => {
-                    console.error(err)
-                })
-            }
+    runningBuilds.push(buildName)
+})
 
-            console.error("Avian - Encountered compile errors, stopping server")
-            avianUtils.killAllWorkers()
-            console.error("Avian - Waiting for you to fix compile errors")
-            return
-        }
+avianEmitter.on("buildCompleted", (buildName) => {
+    runningBuilds = runningBuilds.filter((item) => {
+        item !== buildName
+    })
 
-        if (stats.hasWarnings()) {
-            stats.toJson().warnings.forEach((warning) => {
-                console.log(warning)
-            })
-        }
-
+    completedBuilds.push(buildName)
+    if (completedBuilds.length === 2) {
         console.log("Avian - Restarting server")
         avianUtils.killAllWorkers()
         let cores = os.cpus()
         for (let i = 0; i < cores.length; i++) {
             cluster.fork()
         }
+    }
+})
+
+function startDevWebpackWatcher(webpackDev) {
+    let componentsCompiler: webpack.Compiler
+    componentsCompiler = webpack(
+        webpackDev.ComponentsConfig
+    )
+    componentsCompiler.hooks.watchRun.tap("Starting", () => {
+        avianEmitter.emit("buildStarted", "components")
     })
+
+    let servicesCompiler: webpack.Compiler
+    servicesCompiler = webpack(
+        webpackDev.ServicesConfig
+    )
+    servicesCompiler.hooks.watchRun.tap("Starting", () => {
+        avianEmitter.emit("buildStarted", "services")
+    })
+
+    console.log("Avian - Starting Webpack Watchers")
+    const watching = componentsCompiler.watch({
+        aggregateTimeout: 300,
+        poll: 1000,
+        ignored: ["components/**/*.service.*", "node_modules"]
+    }, (err, stats) => watcherCallback(err, stats, "components"))
+
+    servicesCompiler.watch({
+        aggregateTimeout: 300,
+        poll: 1000,
+        ignored: ["components/**/*.component.*", "node_modules"]
+    }, (err, stats) => watcherCallback(err, stats, "services"))
+}
+
+function watcherCallback(err, stats, buildName) {
+    if (err || stats.hasErrors()) {
+        if (err) {
+            console.error(err)
+        }
+        else if (stats) {
+            stats.toJson().errors.forEach((err) => {
+                console.error(err)
+            })
+        }
+
+        console.error("Avian - Encountered compile errors, stopping server")
+        avianUtils.killAllWorkers()
+        console.error("Avian - Waiting for you to fix compile errors")
+        return
+    }
+
+    if (stats.hasWarnings()) {
+        stats.toJson().warnings.forEach((warning) => {
+            console.log(warning)
+        })
+    }
+
+    avianEmitter.emit("buildCompleted", buildName)
 }
 
 function startProdWebpackCompiler(webpackProd) {
