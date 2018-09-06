@@ -6,7 +6,7 @@
 Create Enterprise-class component driven applications that scale.
 
 # About
-A highly scalable and easy to use environment for hosting modern HTML5 web, mobile and desktop applications.
+A platform powering component driven applications at scale.
 
 ## Key Features
 - Enterprise-class application server that meets infinitely scalable demands.
@@ -35,10 +35,10 @@ Avian uses Redis Server for fast loading component templates and component stora
 The latest stable release of Avian is available via the Node Package Manager.
 
 ## Global
-    npm install avian -g
+    yarn install avian -g
 
 ## Local
-    npm install avian --save
+    yarn add
 
 # GitHub
 The source code is available on GitHub. Though every build is verified through Travis, please consider installation directly from GitHub to be risky for new developers.
@@ -67,3 +67,5 @@ MIT
 
 # Copyright
 2017 - 2018 FlyPaper Technologies, LLC
+2014 - 2018 Thoughtpivot, LLC
+
