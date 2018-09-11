@@ -287,7 +287,7 @@ else {
         }
         catch (err) {
             if (err)
-                res.redirect("/error");
+                res.redirect("/errors");
         }
     });
     avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {

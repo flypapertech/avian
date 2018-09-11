@@ -338,7 +338,7 @@ else {
         }
         catch (err) {
             if (err)
-                res.redirect("/error")
+                res.redirect("/errors")
         }
     })
 
