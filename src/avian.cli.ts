@@ -232,6 +232,7 @@ else {
 
     avian.use(require("express-redis")(6379, "127.0.0.1", {return_buffers: true}, "cache"))
 
+    avian.use("/static", express.static(argv.home + "/static"))
     avian.use("/assets", express.static(argv.home + "/assets"))
     avian.use("/", express.static(argv.home + "/public"))
     avian.use("/node_modules", express.static(argv.home + "/node_modules"))
