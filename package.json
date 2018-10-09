@@ -40,6 +40,7 @@
     "body-parser": "^1.15.2",
     "bunyan": "^1.8.4",
     "connect-redis": "^3.3.3",
+    "cookie-signature": "^1.1.0",
     "css-loader": "^0.28.11",
     "errorhandler": "^1.5.0",
     "express": "^4.16.1",
@@ -110,8 +111,8 @@
   },
   "devDependencies": {
     "@types/cpx": "^1.5.0",
-    "snyk": "^1.90.2",
     "jasmine-ts": "^0.2.1",
+    "snyk": "^1.90.2",
     "tslint": "^5.11.0",
     "typescript": "^3.0.1"
   }

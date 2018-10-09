@@ -17,6 +17,7 @@ const defaultWebpackProd = require("./webpack.production");
 const ts = require("typescript");
 const mkdirp = require("mkdirp");
 const jsonfile = require("jsonfile");
+const signature = require("cookie-signature");
 const argv = require("yargs").argv;
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost";
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
@@ -116,12 +117,12 @@ function startDevWebpackWatcher(webpackDev) {
     const watching = componentsCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
-        ignored: ["components/**/*.service.*", "node_modules"]
+        ignored: ["components/**/*.service.*", "node_modules", "serverless"]
     }, (err, stats) => watcherCallback(err, stats, "components"));
     servicesCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
-        ignored: ["components/**/*.component.*", "node_modules"]
+        ignored: ["components/**/*.component.*", "node_modules", "serverless"]
     }, (err, stats) => watcherCallback(err, stats, "services"));
 }
 function watcherCallback(err, stats, buildName) {
@@ -224,11 +225,28 @@ else {
     const avian = express();
     avian.locals.argv = argv;
     let redisStore = require("connect-redis")(session);
+    let cookieSecret = crypto.createHash("sha512").digest("hex");
+    const enableAuthHeadersForExpressSession = (req, res, next) => {
+        if (req.headers.authorization) {
+            let authParts = req.headers.authorization.split(" ");
+            if (authParts[0].toLowerCase() === "bearer" && authParts.length > 1) {
+                // We need to sign this exactly like how express-session signs cookies
+                let signed = "s:" + signature.sign(authParts[1], cookieSecret);
+                req.cookies["connect.sid"] = signed;
+            }
+        }
+        next();
+    };
+    avian.use(enableAuthHeadersForExpressSession);
     avian.use(session({
         store: new redisStore({ host: "127.0.0.1" }),
-        secret: crypto.createHash("sha512").digest("hex"),
+        secret: cookieSecret,
         resave: false,
-        saveUninitialized: true
+        saveUninitialized: true,
+        cookie: {
+            httpOnly: true,
+            maxAge: 2592000000
+        }
     }));
     avian.use(require("express-redis")(6379, "127.0.0.1", { return_buffers: true }, "cache"));
     avian.use("/assets", express.static(argv.home + "/assets"));
