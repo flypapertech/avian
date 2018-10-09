@@ -11,7 +11,7 @@
   },
   "files" : [
     "./src/avian.cli.ts",
-    "./src/avian.spec.ts"
+    "./spec/avian.spec.ts"
   ],
   "exclude": [
       "node_modules",
