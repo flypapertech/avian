@@ -612,6 +612,10 @@
   dependencies:
     "@types/node" "*"
 
+"@types/cookie-signature@^1.0.1":
+  version "1.0.1"
+  resolved "https://registry.yarnpkg.com/@types/cookie-signature/-/cookie-signature-1.0.1.tgz#10d02ca19c3f7dff7b0471d52f48e3db68029e0e"
+
 "@types/cpx@^1.5.0":
   version "1.5.0"
   resolved "https://registry.yarnpkg.com/@types/cpx/-/cpx-1.5.0.tgz#d2a44b0ab5ec32bfdd743f64aae84847858bce0c"

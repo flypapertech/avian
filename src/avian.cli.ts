@@ -15,9 +15,9 @@ import * as defaultWebpackDev from "./webpack.development"
 import * as defaultWebpackProd from "./webpack.production"
 import * as ts from "typescript"
 import { RequestHandler, Response, Request } from "express"
+import * as signature from "cookie-signature"
 const mkdirp = require("mkdirp")
 const jsonfile = require("jsonfile")
-const signature = require("cookie-signature")
 
 const argv = require("yargs").argv
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
@@ -25,7 +25,6 @@ argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
 argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home
-
 
 // import after argv so they can us it
 
