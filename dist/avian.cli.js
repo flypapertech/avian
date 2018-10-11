@@ -223,6 +223,8 @@ if (cluster.isMaster) {
 }
 else {
     const avian = express();
+    let cookieParser = require("cookie-parser");
+    avian.use(cookieParser());
     avian.locals.argv = argv;
     let redisStore = require("connect-redis")(session);
     let cookieSecret = crypto.createHash("sha512").digest("hex");
@@ -240,6 +242,7 @@ else {
     avian.use(enableAuthHeadersForExpressSession);
     avian.use(session({
         store: new redisStore({ host: "127.0.0.1" }),
+        proxy: true,
         secret: cookieSecret,
         resave: false,
         saveUninitialized: true,

@@ -41,6 +41,7 @@
     "bunyan": "^1.8.4",
     "chalk": "^2.4.1",
     "connect-redis": "^3.3.3",
+    "cookie-parser": "^1.4.3",
     "cookie-signature": "^1.1.0",
     "css-loader": "^0.28.11",
     "errorhandler": "^1.5.0",
