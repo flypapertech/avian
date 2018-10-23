@@ -221,7 +221,7 @@ function startProdWebpackCompiler(webpackProd) {
 }
 
 async function loadUserServiesIntoAvian(avian: express.Express) {
-    let compiledServices = glob.sync(`${argv.home}/private/**/*service.js`)
+    let compiledServices = glob.sync(`${argv.home}/private/**/*.service.js`)
     for (let i = 0; i < compiledServices.length; i++) {
         let dirname = path.dirname(compiledServices[i])
         let directories = dirname.split("/")
@@ -232,6 +232,21 @@ async function loadUserServiesIntoAvian(avian: express.Express) {
             }
             else {
                 break
+            }
+        }
+
+        if (routeArray.length === 0) {
+            let basename = path.basename(compiledServices[i])
+            if (basename !== "avian.service.js") {
+                let nameArray = basename.split(".")
+                for (let j = 0; j < nameArray.length; j++) {
+                    if (nameArray[j] !== "service") {
+                        routeArray.push(nameArray[j])
+                    }
+                    else {
+                        break
+                    }
+                }
             }
         }
 

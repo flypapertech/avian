@@ -82,7 +82,7 @@ const componentsCommonConfig = {
 };
 const servicesCommonConfig = {
     target: "node",
-    entry: WebpackWatchedGlobEntries.getEntries(`${argv.home}/components/**/*.service.*`),
+    entry: WebpackWatchedGlobEntries.getEntries(`${argv.home}/components/**/*.service.*`, `${argv.home}/avian.service.*`),
     output: {
         path: `${argv.home}/private`,
         filename: "[name].js",

@@ -87,7 +87,8 @@ const componentsCommonConfig: webpack.Configuration = {
 const servicesCommonConfig: webpack.Configuration = {
     target: "node",
     entry: WebpackWatchedGlobEntries.getEntries(
-        `${argv.home}/components/**/*.service.*`
+        `${argv.home}/components/**/*.service.*`,
+        `${argv.home}/avian.service.*`
     ),
     output: {
         path: `${argv.home}/private`,
