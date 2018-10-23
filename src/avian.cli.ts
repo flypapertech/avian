@@ -209,6 +209,41 @@ function startProdWebpackCompiler(webpackProd) {
 
 }
 
+function loadUserServiesIntoAvian(avian: express.Express) {
+    let compiledServices = glob.sync(`${argv.home}/private/**/*service.js`)
+    for (let i = 0; i < compiledServices.length; i++) {
+        let dirname = path.dirname(compiledServices[i])
+        let directories = dirname.split("/")
+        let routeArray = []
+        for (let j = directories.length - 1; j >= 0; j--) {
+            if (directories[j] !== "private") {
+                routeArray.unshift(directories[j])
+            }
+            else {
+                break
+            }
+        }
+
+        let routeBase = "/" + routeArray.join("/")
+        import (`${compiledServices[i]}`).then(service => {
+            try {
+                let compiledService: express.Router
+                if (service.default) {
+                    compiledService = service.default
+                }
+                else {
+                    compiledService = service
+                }
+
+                avian.use(`${routeBase}`, compiledService)
+            }
+            catch (err) {
+                console.error(err)
+            }
+        })
+    }
+}
+
 interface RequestWithCache extends express.Request {
     cache: RedisClient
 }
@@ -296,6 +331,8 @@ else {
     }))
 
     avian.use(require("express-redis")(6379, "127.0.0.1", {return_buffers: true}, "cache"))
+
+    loadUserServiesIntoAvian(avian)
 
     avian.use("/static", express.static(argv.home + "/static"))
     avian.use("/assets", express.static(argv.home + "/assets"))
@@ -386,12 +423,11 @@ else {
     avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache
         try {
-            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache)
             reqWithCache.cache.get(req.params.component, (err, config) => {
-
                 res.setHeader("X-Powered-By", "Avian")
                 res.json(JSON.parse(config))
             })
+            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache)
         }
         catch (err) {
 
@@ -422,40 +458,6 @@ else {
     avian.all("/", (req, res, next) => {
         res.redirect("/index")
     })
-
-
-    let compiledServices = glob.sync(`${argv.home}/private/**/*service.js`)
-    for (let i = 0; i < compiledServices.length; i++) {
-        let dirname = path.dirname(compiledServices[i])
-        let directories = dirname.split("/")
-        let routeArray = []
-        for (let j = directories.length - 1; j >= 0; j--) {
-            if (directories[j] !== "private") {
-                routeArray.unshift(directories[j])
-            }
-            else {
-                break
-            }
-        }
-
-        let routeBase = "/" + routeArray.join("/")
-        import (`${compiledServices[i]}`).then(service => {
-            try {
-                let compiledService: express.Router
-                if (service.default) {
-                    compiledService = service.default
-                }
-                else {
-                    compiledService = service
-                }
-
-                avian.use(`${routeBase}`, compiledService)
-            }
-            catch (err) {
-                console.error(err)
-            }
-        })
-    }
 
     const server = avian.listen(argv.port, () => {
 

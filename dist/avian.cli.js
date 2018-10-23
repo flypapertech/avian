@@ -176,6 +176,38 @@ function startProdWebpackCompiler(webpackProd) {
         avianUtils.setWorkersToAutoRestart();
     });
 }
+function loadUserServiesIntoAvian(avian) {
+    let compiledServices = glob.sync(`${argv.home}/private/**/*service.js`);
+    for (let i = 0; i < compiledServices.length; i++) {
+        let dirname = path.dirname(compiledServices[i]);
+        let directories = dirname.split("/");
+        let routeArray = [];
+        for (let j = directories.length - 1; j >= 0; j--) {
+            if (directories[j] !== "private") {
+                routeArray.unshift(directories[j]);
+            }
+            else {
+                break;
+            }
+        }
+        let routeBase = "/" + routeArray.join("/");
+        Promise.resolve().then(() => require(`${compiledServices[i]}`)).then(service => {
+            try {
+                let compiledService;
+                if (service.default) {
+                    compiledService = service.default;
+                }
+                else {
+                    compiledService = service;
+                }
+                avian.use(`${routeBase}`, compiledService);
+            }
+            catch (err) {
+                console.error(err);
+            }
+        });
+    }
+}
 const avianUtils = new AvianUtils();
 if (cluster.isMaster) {
     rimraf.sync(`${argv.home}/private/*`);
@@ -252,6 +284,7 @@ else {
         }
     }));
     avian.use(require("express-redis")(6379, "127.0.0.1", { return_buffers: true }, "cache"));
+    loadUserServiesIntoAvian(avian);
     avian.use("/static", express.static(argv.home + "/static"));
     avian.use("/assets", express.static(argv.home + "/assets"));
     avian.use("/", express.static(argv.home + "/public"));
@@ -330,11 +363,11 @@ else {
     avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req;
         try {
-            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache);
             reqWithCache.cache.get(req.params.component, (err, config) => {
                 res.setHeader("X-Powered-By", "Avian");
                 res.json(JSON.parse(config));
             });
+            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache);
         }
         catch (err) {
             res.setHeader("X-Powered-By", "Avian");
@@ -361,36 +394,6 @@ else {
     avian.all("/", (req, res, next) => {
         res.redirect("/index");
     });
-    let compiledServices = glob.sync(`${argv.home}/private/**/*service.js`);
-    for (let i = 0; i < compiledServices.length; i++) {
-        let dirname = path.dirname(compiledServices[i]);
-        let directories = dirname.split("/");
-        let routeArray = [];
-        for (let j = directories.length - 1; j >= 0; j--) {
-            if (directories[j] !== "private") {
-                routeArray.unshift(directories[j]);
-            }
-            else {
-                break;
-            }
-        }
-        let routeBase = "/" + routeArray.join("/");
-        Promise.resolve().then(() => require(`${compiledServices[i]}`)).then(service => {
-            try {
-                let compiledService;
-                if (service.default) {
-                    compiledService = service.default;
-                }
-                else {
-                    compiledService = service;
-                }
-                avian.use(`${routeBase}`, compiledService);
-            }
-            catch (err) {
-                console.error(err);
-            }
-        });
-    }
     const server = avian.listen(argv.port, () => {
         console.log("Avian - Worker Id: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);
     });
