@@ -1,4 +1,12 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : new P(function (resolve) { resolve(result.value); }).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const events = require("events");
 const crypto = require("crypto");
@@ -189,22 +197,23 @@ function startProdWebpackCompiler(webpackProd) {
     });
 }
 function loadUserServiesIntoAvian(avian) {
-    let compiledServices = glob.sync(`${argv.home}/private/**/*service.js`);
-    for (let i = 0; i < compiledServices.length; i++) {
-        let dirname = path.dirname(compiledServices[i]);
-        let directories = dirname.split("/");
-        let routeArray = [];
-        for (let j = directories.length - 1; j >= 0; j--) {
-            if (directories[j] !== "private") {
-                routeArray.unshift(directories[j]);
+    return __awaiter(this, void 0, void 0, function* () {
+        let compiledServices = glob.sync(`${argv.home}/private/**/*service.js`);
+        for (let i = 0; i < compiledServices.length; i++) {
+            let dirname = path.dirname(compiledServices[i]);
+            let directories = dirname.split("/");
+            let routeArray = [];
+            for (let j = directories.length - 1; j >= 0; j--) {
+                if (directories[j] !== "private") {
+                    routeArray.unshift(directories[j]);
+                }
+                else {
+                    break;
+                }
             }
-            else {
-                break;
-            }
-        }
-        let routeBase = "/" + routeArray.join("/");
-        Promise.resolve().then(() => require(`${compiledServices[i]}`)).then(service => {
+            let routeBase = "/" + routeArray.join("/");
             try {
+                let service = yield Promise.resolve().then(() => require(`${compiledServices[i]}`));
                 let compiledService;
                 if (service.default) {
                     compiledService = service.default;
@@ -212,13 +221,13 @@ function loadUserServiesIntoAvian(avian) {
                 else {
                     compiledService = service;
                 }
-                avian.use(`${routeBase}`, compiledService);
+                avian.use(routeBase, compiledService);
             }
             catch (err) {
                 console.error(err);
             }
-        });
-    }
+        }
+    });
 }
 const avianUtils = new AvianUtils();
 if (cluster.isMaster) {
@@ -296,107 +305,108 @@ else {
         }
     }));
     avian.use(require("express-redis")(6379, "127.0.0.1", {}, "cache"));
-    loadUserServiesIntoAvian(avian);
-    avian.use("/static", express.static(argv.home + "/static"));
-    avian.use("/assets", express.static(argv.home + "/assets"));
-    avian.use("/", express.static(argv.home + "/public"));
-    avian.use("/node_modules", express.static(argv.home + "/node_modules"));
-    avian.use("/bower_components", express.static(argv.home + "/bower_components"));
-    avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"));
-    avian.set("view engine", "pug");
-    avian.set("views", argv.home);
-    if (argv.mode === "production") {
-        mkdirp.sync(argv.home + "/cache/");
-        mkdirp.sync(argv.home + "/logs/");
-        avian.use(require("express-bunyan-logger")({
-            name: argv.name,
-            streams: [
-                {
-                    level: "error",
-                    stream: process.stderr
-                },
-                {
-                    level: "info",
-                    type: "rotating-file",
-                    path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
-                    period: "1d",
-                    count: 365
-                }
-            ],
-        }));
-        avian.use(require("express-minify")({ cache: argv.home + "/cache" }));
-        avian.enable("view cache");
-    }
-    avian.get("/:component/:subcomponent", parser.urlencoded({ extended: true }), (req, res, next) => {
-        let componentRoot = avianUtils.getComponentRoot(req.params.component);
-        let subComponentPath = `${componentRoot}/${req.params.subcomponent}`;
-        // if the subcomponent directory doesn't exist, move on
-        if (!fs.existsSync(`${subComponentPath}`)) {
-            next();
-            return;
-        }
-        let reqWithCache = req;
-        try {
-            avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
-                res.locals.req = req;
-                res.setHeader("X-Powered-By", "Avian");
-                res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, config, function (err, html) {
-                    if (err) {
-                        res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, config);
+    loadUserServiesIntoAvian(avian).then(() => {
+        avian.use("/static", express.static(argv.home + "/static"));
+        avian.use("/assets", express.static(argv.home + "/assets"));
+        avian.use("/", express.static(argv.home + "/public"));
+        avian.use("/node_modules", express.static(argv.home + "/node_modules"));
+        avian.use("/bower_components", express.static(argv.home + "/bower_components"));
+        avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"));
+        avian.set("view engine", "pug");
+        avian.set("views", argv.home);
+        if (argv.mode === "production") {
+            mkdirp.sync(argv.home + "/cache/");
+            mkdirp.sync(argv.home + "/logs/");
+            avian.use(require("express-bunyan-logger")({
+                name: argv.name,
+                streams: [
+                    {
+                        level: "error",
+                        stream: process.stderr
+                    },
+                    {
+                        level: "info",
+                        type: "rotating-file",
+                        path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
+                        period: "1d",
+                        count: 365
                     }
+                ],
+            }));
+            avian.use(require("express-minify")({ cache: argv.home + "/cache" }));
+            avian.enable("view cache");
+        }
+        avian.get("/:component/:subcomponent", parser.urlencoded({ extended: true }), (req, res, next) => {
+            let componentRoot = avianUtils.getComponentRoot(req.params.component);
+            let subComponentPath = `${componentRoot}/${req.params.subcomponent}`;
+            // if the subcomponent directory doesn't exist, move on
+            if (!fs.existsSync(`${subComponentPath}`)) {
+                next();
+                return;
+            }
+            let reqWithCache = req;
+            try {
+                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
+                    res.locals.req = req;
+                    res.setHeader("X-Powered-By", "Avian");
+                    res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, config, function (err, html) {
+                        if (err) {
+                            res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, config);
+                        }
+                    });
                 });
-            });
-        }
-        catch (err) {
-            console.error(err);
-            res.redirect("/errors");
-        }
-    });
-    avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
-        let reqWithCache = req;
-        let componentRoot = avianUtils.getComponentRoot(req.params.component);
-        try {
-            avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
-                res.locals.req = req;
+            }
+            catch (err) {
+                console.error(err);
+                res.redirect("/errors");
+            }
+        });
+        avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
+            let reqWithCache = req;
+            let componentRoot = avianUtils.getComponentRoot(req.params.component);
+            try {
+                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
+                    res.locals.req = req;
+                    res.setHeader("X-Powered-By", "Avian");
+                    res.render(`${componentRoot}/${req.params.component}.view.pug`, config);
+                });
+            }
+            catch (err) {
+                console.error(err);
+                res.redirect("/errors");
+            }
+        });
+        avian.get("/:component/config/objects.json", (req, res, next) => {
+            let reqWithCache = req;
+            try {
+                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
+                    res.setHeader("X-Powered-By", "Avian");
+                    res.json(config);
+                });
+            }
+            catch (err) {
                 res.setHeader("X-Powered-By", "Avian");
-                res.render(`${componentRoot}/${req.params.component}.view.pug`, config);
-            });
-        }
-        catch (err) {
-            console.error(err);
-            res.redirect("/errors");
-        }
-    });
-    avian.get("/:component/config/objects.json", (req, res, next) => {
-        let reqWithCache = req;
-        try {
-            avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
-                res.setHeader("X-Powered-By", "Avian");
-                res.json(config);
-            });
-        }
-        catch (err) {
-            res.setHeader("X-Powered-By", "Avian");
-            res.sendStatus(404);
-        }
-    });
-    avian.get("/:component/:subcomponent/config/objects.json", (req, res, next) => {
-        let reqWithCache = req;
-        try {
-            avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
-                res.setHeader("X-Powered-By", "Avian");
-                res.json(config);
-            });
-        }
-        catch (err) {
-            res.setHeader("X-Powered-y", "Avian");
-            res.sendStatus(404);
-        }
-    });
-    avian.all("/", (req, res, next) => {
-        res.redirect("/index");
-    });
-    const server = avian.listen(argv.port, () => {
-        console.log("Avian - Worker Id: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);
+                res.sendStatus(404);
+            }
+        });
+        avian.get("/:component/:subcomponent/config/objects.json", (req, res, next) => {
+            let reqWithCache = req;
+            try {
+                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
+                    res.setHeader("X-Powered-By", "Avian");
+                    res.json(config);
+                });
+            }
+            catch (err) {
+                res.setHeader("X-Powered-y", "Avian");
+                res.sendStatus(404);
+            }
+        });
+        avian.all("/", (req, res, next) => {
+            res.redirect("/index");
+        });
+        const server = avian.listen(argv.port, () => {
+            console.log("Avian - Worker Id: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);
+        });
     });
 }
