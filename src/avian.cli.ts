@@ -44,16 +44,21 @@ class AvianUtils {
             let fallbackFilePath = (subcomponent) ? `${componentPath}/${component}.${subcomponent}.config.json` : undefined
             let configStringJSON: string
             try {
+                console.log(configFilePath)
                 configStringJSON = JSON.stringify(jsonfile.readFileSync(configFilePath))
             } catch (err) {
                 if (!fallbackFilePath) {
+                    console.log("no fall back config file returning empty")
                     configStringJSON = JSON.stringify({})
                 }
                 else {
                     try {
+                        console.log("falling back")
+                        console.log(fallbackFilePath)
                         configStringJSON = JSON.stringify(jsonfile.readFileSync(fallbackFilePath))
                     }
                     catch {
+                        console.log("fall back config file failed returning empty")
                         configStringJSON = JSON.stringify({})
                     }
                 }
