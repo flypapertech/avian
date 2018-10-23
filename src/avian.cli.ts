@@ -28,7 +28,6 @@ argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home
 argv.sessionSecret = argv.sessionSecret || process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
 
 // import after argv so they can us it
-
 class AvianUtils {
     getComponentRoot(component: string): string {
         if (fs.existsSync(`${argv.home}/components/${component}`))
@@ -37,40 +36,56 @@ class AvianUtils {
             return `${argv.home}/components`
     }
 
-    setComponentConfigObjectCache(component: string, reqWithCache: RequestWithCache) {
-        let component_root = this.getComponentRoot(component)
-        let configStringJSON: string
-        try {
-            configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${component}.config.json`))
-        } catch (err) {
-            configStringJSON = JSON.stringify({})
-        }
-
-        this.setConfigObjectCache(component, configStringJSON, reqWithCache)
-    }
-
-    setSubComponentConfigObjectCache(component: string, subcomponent: string, reqWithCache: RequestWithCache) {
-        let component_root = this.getComponentRoot(component)
-        let configStringJSON: string
-        try {
+    setComponentConfigObjectCache(component: string, reqWithCache: RequestWithCache, subcomponent?: string): Promise<string> {
+        return new Promise(() => {
+            let parentComponentRoot = this.getComponentRoot(component)
+            let componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`
+            let configFilePath = (subcomponent) ? `${componentPath}/${subcomponent}.config.json` : `${componentPath}/${component}.config.json`
+            let fallbackFilePath = (subcomponent) ? `${componentPath}/${component}.${subcomponent}.config.json` : undefined
+            let configStringJSON: string
             try {
-                configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${subcomponent}/${subcomponent}.config.json`))
+                configStringJSON = JSON.stringify(jsonfile.readFileSync(configFilePath))
+            } catch (err) {
+                if (!fallbackFilePath) {
+                    configStringJSON = JSON.stringify({})
+                }
+                else {
+                    try {
+                        configStringJSON = JSON.stringify(jsonfile.readFileSync(fallbackFilePath))
+                    }
+                    catch {
+                        configStringJSON = JSON.stringify({})
+                    }
+                }
             }
-            catch {
-                configStringJSON = JSON.stringify(jsonfile.readFileSync(`${component_root}/${subcomponent}/${component}.${subcomponent}.config.json`))
-            }
-        } catch (err) {
-            console.log(err)
-            configStringJSON = JSON.stringify({})
-        }
 
-        this.setConfigObjectCache(`${component}/${subcomponent}`, configStringJSON, reqWithCache)
+            reqWithCache.cache.set(component, configStringJSON)
+            return configStringJSON
+        })
     }
 
-    private setConfigObjectCache(componentKey: string, configStringJSON: string, reqWithCache: RequestWithCache) {
-        let event = new events.EventEmitter()
-        event.emit("synch",
-            reqWithCache.cache.set(componentKey, configStringJSON))
+    getComponentConfigObject(component: string, reqWithCache: RequestWithCache, subcomponent?: string): string {
+        try {
+            let cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component
+            reqWithCache.cache.get(cacheKey, (err, config) => {
+                if (config) {
+                    return config
+                }
+
+                let updateCachePromise = avianUtils.setComponentConfigObjectCache(component, reqWithCache)
+
+                updateCachePromise.then(configString => {
+                    return configString
+                }).catch(error => {
+                    console.log(error)
+                    return "{}"
+                })
+            })
+        }
+        catch (error) {
+            console.log(error)
+            return "{}"
+        }
     }
 
     killAllWorkers(): boolean {
@@ -370,13 +385,9 @@ else {
         avian.enable("view cache")
     }
 
-    let event = new events.EventEmitter()
-    event.on("synch", () => {this})
-
     avian.get("/:component/:subcomponent", parser.urlencoded({ extended: true }), (req, res, next) => {
         let componentRoot = avianUtils.getComponentRoot(req.params.component)
         let subComponentPath = `${componentRoot}/${req.params.subcomponent}`
-        let cacheKey = `${req.params.component}/${req.params.subcomponent}`
 
         // if the subcomponent directory doesn't exist, move on
         if (!fs.existsSync(`${subComponentPath}`)) {
@@ -386,15 +397,13 @@ else {
 
         let reqWithCache = req as RequestWithCache
         try {
-            avianUtils.setSubComponentConfigObjectCache(req.params.component, req.params.subcomponent, reqWithCache)
-            reqWithCache.cache.get(cacheKey, (err, config) => {
-                res.locals.req = req
-                res.setHeader("X-Powered-By", "Avian")
-                res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, JSON.parse(config), function(err, html) {
-                    if (err) {
-                        res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, JSON.parse(config))
-                    }
-                })
+            let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent)
+            res.locals.req = req
+            res.setHeader("X-Powered-By", "Avian")
+            res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, JSON.parse(config), function(err, html) {
+                if (err) {
+                    res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, JSON.parse(config))
+                }
             })
         }
         catch (err) {
@@ -407,12 +416,10 @@ else {
         let reqWithCache = req as RequestWithCache
         let componentRoot = avianUtils.getComponentRoot(req.params.component)
         try {
-            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache)
-            reqWithCache.cache.get(`${req.params.component}`, (err, config) => {
-                res.locals.req = req
-                res.setHeader("X-Powered-By", "Avian")
-                res.render(`${componentRoot}/${req.params.component}.view.pug`, JSON.parse(config))
-            })
+            let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache)
+            res.locals.req = req
+            res.setHeader("X-Powered-By", "Avian")
+            res.render(`${componentRoot}/${req.params.component}.view.pug`, JSON.parse(config))
         }
         catch (err) {
             if (err)
@@ -423,14 +430,11 @@ else {
     avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache
         try {
-            reqWithCache.cache.get(req.params.component, (err, config) => {
-                res.setHeader("X-Powered-By", "Avian")
-                res.json(JSON.parse(config))
-            })
-            avianUtils.setComponentConfigObjectCache(req.params.component, reqWithCache)
+            let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache)
+            res.setHeader("X-Powered-By", "Avian")
+            res.json(JSON.parse(config))
         }
         catch (err) {
-
             res.setHeader("X-Powered-By", "Avian")
             res.status(404)
                 .send("Not Found")
@@ -439,13 +443,10 @@ else {
 
     avian.get("/:component/:subcomponent/config/objects.json", (req, res, next) => {
         let reqWithCache = req as RequestWithCache
-        let cacheKey = `${req.params.component}/${req.params.subcomponent}`
         try {
-            avianUtils.setSubComponentConfigObjectCache(req.params.component, req.params.subcomponent, reqWithCache)
-            reqWithCache.cache.get(cacheKey, (err, config) => {
-                res.setHeader("X-Powered-By", "Avian")
-                res.json(JSON.parse(config))
-            })
+            let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent)
+            res.setHeader("X-Powered-By", "Avian")
+            res.json(JSON.parse(config))
         }
         catch (err) {
             res.setHeader("X-Powered-By", "Avian")
