@@ -101,20 +101,13 @@ class AvianUtils {
     }
 }
 const avianEmitter = new events.EventEmitter();
-let runningBuilds = [];
-let completedBuilds = [];
+let runningBuilds = 0;
 avianEmitter.on("buildStarted", (buildName) => {
-    completedBuilds = completedBuilds.filter((item) => {
-        item !== buildName;
-    });
-    runningBuilds.push(buildName);
+    runningBuilds++;
 });
 avianEmitter.on("buildCompleted", (buildName) => {
-    runningBuilds = runningBuilds.filter((item) => {
-        item !== buildName;
-    });
-    completedBuilds.push(buildName);
-    if (completedBuilds.length === 2) {
+    runningBuilds--;
+    if (runningBuilds === 0) {
         console.log("Avian - Restarting server");
         avianUtils.killAllWorkers();
         let cores = os.cpus();
