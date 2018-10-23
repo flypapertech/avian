@@ -407,8 +407,8 @@ else {
             })
         }
         catch (err) {
-            if (err)
-                res.redirect("/errors")
+            console.log(err)
+            res.redirect("/errors")
         }
     })
 
@@ -422,8 +422,8 @@ else {
             res.render(`${componentRoot}/${req.params.component}.view.pug`, JSON.parse(config))
         }
         catch (err) {
-            if (err)
-                res.redirect("/error")
+            console.log(err)
+            res.redirect("/errors")
         }
     })
 
@@ -436,8 +436,7 @@ else {
         }
         catch (err) {
             res.setHeader("X-Powered-By", "Avian")
-            res.status(404)
-                .send("Not Found")
+            res.sendStatus(404)
         }
     })
 
@@ -449,9 +448,8 @@ else {
             res.json(JSON.parse(config))
         }
         catch (err) {
-            res.setHeader("X-Powered-By", "Avian")
-            res.status(404)
-                .send("Not Found")
+            res.setHeader("X-Powered-y", "Avian")
+            res.sendStatus(404)
         }
     })
 
