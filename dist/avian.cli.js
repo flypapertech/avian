@@ -65,20 +65,22 @@ class AvianUtils {
             let cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component;
             reqWithCache.cache.get(cacheKey, (err, config) => {
                 if (config) {
-                    return config;
+                    console.log(config);
+                    return JSON.parse(config);
                 }
                 let updateCachePromise = avianUtils.setComponentConfigObjectCache(component, reqWithCache);
                 updateCachePromise.then(configString => {
-                    return configString;
+                    console.log(configString);
+                    return JSON.parse(configString);
                 }).catch(error => {
-                    console.log(error);
-                    return "{}";
+                    console.error(error);
+                    return {};
                 });
             });
         }
         catch (error) {
-            console.log(error);
-            return "{}";
+            console.error(error);
+            return {};
         }
     }
     killAllWorkers() {
@@ -344,9 +346,9 @@ else {
             let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent);
             res.locals.req = req;
             res.setHeader("X-Powered-By", "Avian");
-            res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, JSON.parse(config), function (err, html) {
+            res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, config, function (err, html) {
                 if (err) {
-                    res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, JSON.parse(config));
+                    res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, config);
                 }
             });
         }
@@ -362,7 +364,7 @@ else {
             let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache);
             res.locals.req = req;
             res.setHeader("X-Powered-By", "Avian");
-            res.render(`${componentRoot}/${req.params.component}.view.pug`, JSON.parse(config));
+            res.render(`${componentRoot}/${req.params.component}.view.pug`, config);
         }
         catch (err) {
             console.log(err);
@@ -374,7 +376,7 @@ else {
         try {
             let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache);
             res.setHeader("X-Powered-By", "Avian");
-            res.json(JSON.parse(config));
+            res.json(config);
         }
         catch (err) {
             res.setHeader("X-Powered-By", "Avian");
@@ -386,7 +388,7 @@ else {
         try {
             let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent);
             res.setHeader("X-Powered-By", "Avian");
-            res.json(JSON.parse(config));
+            res.json(config);
         }
         catch (err) {
             res.setHeader("X-Powered-y", "Avian");
