@@ -33,6 +33,11 @@ argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development";
 argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home;
 argv.sessionSecret = argv.sessionSecret || process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex");
+exports.injectArgv = (req, res, next) => {
+    // @ts-ignore
+    req.argv = argv;
+    next();
+};
 // import after argv so they can us it
 class AvianUtils {
     getComponentRoot(component) {
@@ -284,6 +289,7 @@ if (cluster.isMaster) {
 }
 else {
     const avian = express();
+    avian.use(exports.injectArgv);
     let cookieParser = require("cookie-parser");
     avian.use(cookieParser());
     avian.locals.argv = argv;
