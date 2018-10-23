@@ -34,58 +34,47 @@ class AvianUtils {
             return `${argv.home}/components`;
     }
     setComponentConfigObjectCache(component, reqWithCache, subcomponent) {
-        return new Promise(() => {
-            let parentComponentRoot = this.getComponentRoot(component);
-            let componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`;
-            let configFilePath = (subcomponent) ? `${componentPath}/${subcomponent}.config.json` : `${componentPath}/${component}.config.json`;
-            let fallbackFilePath = (subcomponent) ? `${componentPath}/${component}.${subcomponent}.config.json` : undefined;
-            let configStringJSON;
-            try {
-                console.log(configFilePath);
-                configStringJSON = JSON.stringify(jsonfile.readFileSync(configFilePath));
+        let parentComponentRoot = this.getComponentRoot(component);
+        let componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`;
+        let configFilePath = (subcomponent) ? `${componentPath}/${subcomponent}.config.json` : `${componentPath}/${component}.config.json`;
+        let fallbackFilePath = (subcomponent) ? `${componentPath}/${component}.${subcomponent}.config.json` : undefined;
+        let configStringJSON;
+        try {
+            configStringJSON = JSON.stringify(jsonfile.readFileSync(configFilePath));
+        }
+        catch (err) {
+            if (!fallbackFilePath) {
+                configStringJSON = JSON.stringify({});
             }
-            catch (err) {
-                if (!fallbackFilePath) {
-                    console.log("no fall back config file returning empty");
+            else {
+                try {
+                    configStringJSON = JSON.stringify(jsonfile.readFileSync(fallbackFilePath));
+                }
+                catch (_a) {
                     configStringJSON = JSON.stringify({});
                 }
-                else {
-                    try {
-                        console.log("falling back");
-                        console.log(fallbackFilePath);
-                        configStringJSON = JSON.stringify(jsonfile.readFileSync(fallbackFilePath));
-                    }
-                    catch (_a) {
-                        console.log("fall back config file failed returning empty");
-                        configStringJSON = JSON.stringify({});
-                    }
-                }
             }
-            reqWithCache.cache.set(component, configStringJSON);
-            return configStringJSON;
-        });
+        }
+        reqWithCache.cache.set(component, configStringJSON);
+        return configStringJSON;
     }
-    getComponentConfigObject(component, reqWithCache, subcomponent) {
+    getComponentConfigObject(component, reqWithCache, subcomponent, callback) {
         try {
             let cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component;
+            let config = undefined;
             reqWithCache.cache.get(cacheKey, (err, config) => {
                 if (config) {
-                    console.log(config);
-                    return JSON.parse(config);
+                    callback(JSON.parse(config));
+                    return;
                 }
-                let updateCachePromise = avianUtils.setComponentConfigObjectCache(component, reqWithCache);
-                updateCachePromise.then(configString => {
-                    console.log(configString);
-                    return JSON.parse(configString);
-                }).catch(error => {
-                    console.error(error);
-                    return {};
-                });
+                let configString = avianUtils.setComponentConfigObjectCache(component, reqWithCache);
+                callback(JSON.parse(configString));
             });
+            return config;
         }
         catch (error) {
             console.error(error);
-            return {};
+            callback({});
         }
     }
     killAllWorkers() {
@@ -306,7 +295,7 @@ else {
             maxAge: 2592000000
         }
     }));
-    avian.use(require("express-redis")(6379, "127.0.0.1", { return_buffers: true }, "cache"));
+    avian.use(require("express-redis")(6379, "127.0.0.1", {}, "cache"));
     loadUserServiesIntoAvian(avian);
     avian.use("/static", express.static(argv.home + "/static"));
     avian.use("/assets", express.static(argv.home + "/assets"));
@@ -348,17 +337,18 @@ else {
         }
         let reqWithCache = req;
         try {
-            let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent);
-            res.locals.req = req;
-            res.setHeader("X-Powered-By", "Avian");
-            res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, config, function (err, html) {
-                if (err) {
-                    res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, config);
-                }
+            avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
+                res.locals.req = req;
+                res.setHeader("X-Powered-By", "Avian");
+                res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, config, function (err, html) {
+                    if (err) {
+                        res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, config);
+                    }
+                });
             });
         }
         catch (err) {
-            console.log(err);
+            console.error(err);
             res.redirect("/errors");
         }
     });
@@ -366,22 +356,24 @@ else {
         let reqWithCache = req;
         let componentRoot = avianUtils.getComponentRoot(req.params.component);
         try {
-            let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache);
-            res.locals.req = req;
-            res.setHeader("X-Powered-By", "Avian");
-            res.render(`${componentRoot}/${req.params.component}.view.pug`, config);
+            avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
+                res.locals.req = req;
+                res.setHeader("X-Powered-By", "Avian");
+                res.render(`${componentRoot}/${req.params.component}.view.pug`, config);
+            });
         }
         catch (err) {
-            console.log(err);
+            console.error(err);
             res.redirect("/errors");
         }
     });
     avian.get("/:component/config/objects.json", (req, res, next) => {
         let reqWithCache = req;
         try {
-            let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache);
-            res.setHeader("X-Powered-By", "Avian");
-            res.json(config);
+            avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
+                res.setHeader("X-Powered-By", "Avian");
+                res.json(config);
+            });
         }
         catch (err) {
             res.setHeader("X-Powered-By", "Avian");
@@ -391,9 +383,10 @@ else {
     avian.get("/:component/:subcomponent/config/objects.json", (req, res, next) => {
         let reqWithCache = req;
         try {
-            let config = avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent);
-            res.setHeader("X-Powered-By", "Avian");
-            res.json(config);
+            avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
+                res.setHeader("X-Powered-By", "Avian");
+                res.json(config);
+            });
         }
         catch (err) {
             res.setHeader("X-Powered-y", "Avian");
