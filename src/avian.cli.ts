@@ -341,7 +341,7 @@ else {
     avian.use(enableAuthHeadersForExpressSession)
 
     avian.use(session({
-        store: new redisStore({host: "127.0.0.1"}),
+        store: new redisStore({host: "127.0.0.1", db: 1}),
         proxy: true,
         secret: argv.sessionSecret,
         resave: false,
@@ -352,7 +352,7 @@ else {
         }
     }))
 
-    avian.use(require("express-redis")(6379, "127.0.0.1", {}, "cache"))
+    avian.use(require("express-redis")(6379, "127.0.0.1", {db: 2}, "cache"))
 
     loadUserServiesIntoAvian(avian).then(() => {
         avian.use("/static", express.static(argv.home + "/static"))
