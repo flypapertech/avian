@@ -73,7 +73,7 @@ class AvianUtils {
             let config = undefined
             reqWithCache.cache.get(cacheKey, (err, config) => {
                 if (config) {
-                    callback(JSON.parse(config))
+                    callback(JSON.parse(config.toString()))
                     return
                 }
 
@@ -352,7 +352,7 @@ else {
         }
     }))
 
-    avian.use(require("express-redis")(6379, "127.0.0.1", {}, "cache"))
+    avian.use(require("express-redis")(6379, "127.0.0.1", {return_buffers: true}, "cache"))
 
     loadUserServiesIntoAvian(avian).then(() => {
         avian.use("/static", express.static(argv.home + "/static"))
