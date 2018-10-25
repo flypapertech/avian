@@ -1,15 +1,15 @@
 language: node_js
 install:
-  - npm install
-  - npm run test
+- npm install
+- npm run test
 node_js:
-  - "9.0"
-  - "10.0"
+- '9.0'
+- '10.0'
 deploy:
   provider: npm
-  email: ispyhumanfly@gmail.com
+  email: npm@flypaper.com
   api_key:
-    secure: tsJCJDt5TNvbdwxHrcOIiMyYifu6Iz4dW12ay+3MCA2WC4qYddD3HGLEJxgl1fkFyY2RtnSOy9dOC3ionxO3G/p4p9H8koZ2rXycKvs12XxMXghQbrb+9aQhHVP85beimCmgw/EmXu6P/noddeaVcY0i576809Es47cCvYuJUUZPtWFE1BECsKfx4LLBIkU9YIC3AUUIHhigdiFIsGe8ncbSw8KycDBsyhfyb5tmmlZilQXZDze61yUEQNSVVkih3KAJk7SuFFVCenDnpPPARCCkfErEw20FxIUhVNIGCKAtrfomr8n6+8RYGhqbPE3kntbIDrN6DUMALb2/7DeO6ZNbi+eS00VH3scwGa0lDB1VSDfmcg/gk6JsMC7SlWkxGSxZlhtJEbcD9P6aB4kwhY+nvMwOYyyKWOVpteFfvQ2FpiqJhnidku/70v2XYEPGYy9KMHh/TXlGOXlqo/7kZb4Iljjw/szKy24ISpOothhEYWaue1puBj0ljLmyJ2lcu9pxs5lqodk9GNnxHS6vq0a55FZBzpuQTek4AIlo2z2rp5D1my9gAZsOAWHOQmqMd10u5uJOMi8d44bRrQ3vw3dGDObC7pzx4oVfcrn695qx4VMzlYnagXspk/qpSd4bA0EBT2hphNNfVWlfMeHg0E46udTBAa+AHuQushNC92o=
+    secure: A8TO2vnhyJgEoOQ0s/9UnAIxV7bcDvPIOYwaJ5PSW1CQw0XorXMYJI2UO3ufuBgWfppQwV0gBcl4Mf5HNjWvDIu1jcElFHpFD/WJ+ffEceCpZWXwzFUkpLD2sRQgjwA5ys7SNNQX4n1u39EJ5eG/y2+vnvtWL8NikVQotKkctBiyKAHFN90UTBd5ZqpqnbA5Pwm3mrHKB7dCk7KV8h2A3zOaGDxCsPHZMD/VaCvg+ka4oH8VtD7GQCOFHky0xIHLgO2pjjym8J5HAxThaEaih6KkvlDWXpkBLqjtdcPGgcR1EWFwF0aYt4giVdujz+JshX1REqkcK9F/C3vNDfOBSOC953x//lPUo8/7Kp/AgZI8Fy+/k83NwQrjX/fNbuihbI874NRSAkK/KS8lXH4Co1AsP7y+tibkaFjyErIDVFzPrT3gX8VhC+nlO6HTRrteWDqRxwxciYsOjHpyNuvXYvwCNIz0FyWPiieOyeyI3BxKVpkJsyG2jAcVuBZ5whxRzGPZk3jtC6KyAEL/clqJIIyWjXdGHvMHMBwfp2BbkzjTqAdjcJhAl93zDFcG9xGuTO7nK+YHNOTARng8B2wEl/D57m8PHU3ebNKkd/gXsttv20V00gGqR5CZ378TOhrEaLYUMe8m+EySGQreRSEjifJyFKg02BF+UjlpdsA3s3E=
   on:
     tags: true
     repo: flypapertech/avian
