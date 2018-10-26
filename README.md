@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/flypapertech/avian.svg?branch=master)](https://travis-ci.org/flypapertech/avian) [![Known Vulnerabilities](https://snyk.io/test/github/flypapertech/avian/badge.svg)](https://snyk.io/test/github/flypapertech/avian)
 
-[![NPM](https://nodei.co/npm/avian.png)](https://npmjs.org/package/avian)
+[![NPM](https://nodei.co/npm/@flypapertech/avian.png)](https://npmjs.org/package/@flypapertech/avian)
 
 # Avian
 Create Enterprise-class component driven applications that scale.
