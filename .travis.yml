@@ -5,6 +5,7 @@ install:
 node_js:
 - '9.0'
 - '10.0'
+- '11.0'
 deploy:
   provider: npm
   email: npm@flypaper.com
