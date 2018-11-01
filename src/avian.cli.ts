@@ -13,7 +13,7 @@ import * as defaultWebpackDev from "./webpack.development"
 import * as defaultWebpackProd from "./webpack.production"
 import * as ts from "typescript"
 import * as signature from "cookie-signature"
-import {RequestHandler, Request} from "express"
+import { RequestHandler, Request } from "express"
 import mkdirp = require("mkdirp")
 import jsonfile = require("jsonfile")
 import yargs = require("yargs")

@@ -65,4 +65,3 @@ import * as Avian from "@flypapertech/avian"
 # Copyright
 2017 - 2018 FlyPaper Technologies, LLC
 2014 - 2018 Thoughtpivot, LLC
-
