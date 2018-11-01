@@ -20,8 +20,8 @@
     "build_cli": "node_modules/.bin/tsc --project ./;",
     "test": "node_modules/.bin/jasmine-ts",
     "start": "node_modules/.bin/ts-node dist/avian.cli.ts",
-    "snyk-protect": "snyk protect",
-    "security-check": "snyk test"
+    "snyk-protect": "node_modules/.bin/snyk protect",
+    "security-check": "node_modules/.bin/snyk test"
   },
   "contributors": [
     "Dan Stephenson",
