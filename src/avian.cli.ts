@@ -9,13 +9,12 @@ import * as os from "os"
 import * as fs from "fs"
 import * as path from "path"
 import * as webpack from "webpack"
-import { RedisClient } from "redis"
 import * as rimraf from "rimraf"
 import * as defaultWebpackDev from "./webpack.development"
 import * as defaultWebpackProd from "./webpack.production"
 import * as ts from "typescript"
-import { RequestHandler, Response, Request } from "express"
 import * as signature from "cookie-signature"
+import {RequestHandler, Request} from "express"
 import mkdirp = require("mkdirp")
 import jsonfile = require("jsonfile")
 import yargs = require("yargs")
@@ -28,8 +27,7 @@ argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || 
 argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home
 argv.sessionSecret = argv.sessionSecret || process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
 
-export const injectArgv: RequestHandler = (req: Request, res: Response, next: any) => {
-    // @ts-ignore
+export const injectArgv: RequestHandler = (req, res, next) => {
     req.argv = Object.assign({}, argv)
     next()
 }
@@ -42,7 +40,7 @@ class AvianUtils {
             return `${argv.home}/components`
     }
 
-    setComponentConfigObjectCache(component: string, reqWithCache: RequestWithCache, subcomponent?: string): string {
+    setComponentConfigObjectCache(component: string, req: Request, subcomponent?: string): string {
         let parentComponentRoot = this.getComponentRoot(component)
         let componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`
         let configFilePath = (subcomponent) ? `${componentPath}/${subcomponent}.config.json` : `${componentPath}/${component}.config.json`
@@ -64,21 +62,21 @@ class AvianUtils {
             }
         }
 
-        reqWithCache.cache.set(component, configStringJSON)
+        req.cache.set(component, configStringJSON)
         return configStringJSON
     }
 
-    getComponentConfigObject(component: string, reqWithCache: RequestWithCache, subcomponent: string, callback: Function) {
+    getComponentConfigObject(component: string, req: Request, subcomponent: string | undefined, callback: Function) {
         try {
             let cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component
             let config = undefined
-            reqWithCache.cache.get(cacheKey, (err, config) => {
+            req.cache.get(cacheKey, (err, config) => {
                 if (config) {
                     callback(JSON.parse(config))
                     return
                 }
 
-                let configString = avianUtils.setComponentConfigObjectCache(component, reqWithCache)
+                let configString = avianUtils.setComponentConfigObjectCache(component, req)
                 callback(JSON.parse(configString))
             })
 
@@ -95,7 +93,8 @@ class AvianUtils {
         for (const id in cluster.workers) {
             existingWorkers = true
             let worker = cluster.workers[id]
-            worker.kill()
+            if (worker)
+                worker.kill()
         }
 
         return existingWorkers
@@ -110,11 +109,11 @@ class AvianUtils {
 
 const avianEmitter = new events.EventEmitter()
 let runningBuilds = 0
-avianEmitter.on("buildStarted", (buildName) => {
+avianEmitter.on("buildStarted", () => {
     runningBuilds++
 })
 
-avianEmitter.on("buildCompleted", (buildName) => {
+avianEmitter.on("buildCompleted", () => {
     runningBuilds--
     if (runningBuilds === 0) {
         console.log("Avian - Restarting server")
@@ -126,7 +125,7 @@ avianEmitter.on("buildCompleted", (buildName) => {
     }
 })
 
-function startDevWebpackWatcher(webpackDev) {
+function startDevWebpackWatcher(webpackDev: any) {
     let componentsCompiler: webpack.Compiler
     componentsCompiler = webpack(
         webpackDev.ComponentsConfig
@@ -148,22 +147,22 @@ function startDevWebpackWatcher(webpackDev) {
         aggregateTimeout: 300,
         poll: 1000,
         ignored: ["components/**/*.service.*", "node_modules", "serverless"]
-    }, (err, stats) => watcherCallback(err, stats, "components"))
+    }, watcherCallback)
 
     servicesCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
         ignored: ["components/**/*.component.*", "node_modules", "serverless"]
-    }, (err, stats) => watcherCallback(err, stats, "services"))
+    }, watcherCallback)
 }
 
-function watcherCallback(err, stats, buildName) {
+const watcherCallback: webpack.ICompiler.Handler = (err, stats) => {
     if (err || stats.hasErrors()) {
         if (err) {
             console.error(err)
         }
         else if (stats) {
-            stats.toJson().errors.forEach((err) => {
+            stats.toJson().errors.forEach((err: any) => {
                 console.error(err)
             })
         }
@@ -175,15 +174,16 @@ function watcherCallback(err, stats, buildName) {
     }
 
     if (stats.hasWarnings()) {
-        stats.toJson().warnings.forEach((warning) => {
+        stats.toJson().warnings.forEach((warning: any) => {
             console.log(warning)
         })
     }
 
-    avianEmitter.emit("buildCompleted", buildName)
+    avianEmitter.emit("buildCompleted")
+    return
 }
 
-function startProdWebpackCompiler(webpackProd) {
+function startProdWebpackCompiler(webpackProd: any) {
     let webpackCompiler: webpack.MultiCompiler
     webpackCompiler = webpack([
         webpackProd.ComponentsConfig,
@@ -197,7 +197,7 @@ function startProdWebpackCompiler(webpackProd) {
                 console.error(err)
             }
             else if (stats) {
-                stats.toJson().errors.forEach((err) => {
+                stats.toJson().errors.forEach((err: any) => {
                     console.error(err)
                 })
             }
@@ -266,9 +266,6 @@ async function loadUserServiesIntoAvian(avian: express.Express) {
     }
 }
 
-interface RequestWithCache extends express.Request {
-    cache: RedisClient
-}
 const avianUtils = new AvianUtils()
 if (cluster.isMaster) {
     rimraf.sync(`${argv.home}/private/*`)
@@ -326,7 +323,7 @@ else {
 
     avian.locals.argv = argv
     let redisStore = require("connect-redis")(session)
-    const enableAuthHeadersForExpressSession: RequestHandler = (req: Request, res: Response, next: any) => {
+    const enableAuthHeadersForExpressSession: RequestHandler = (req, res, next) => {
         if (req.headers.authorization) {
             let authParts = req.headers.authorization.split(" ")
             if (authParts[0].toLowerCase() === "bearer" && authParts.length > 1) {
@@ -402,9 +399,8 @@ else {
                 return
             }
 
-            let reqWithCache = req as RequestWithCache
             try {
-                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
+                avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
                     res.locals.req = req
                     res.setHeader("X-Powered-By", "Avian")
                     res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, config, function(err, html) {
@@ -421,10 +417,9 @@ else {
         })
 
         avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
-            let reqWithCache = req as RequestWithCache
             let componentRoot = avianUtils.getComponentRoot(req.params.component)
             try {
-                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
+                avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
                     res.locals.req = req
                     res.setHeader("X-Powered-By", "Avian")
                     res.render(`${componentRoot}/${req.params.component}.view.pug`, config)
@@ -437,9 +432,8 @@ else {
         })
 
         avian.get("/:component/config/objects.json", (req, res, next) => {
-            let reqWithCache = req as RequestWithCache
             try {
-                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
+                avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
                     res.setHeader("X-Powered-By", "Avian")
                     res.json(config)
                 })
@@ -451,9 +445,8 @@ else {
         })
 
         avian.get("/:component/:subcomponent/config/objects.json", (req, res, next) => {
-            let reqWithCache = req as RequestWithCache
             try {
-                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
+                avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
                     res.setHeader("X-Powered-By", "Avian")
                     res.json(config)
                 })

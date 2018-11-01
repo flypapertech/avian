@@ -1,9 +1,9 @@
 import * as webpack from "webpack"
-import * as WebpackWatchedGlobEntries from "webpack-watched-glob-entries-plugin"
-import * as ProgressBarPlugin from "progress-bar-webpack-plugin"
 import * as VueLoader from "vue-loader"
 import chalk from "chalk"
 
+const ProgressBarPlugin = require("progress-bar-webpack-plugin")
+const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 const nodeExternals = require("webpack-node-externals")
 const argv = require("yargs").argv
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()

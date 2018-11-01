@@ -35,11 +35,9 @@ argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || 
 argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home;
 argv.sessionSecret = argv.sessionSecret || process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex");
 exports.injectArgv = (req, res, next) => {
-    // @ts-ignore
     req.argv = Object.assign({}, argv);
     next();
 };
-// import after argv so they can us it
 class AvianUtils {
     getComponentRoot(component) {
         if (fs.existsSync(`${argv.home}/components/${component}`))
@@ -47,7 +45,7 @@ class AvianUtils {
         else
             return `${argv.home}/components`;
     }
-    setComponentConfigObjectCache(component, reqWithCache, subcomponent) {
+    setComponentConfigObjectCache(component, req, subcomponent) {
         let parentComponentRoot = this.getComponentRoot(component);
         let componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`;
         let configFilePath = (subcomponent) ? `${componentPath}/${subcomponent}.config.json` : `${componentPath}/${component}.config.json`;
@@ -69,19 +67,19 @@ class AvianUtils {
                 }
             }
         }
-        reqWithCache.cache.set(component, configStringJSON);
+        req.cache.set(component, configStringJSON);
         return configStringJSON;
     }
-    getComponentConfigObject(component, reqWithCache, subcomponent, callback) {
+    getComponentConfigObject(component, req, subcomponent, callback) {
         try {
             let cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component;
             let config = undefined;
-            reqWithCache.cache.get(cacheKey, (err, config) => {
+            req.cache.get(cacheKey, (err, config) => {
                 if (config) {
                     callback(JSON.parse(config));
                     return;
                 }
-                let configString = avianUtils.setComponentConfigObjectCache(component, reqWithCache);
+                let configString = avianUtils.setComponentConfigObjectCache(component, req);
                 callback(JSON.parse(configString));
             });
             return config;
@@ -96,7 +94,8 @@ class AvianUtils {
         for (const id in cluster.workers) {
             existingWorkers = true;
             let worker = cluster.workers[id];
-            worker.kill();
+            if (worker)
+                worker.kill();
         }
         return existingWorkers;
     }
@@ -108,10 +107,10 @@ class AvianUtils {
 }
 const avianEmitter = new events.EventEmitter();
 let runningBuilds = 0;
-avianEmitter.on("buildStarted", (buildName) => {
+avianEmitter.on("buildStarted", () => {
     runningBuilds++;
 });
-avianEmitter.on("buildCompleted", (buildName) => {
+avianEmitter.on("buildCompleted", () => {
     runningBuilds--;
     if (runningBuilds === 0) {
         console.log("Avian - Restarting server");
@@ -138,14 +137,14 @@ function startDevWebpackWatcher(webpackDev) {
         aggregateTimeout: 300,
         poll: 1000,
         ignored: ["components/**/*.service.*", "node_modules", "serverless"]
-    }, (err, stats) => watcherCallback(err, stats, "components"));
+    }, watcherCallback);
     servicesCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
         ignored: ["components/**/*.component.*", "node_modules", "serverless"]
-    }, (err, stats) => watcherCallback(err, stats, "services"));
+    }, watcherCallback);
 }
-function watcherCallback(err, stats, buildName) {
+const watcherCallback = (err, stats) => {
     if (err || stats.hasErrors()) {
         if (err) {
             console.error(err);
@@ -165,8 +164,9 @@ function watcherCallback(err, stats, buildName) {
             console.log(warning);
         });
     }
-    avianEmitter.emit("buildCompleted", buildName);
-}
+    avianEmitter.emit("buildCompleted");
+    return;
+};
 function startProdWebpackCompiler(webpackProd) {
     let webpackCompiler;
     webpackCompiler = webpack([
@@ -299,7 +299,6 @@ else {
         if (req.headers.authorization) {
             let authParts = req.headers.authorization.split(" ");
             if (authParts[0].toLowerCase() === "bearer" && authParts.length > 1) {
-                // We need to sign this exactly like how express-session signs cookies
                 let signed = "s:" + signature.sign(authParts[1], argv.sessionSecret);
                 req.cookies["connect.sid"] = signed;
             }
@@ -353,14 +352,12 @@ else {
         avian.get("/:component/:subcomponent", parser.urlencoded({ extended: true }), (req, res, next) => {
             let componentRoot = avianUtils.getComponentRoot(req.params.component);
             let subComponentPath = `${componentRoot}/${req.params.subcomponent}`;
-            // if the subcomponent directory doesn't exist, move on
             if (!fs.existsSync(`${subComponentPath}`)) {
                 next();
                 return;
             }
-            let reqWithCache = req;
             try {
-                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
+                avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config) => {
                     res.locals.req = req;
                     res.setHeader("X-Powered-By", "Avian");
                     res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, config, function (err, html) {
@@ -376,10 +373,9 @@ else {
             }
         });
         avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
-            let reqWithCache = req;
             let componentRoot = avianUtils.getComponentRoot(req.params.component);
             try {
-                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
+                avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config) => {
                     res.locals.req = req;
                     res.setHeader("X-Powered-By", "Avian");
                     res.render(`${componentRoot}/${req.params.component}.view.pug`, config);
@@ -391,9 +387,8 @@ else {
             }
         });
         avian.get("/:component/config/objects.json", (req, res, next) => {
-            let reqWithCache = req;
             try {
-                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, undefined, (config) => {
+                avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config) => {
                     res.setHeader("X-Powered-By", "Avian");
                     res.json(config);
                 });
@@ -404,9 +399,8 @@ else {
             }
         });
         avian.get("/:component/:subcomponent/config/objects.json", (req, res, next) => {
-            let reqWithCache = req;
             try {
-                avianUtils.getComponentConfigObject(req.params.component, reqWithCache, req.params.subcomponent, (config) => {
+                avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config) => {
                     res.setHeader("X-Powered-By", "Avian");
                     res.json(config);
                 });

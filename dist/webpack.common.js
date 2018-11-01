@@ -1,9 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
-const ProgressBarPlugin = require("progress-bar-webpack-plugin");
 const VueLoader = require("vue-loader");
 const chalk_1 = require("chalk");
+const ProgressBarPlugin = require("progress-bar-webpack-plugin");
+const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
 const nodeExternals = require("webpack-node-externals");
 const argv = require("yargs").argv;
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
@@ -47,7 +47,6 @@ const componentsCommonConfig = {
             {
                 test: /\.pug$/,
                 oneOf: [
-                    // this applies to `<template lang="pug">` in Vue components
                     {
                         resourceQuery: /^\?vue/,
                         use: ["pug-plain-loader"]
@@ -98,7 +97,6 @@ const servicesCommonConfig = {
             clear: false
         })
     ],
-    // externals: [nodeExternals(), /\.pug$/, /\.less$/, /\.css$/],
     externals: [nodeExternals()],
     module: {
         rules: [
