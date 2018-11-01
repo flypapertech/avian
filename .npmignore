@@ -1,0 +1,8 @@
+src
+.snyk
+.travis.yml
+.vscodeignore
+tsconfig.json
+tslint.json
+yarn.lock
+package-lock.json
