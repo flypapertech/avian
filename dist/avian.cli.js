@@ -26,7 +26,8 @@ const ts = require("typescript");
 const signature = require("cookie-signature");
 const mkdirp = require("mkdirp");
 const jsonfile = require("jsonfile");
-const argv = require("yargs").argv;
+const yargs = require("yargs");
+const argv = yargs.argv;
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost";
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080;
@@ -419,7 +420,7 @@ else {
             res.redirect("/index");
         });
         const server = avian.listen(argv.port, () => {
-            console.log("Avian - Worker Id: %s, Process: %sd, Name: %s, Home: %s, Port: %d", cluster.worker.id, process.pid, argv.name, argv.home, argv.port);
+            console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s", process.pid, argv.name, argv.home, argv.port, argv.mode);
         });
     });
 }

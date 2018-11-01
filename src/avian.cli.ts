@@ -16,10 +16,11 @@ import * as defaultWebpackProd from "./webpack.production"
 import * as ts from "typescript"
 import { RequestHandler, Response, Request } from "express"
 import * as signature from "cookie-signature"
-const mkdirp = require("mkdirp")
-const jsonfile = require("jsonfile")
+import mkdirp = require("mkdirp")
+import jsonfile = require("jsonfile")
+import yargs = require("yargs")
 
-const argv = require("yargs").argv
+const argv = yargs.argv
 argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
