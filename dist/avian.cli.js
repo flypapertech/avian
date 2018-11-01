@@ -36,7 +36,7 @@ argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home;
 argv.sessionSecret = argv.sessionSecret || process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex");
 exports.injectArgv = (req, res, next) => {
     // @ts-ignore
-    req.argv = argv;
+    req.argv = Object.assign({}, argv);
     next();
 };
 // import after argv so they can us it

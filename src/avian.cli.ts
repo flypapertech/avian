@@ -30,7 +30,7 @@ argv.sessionSecret = argv.sessionSecret || process.env.AVIAN_APP_SESSION_SECRET 
 
 export const injectArgv: RequestHandler = (req: Request, res: Response, next: any) => {
     // @ts-ignore
-    req.argv = argv
+    req.argv = Object.assign({}, argv)
     next()
 }
 // import after argv so they can us it
