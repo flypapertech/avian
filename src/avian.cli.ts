@@ -469,13 +469,12 @@ else {
         })
 
         const server = avian.listen(argv.port, () => {
-
-            console.log("Avian - Worker Id: %s, Process: %sd, Name: %s, Home: %s, Port: %d",
-                cluster.worker.id,
+            console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s",
                 process.pid,
                 argv.name,
                 argv.home,
-                argv.port
+                argv.port,
+                argv.mode
             )
         })
     })
