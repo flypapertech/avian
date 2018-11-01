@@ -14,7 +14,6 @@ const cluster = require("cluster");
 const express = require("express");
 const session = require("express-session");
 const glob = require("glob");
-const parser = require("body-parser");
 const os = require("os");
 const fs = require("fs");
 const path = require("path");
@@ -349,7 +348,7 @@ else {
             avian.use(require("express-minify")({ cache: argv.home + "/cache" }));
             avian.enable("view cache");
         }
-        avian.get("/:component/:subcomponent", parser.urlencoded({ extended: true }), (req, res, next) => {
+        avian.get("/:component/:subcomponent", express.urlencoded({ extended: true }), (req, res, next) => {
             let componentRoot = avianUtils.getComponentRoot(req.params.component);
             let subComponentPath = `${componentRoot}/${req.params.subcomponent}`;
             if (!fs.existsSync(`${subComponentPath}`)) {
@@ -372,7 +371,7 @@ else {
                 res.redirect("/errors");
             }
         });
-        avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
+        avian.get("/:component", express.urlencoded({ extended: true }), (req, res, next) => {
             let componentRoot = avianUtils.getComponentRoot(req.params.component);
             try {
                 avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config) => {

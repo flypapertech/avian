@@ -4,7 +4,6 @@ import * as cluster from "cluster"
 import * as express from "express"
 import * as session from "express-session"
 import * as glob from "glob"
-import * as parser from "body-parser"
 import * as os from "os"
 import * as fs from "fs"
 import * as path from "path"
@@ -389,7 +388,7 @@ else {
             avian.enable("view cache")
         }
 
-        avian.get("/:component/:subcomponent", parser.urlencoded({ extended: true }), (req, res, next) => {
+        avian.get("/:component/:subcomponent", express.urlencoded({ extended: true }), (req, res, next) => {
             let componentRoot = avianUtils.getComponentRoot(req.params.component)
             let subComponentPath = `${componentRoot}/${req.params.subcomponent}`
 
@@ -416,7 +415,7 @@ else {
             }
         })
 
-        avian.get("/:component", parser.urlencoded({ extended: true }), (req, res, next) => {
+        avian.get("/:component", express.urlencoded({ extended: true }), (req, res, next) => {
             let componentRoot = avianUtils.getComponentRoot(req.params.component)
             try {
                 avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
