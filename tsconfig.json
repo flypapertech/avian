@@ -1,22 +1,18 @@
 {
   "compilerOptions": {
-      "target": "es6",
-      "module": "commonjs",
-      "moduleResolution": "node",
-      "removeComments": true,
-	    "experimentalDecorators" : true,
-      "noImplicitAny": false,
-      "suppressImplicitAnyIndexErrors": true
-
-  },
-  "files" : [
-    "./src/avian.cli.ts",
-    "./spec/avian.spec.ts"
-  ],
-  "exclude": [
-      "node_modules",
-      "dist",
+    "strict": true,
+    "target": "es6",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "removeComments": true,
+    "outDir": "dist",
+    "rootDirs": [
+      "src",
       "spec"
-  ],
-  "compileOnSave": false
+    ]
+  },
+  "files": [
+    "./src/avian.cli.ts",
+    "./index.d.ts"
+  ]
 }
