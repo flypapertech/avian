@@ -1,25 +1,29 @@
-[![Build Status](https://travis-ci.org/flypapertech/avian.svg?branch=master)](https://travis-ci.org/flypapertech/avian) [![Known Vulnerabilities](https://snyk.io/test/github/flypapertech/avian/badge.svg)](https://snyk.io/test/github/flypapertech/avian)
-
-[![NPM](https://nodei.co/npm/@flypapertech/avian.png)](https://npmjs.org/package/@flypapertech/avian)
+[![Build Status](https://travis-ci.org/flypapertech/avian.svg?branch=master)](https://travis-ci.org/flypapertech/avian)
+[![Known Vulnerabilities](https://snyk.io/test/github/flypapertech/avian/badge.svg)](https://snyk.io/test/github/flypapertech/avian)
+[![npm (scoped)](https://img.shields.io/npm/v/@flypapertech/avian.svg)](https://www.npmjs.com/package/@flypapertech/avian)
+[![NpmLicense](https://img.shields.io/npm/l/@flypapertech/avian.svg)](https://github.com/flypapertech/avian/blob/master/LICENSE)
+[![dependencies Status](https://david-dm.org/flypapertech/avian/status.svg)](https://david-dm.org/flypapertech/avian)
 
 # Avian
 Create Enterprise-class component driven applications that scale.
-
-# About
-A platform powering component driven applications at scale.
 
 ## Key Features
 - Enterprise-class application server that meets infinitely scalable demands.
 - A unique and easy to use component-based model that is flexible with popular
 frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
 - Multi-core / Multi-threaded application host operations remove the burden of such considerations from the application developer.
-
-Host an HTML5 application using Avian...
-
-    avian --name appname --home /path/to/your/app --port 8080 --mode production
+- Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
 
 # Installation
-Avian can be installed using various methods.
+The latest stable release of Avian is available via the Node Package Manager.
+
+```
+npm install @flypapertech/avian
+
+or
+
+yarn add @flypapertech/avian
+```
 
 ## System Requirements
 Avian uses Redis Server for fast loading component templates and component storage objects. Because of this, and other lower-level goodies, the following software must be available to the installation environment.
@@ -31,26 +35,22 @@ Avian uses Redis Server for fast loading component templates and component stora
     - Redis Server
     - Visual Studio, Windows SDK, .NET and Python 2.x.
 
-# NPM
-The latest stable release of Avian is available via the Node Package Manager.
+# Getting Started
+Host an HTML5 application using Avian...
 
-## Global
-    yarn install avian -g
+    avian --name appname --home /path/to/your/app --port 8080 --mode production
 
-## Local
-    yarn add
+## Express Globals Added by Avian
+### Properties Added to All Request Objects
+`req.argv` contains a copy of all arguments passed to avian at start
 
-# GitHub
-The source code is available on GitHub. Though every build is verified through Travis, please consider installation directly from GitHub to be risky for new developers.
+`req.cache` is a RedisClient instance hooked to avian's config object cache. Feel free to use it for your own needs as well.
 
-## Global
-    npm install https://github.com/flypapertech/avian --global
-
-## Local
-    npm install https://github.com/flypapertech/avian --save
-
-## Clone
-    git clone https://github.com/flypapertech/avian.git
+### Using Typescript?
+To make typescript aware of the globals Avian adds to your project simply place the below import into any .d.ts file that is within your project
+```typescript
+import * as Avian from "@flypapertech/avian"
+```
 
 # Documentation
     docs/README.md
@@ -61,9 +61,6 @@ The source code is available on GitHub. Though every build is verified through T
 # Contributors
     Dan Stephenson
     Nick Fredricks
-
-# License
-MIT
 
 # Copyright
 2017 - 2018 FlyPaper Technologies, LLC
