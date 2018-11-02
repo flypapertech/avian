@@ -73,6 +73,21 @@ After Avian is installed as a dependency of your project start avian via:
 ├── public (auto-generated, for compiled component bundles, statically served at /)
 ```
 
+## Session Management
+Avian uses [express-session](https://github.com/expressjs/session) to manage client sessions.
+
+- Browser Based Clients
+    - Avian uses secure [HttpOnly Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Secure_and_HttpOnly_cookies) for managing browser based client sessions.
+
+- Mobile Device and API Clients
+    - Avian augments express-session to allow API and mobile device sessions management.  Since those clients may not use coookies they simply need to send their session ID in the authorization header of all requests made to Avian. See below for an example header.
+
+```json
+headers: {
+    Authorization: "Bearer Session_ID"
+}
+```
+
 ## Express Globals Added by Avian
 ### Properties Added to All Request Objects
 `req.argv` contains a copy of all arguments passed to avian at start
