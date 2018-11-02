@@ -8,7 +8,7 @@
 Create Enterprise-class component driven applications that scale.
 
 ## Key Features
-- Enterprise-class application server that meets infinitely scalable demands.
+- Enterprise-class application server built on [Express](https://github.com/expressjs/express) that meets infinitely scalable demands.
 - A unique and easy to use component-based model that is flexible with popular
 frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
 - Multi-core / Multi-threaded application host operations remove the burden of such considerations from the application developer.
@@ -36,9 +36,20 @@ Avian uses Redis Server for fast loading component templates and component stora
     - Visual Studio, Windows SDK, .NET and Python 2.x.
 
 # Getting Started
-Host an HTML5 application using Avian
+After Avian is installed as a dependency of your project start avian via:
 
-    avian --name appname --home /path/to/your/app --port 8080 --mode production
+    node ./node_modules/.bin/avian
+
+## CLI Arguments
+- --name (name of your application, defaults to localhost)
+- --home (directory of your application, defaults to .)
+- --port (port to start express server, defaults to 8080)
+- --mode (mode to run avian in, development or production, defaults to development)
+- --redisPort (port that your Redis server is listening on, defaults to 6379)
+- --redisHost (host where your Redis server is running, defaults to 127.0.0.1)
+- --redisSessionDB (the Redis database number to store session data, defaults to 1)
+- --redisCacheDB (the Redis database number to store general cache data, defaults to 2)
+- --webpack (directory to find webpack config files to override avian default, defaults to .)
 
 ## Project Folder Structure
 ```
