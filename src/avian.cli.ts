@@ -23,6 +23,10 @@ argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
+argv.redisHost = argv.redisHost || process.env.AVIAN_APP_REDIS_HOST || "127.0.0.1"
+argv.redisPort = argv.redisPort || process.env.AVIAN_APP_REDIS_PORT || 6379
+argv.redisSessionDB = argv.redisSessionDB || process.env.AVIAN_APP_REDIS_SESSION_DB || 1
+argv.redisCacheDB = argv.redisCacheDB || process.env.AVIAN_APP_REDIS_CACHE_DB || 2
 argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home
 
 const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
@@ -339,7 +343,7 @@ else {
     avian.use(enableAuthHeadersForExpressSession)
 
     avian.use(session({
-        store: new redisStore({host: "127.0.0.1", db: 1}),
+        store: new redisStore({host: argv.redisHost, db: argv.redisSessionDB}),
         proxy: true,
         secret: sessionSecret,
         resave: false,
@@ -350,7 +354,7 @@ else {
         }
     }))
 
-    avian.use(require("express-redis")(6379, "127.0.0.1", {db: 2}, "cache"))
+    avian.use(require("express-redis")(argv.redisPort, argv.redisHost, {db: argv.redisCacheDB}, "cache"))
 
     loadUserServiesIntoAvian(avian).then(() => {
         avian.use("/static", express.static(argv.home + "/static"))
