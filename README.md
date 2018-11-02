@@ -26,14 +26,22 @@ yarn add @flypapertech/avian
 ```
 
 ## System Requirements
-Avian uses Redis Server for fast loading component templates and component storage objects. Because of this, and other lower-level goodies, the following software must be available to the installation environment.
+### NodeJS
+Avian requires NodeJS version >9.0
 
-- macOS/Linux
-    - Redis Server
-    - GCC 4.8+ / G++5 / Python 2.x
+### Redis Server
+Avian uses Redis Server for session managment and for caching component config object requests.  Avian does not support password protected Redis Servers at this time.
+
+Suggested Redis Installation Methods
+- macOS
+    - `brew install redis`
+- Linux
+    - [Debian Installation Instructions](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-18-04)
+    - You can use other flavors of Linux, we just aren't familiar with the installation of Redis on them.
 - Windows
-    - Redis Server
-    - Visual Studio, Windows SDK, .NET and Python 2.x.
+    - [Windows with WSL (10 and higher)](https://redislabs.com/blog/redis-on-windows-10/)
+    - [Windows without WSL (8.1 and lower)](https://redislabs.com/blog/redis-on-windows-8-1-and-previous-versions/)
+        - Note: it is not recommended to use Redis in production on Windows with out WSL
 
 # Getting Started
 After Avian is installed as a dependency of your project start avian via:
