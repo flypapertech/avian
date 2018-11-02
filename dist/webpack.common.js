@@ -2,21 +2,31 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const VueLoader = require("vue-loader");
 const chalk_1 = require("chalk");
+const path = require("path");
+const nodeExternals = require("webpack-node-externals");
+const yargs = require("yargs");
 const ProgressBarPlugin = require("progress-bar-webpack-plugin");
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin");
-const nodeExternals = require("webpack-node-externals");
-const argv = require("yargs").argv;
+const argv = yargs.argv;
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd();
+argv.mode = argv.mode || process.env.AVIAN_APP_MODE || "development";
+function srcPath(subdir) {
+    return path.join(argv.home, subdir);
+}
 const componentsCommonConfig = {
-    entry: WebpackWatchedGlobEntries.getEntries(`${argv.home}/components/**/*.component.*`),
+    entry: WebpackWatchedGlobEntries.getEntries([
+        `${argv.home}/components/**/*.component.*`
+    ]),
     output: {
         path: `${argv.home}/public`,
         filename: "[name].bundle.js",
+        publicPath: "/"
     },
     resolve: {
-        extensions: [".ts", ".js", ".vue", ".json"],
+        extensions: [`.${argv.mode}.ts`, ".ts", ".js", ".vue", ".json", ".pug", ".less"],
         alias: {
-            vue$: "vue/dist/vue.js"
+            vue$: "vue/dist/vue.js",
+            "components": srcPath("components")
         }
     },
     plugins: [
@@ -31,6 +41,7 @@ const componentsCommonConfig = {
         rules: [
             {
                 test: /\.jsx$/,
+                exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
                     options: {
@@ -54,19 +65,39 @@ const componentsCommonConfig = {
                 ]
             },
             {
+                test: /\.css$/,
+                use: [
+                    "css-loader"
+                ]
+            },
+            {
+                test: /\.less$/,
+                use: [
+                    "css-loader",
+                    "less-loader"
+                ]
+            },
+            {
                 test: /\.js$/,
+                exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
                     options: {
-                        presets: ["@babel/preset-env"]
+                        presets: ["@babel/preset-env"],
+                        plugins: [require("@babel/plugin-syntax-dynamic-import").default]
                     }
                 }
             },
             {
                 test: /\.tsx?$/,
+                exclude: /node_modules/,
                 loaders: [
                     {
-                        loader: "babel-loader"
+                        loader: "babel-loader",
+                        options: {
+                            presets: ["@babel/preset-env"],
+                            plugins: [require("@babel/plugin-syntax-dynamic-import").default]
+                        }
                     },
                     {
                         loader: "ts-loader",
@@ -81,14 +112,19 @@ const componentsCommonConfig = {
 };
 const servicesCommonConfig = {
     target: "node",
-    entry: WebpackWatchedGlobEntries.getEntries(`${argv.home}/components/**/*.service.*`, `${argv.home}/avian.service.*`),
+    entry: WebpackWatchedGlobEntries.getEntries([
+        `${argv.home}/components/**/*.service.*`
+    ]),
     output: {
         path: `${argv.home}/private`,
         filename: "[name].js",
         libraryTarget: "commonjs2"
     },
     resolve: {
-        extensions: [".ts", ".js", ".json"],
+        extensions: [`.${argv.mode}.ts`, ".ts", ".js", ".json"],
+        alias: {
+            "components": srcPath("components")
+        }
     },
     plugins: [
         new WebpackWatchedGlobEntries(),
