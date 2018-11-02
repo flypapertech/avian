@@ -1,25 +1,36 @@
 import * as webpack from "webpack"
 import * as VueLoader from "vue-loader"
 import chalk from "chalk"
+import * as path from "path"
+import nodeExternals = require("webpack-node-externals")
+import yargs = require("yargs")
 
 const ProgressBarPlugin = require("progress-bar-webpack-plugin")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
-const nodeExternals = require("webpack-node-externals")
-const argv = require("yargs").argv
+
+const argv = yargs.argv
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
+argv.mode = argv.mode || process.env.AVIAN_APP_MODE || "development"
+
+function srcPath(subdir: string) {
+    return path.join(argv.home, subdir)
+}
 
 const componentsCommonConfig: webpack.Configuration = {
-    entry: WebpackWatchedGlobEntries.getEntries(
+    entry: WebpackWatchedGlobEntries.getEntries([
         `${argv.home}/components/**/*.component.*`
+        ]
     ),
     output: {
         path: `${argv.home}/public`,
         filename: "[name].bundle.js",
+        publicPath: "/"
     },
     resolve: {
-        extensions: [".ts", ".js", ".vue", ".json"],
+        extensions: [`.${argv.mode}.ts`, ".ts", ".js", ".vue", ".json", ".pug", ".less"],
         alias: {
-            vue$: "vue/dist/vue.js"
+            vue$: "vue/dist/vue.js",
+            "components": srcPath("components")
         }
     },
     plugins: [
@@ -34,6 +45,7 @@ const componentsCommonConfig: webpack.Configuration = {
         rules: [
             {
                 test: /\.jsx$/,
+                exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
                     options: {
@@ -44,7 +56,7 @@ const componentsCommonConfig: webpack.Configuration = {
             {
                 test: /\.vue$/,
                 use: {
-                    loader: "vue-loader"
+                        loader: "vue-loader"
                 }
             },
             {
@@ -58,19 +70,39 @@ const componentsCommonConfig: webpack.Configuration = {
                 ]
             },
             {
+                test: /\.css$/,
+                use: [
+                    "css-loader"
+                ]
+            },
+            {
+                test: /\.less$/,
+                use: [
+                    "css-loader",
+                    "less-loader"
+                ]
+            },
+            {
                 test: /\.js$/,
+                exclude: /node_modules/,
                 use: {
                     loader: "babel-loader",
                     options: {
-                        presets: ["@babel/preset-env"]
+                        presets: ["@babel/preset-env"],
+                        plugins: [require("@babel/plugin-syntax-dynamic-import").default]
                     }
                 }
             },
             {
                 test: /\.tsx?$/,
+                exclude: /node_modules/,
                 loaders: [
                     {
-                        loader: "babel-loader"
+                        loader: "babel-loader",
+                        options: {
+                            presets: ["@babel/preset-env"],
+                            plugins: [require("@babel/plugin-syntax-dynamic-import").default]
+                        }
                     },
                     {
                         loader: "ts-loader",
@@ -86,9 +118,9 @@ const componentsCommonConfig: webpack.Configuration = {
 
 const servicesCommonConfig: webpack.Configuration = {
     target: "node",
-    entry: WebpackWatchedGlobEntries.getEntries(
-        `${argv.home}/components/**/*.service.*`,
-        `${argv.home}/avian.service.*`
+    entry: WebpackWatchedGlobEntries.getEntries([
+            `${argv.home}/components/**/*.service.*`
+        ]
     ),
     output: {
         path: `${argv.home}/private`,
@@ -96,7 +128,10 @@ const servicesCommonConfig: webpack.Configuration = {
         libraryTarget: "commonjs2"
     },
     resolve: {
-        extensions: [".ts", ".js", ".json"],
+        extensions: [`.${argv.mode}.ts`, ".ts", ".js", ".json"],
+        alias: {
+            "components": srcPath("components")
+        }
     },
     plugins: [
         new WebpackWatchedGlobEntries(),
