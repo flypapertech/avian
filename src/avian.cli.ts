@@ -24,7 +24,8 @@ argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
 argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home
-argv.sessionSecret = argv.sessionSecret || process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
+
+const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
 
 export const injectArgv: RequestHandler = (req, res, next) => {
     req.argv = Object.assign({}, argv)
@@ -327,7 +328,7 @@ else {
             let authParts = req.headers.authorization.split(" ")
             if (authParts[0].toLowerCase() === "bearer" && authParts.length > 1) {
                 // We need to sign this exactly like how express-session signs cookies
-                let signed = "s:" + signature.sign(authParts[1], argv.sessionSecret)
+                let signed = "s:" + signature.sign(authParts[1], sessionSecret)
                 req.cookies["connect.sid"] = signed
             }
         }
@@ -340,7 +341,7 @@ else {
     avian.use(session({
         store: new redisStore({host: "127.0.0.1", db: 1}),
         proxy: true,
-        secret: argv.sessionSecret,
+        secret: sessionSecret,
         resave: false,
         saveUninitialized: true,
         cookie: {
