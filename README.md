@@ -85,11 +85,8 @@ To make typescript aware of the globals Avian adds to your project simply place 
 import * as Avian from "@flypapertech/avian"
 ```
 
-# Documentation
-    docs/README.md
-
 # Examples
-    docs/examples/README.md
+Examples are located in the [examples directory](https://github.com/flypapertech/avian/tree/master/examples)
 
 # Contributors
     Dan Stephenson
