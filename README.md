@@ -74,7 +74,7 @@ After Avian is installed as a dependency of your project start avian via:
 ```
 
 ## Session Management
-Avian uses [express-session](https://github.com/expressjs/session) to manage client sessions.
+Avian uses [express-session](https://github.com/expressjs/session) to manage client sessions. All sessions are stored in a Redis database.
 
 - Browser Based Clients
     - Avian uses secure [HttpOnly Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Secure_and_HttpOnly_cookies) for managing browser based client sessions.
