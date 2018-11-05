@@ -44,6 +44,19 @@ class AvianUtils {
             return `${argv.home}/components`
     }
 
+    getComponentViewExtension(pathToViewFileWithoutExtension: string): string {
+        if (fs.existsSync(`${pathToViewFileWithoutExtension}.html`))
+            return "html"
+        if (fs.existsSync(`${pathToViewFileWithoutExtension}.pug`))
+            return "pug"
+        if (fs.existsSync(`${pathToViewFileWithoutExtension}.ejs`))
+            return "ejs"
+        if (fs.existsSync(`${pathToViewFileWithoutExtension}.hbs`))
+            return "hbs"
+
+        return ""
+    }
+
     setComponentConfigObjectCache(component: string, req: Request, subcomponent?: string): string {
         let parentComponentRoot = this.getComponentRoot(component)
         let componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`
@@ -365,6 +378,8 @@ else {
         avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))
 
         avian.set("view engine", "pug")
+        avian.set("view engine", "ejs")
+        avian.set("view engine", "handlebars")
         avian.set("views", argv.home)
 
         if (argv.mode === "production") {
@@ -404,15 +419,30 @@ else {
             }
 
             try {
-                avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
-                    res.locals.req = req
-                    res.setHeader("X-Powered-By", "Avian")
-                    res.render(`${subComponentPath}/${req.params.subcomponent}.view.pug`, config, function(err, html) {
-                        if (err) {
-                            res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.pug`, config)
-                        }
+
+                let viewExtension = ""
+
+                if (fs.existsSync(`${subComponentPath}/${req.params.subcomponent}`))
+                    viewExtension = avianUtils.getComponentViewExtension(`${subComponentPath}/${req.params.subcomponent}.view`)
+                else
+                    viewExtension = avianUtils.getComponentViewExtension(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view`)
+
+                if (viewExtension !== "html") {
+
+                    avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
+                        res.locals.req = req
+                        res.setHeader("X-Powered-By", "Avian")
+
+                        res.render(`${subComponentPath}/${req.params.subcomponent}.view.${viewExtension}`, config, (err, html) => {
+                            if (err) {
+                                res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.${viewExtension}`, config)
+                            }
+                        })
                     })
-                })
+                }
+                else {
+                    res.sendFile(`${subComponentPath}/${req.params.subcomponent}.view.html`)
+                }
             }
             catch (err) {
                 console.error(err)
@@ -422,12 +452,22 @@ else {
 
         avian.get("/:component", express.urlencoded({ extended: true }), (req, res, next) => {
             let componentRoot = avianUtils.getComponentRoot(req.params.component)
+
             try {
-                avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
-                    res.locals.req = req
-                    res.setHeader("X-Powered-By", "Avian")
-                    res.render(`${componentRoot}/${req.params.component}.view.pug`, config)
-                })
+
+                let viewExtension = avianUtils.getComponentViewExtension(`${componentRoot}/${req.params.component}.view`)
+
+                if (viewExtension !== "html") {
+
+                    avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
+                        res.locals.req = req
+                        res.setHeader("X-Powered-By", "Avian")
+                        res.render(`${componentRoot}/${req.params.component}.view.${viewExtension}`, config)
+                    })
+                }
+                else {
+                    res.sendFile(`${componentRoot}/${req.params.component}.view.html`)
+                }
             }
             catch (err) {
                 console.error(err)
@@ -456,7 +496,7 @@ else {
                 })
             }
             catch (err) {
-                res.setHeader("X-Powered-y", "Avian")
+                res.setHeader("X-Powered-By", "Avian")
                 res.sendStatus(404)
             }
         })
