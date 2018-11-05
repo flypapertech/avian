@@ -26,24 +26,30 @@ yarn add @flypapertech/avian
 ```
 
 ## System Requirements
+
 ### NodeJS
+
 Avian requires NodeJS version >9.0
 
 ### Redis Server
+
 Avian uses Redis Server for storing session data, caching component config object requests and arbitrary caching requirements you may have.  Avian does not support password protected Redis Servers at this time.
 
 Suggested Redis Installation Methods
+
 - macOS
-    - `brew install redis`
+  - `brew install redis`
+
 - Linux
-    - [Debian Installation Instructions](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-18-04)
-    - You can use other flavors of Linux, we just aren't familiar with the installation of Redis on them.
+  - [Debian Installation Instructions](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-18-04)
+  - You can use other flavors of Linux, we just aren't familiar with the installation of Redis on them.
 - Windows
-    - [Windows with WSL (10 and higher)](https://redislabs.com/blog/redis-on-windows-10/)
-    - [Windows without WSL (8.1 and lower)](https://redislabs.com/blog/redis-on-windows-8-1-and-previous-versions/)
-        - Note: it is not recommended to use Redis in production on Windows with out WSL.
+  - [Windows with WSL (10 and higher)](https://redislabs.com/blog/redis-on-windows-10/)
+  - [Windows without WSL (8.1 and lower)](https://redislabs.com/blog/redis-on-windows-8-1-and-previous-versions/)
+    - Note: it is not recommended to use Redis in production on Windows with out WSL.
 
 # Getting Started
+
 After Avian is installed as a dependency of your application start Avian via:
 
     node ./node_modules/.bin/avian
@@ -61,6 +67,7 @@ After Avian is installed as a dependency of your application start Avian via:
 - --webpack (directory to find webpack config files to override avian default, defaults to)
 
 ## Application Folder Structure
+
 ```
 ├── assets (optional, statically served at /assets)
 ├── static (optional, statically served at /static)
@@ -83,13 +90,15 @@ After Avian is installed as a dependency of your application start Avian via:
 ```
 
 ## Understanding Session Management
+
 Avian uses [express-session](https://github.com/expressjs/session) to manage client sessions. All sessions are stored in a Redis database.
 
 - Browser Based Clients
-    - Avian uses secure [HttpOnly Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Secure_and_HttpOnly_cookies) for managing browser based client sessions.
+  - Avian uses secure [HttpOnly Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Secure_and_HttpOnly_cookies) for managing browser based client sessions.
 
 - Mobile Device and API Clients
-    - Avian augments express-session to allow API and mobile device sessions management.  Since those clients may not use coookies they simply need to send their session ID in the authorization header of all requests made to Avian. See below for an example header.
+
+  - Avian augments express-session to allow API and mobile device sessions management.  Since those clients may not use coookies they simply need to send their session ID in the authorization header of all requests made to Avian. See below for an example header.
 
 ```json
 headers: {
@@ -98,10 +107,16 @@ headers: {
 ```
 
 ## Global Variables Added by Avian
+
 ### Properties Added to All Request Objects
+
 `req.argv` contains a copy of all arguments passed to avian at start
 
 `req.cache` is a RedisClient instance hooked to avian's config object cache. Feel free to use it for your own needs as well.
+
+`req.params` paramaters passed to your component. Typically this is used to determine the component name being rendered, e.g. req.params.component.
+
+`req.query` contains all query paramters passed to the componenent being requested.
 
 ### Using TypeScript?
 To make TypeScript aware of the globals Avian adds to your application simply place the below import into any .d.ts file that is within your application.
