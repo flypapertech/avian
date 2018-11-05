@@ -10,7 +10,7 @@ Create Enterprise-class component driven applications that scale.
 
 ## Key Features
 
-- Enterprise-class application server built on [Express](https://github.com/expressjs/express) that meets infinitely scalable demands.
+- Enterprise-class application server built on [Express](https://github.com/expressjs/express) and [Redis](https://redislabs.com/) that meets infinitely scalable demands.
 - A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
 - Multi-core / Multi-threaded application host operations remove the burden of such considerations from the application developer.
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
