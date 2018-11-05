@@ -30,7 +30,7 @@ yarn add @flypapertech/avian
 Avian requires NodeJS version >9.0
 
 ### Redis Server
-Avian uses Redis Server for session managment and for caching component config object requests.  Avian does not support password protected Redis Servers at this time.
+Avian uses Redis Server for storing session data, caching component config object requests and arbitrary caching requirements you may have.  Avian does not support password protected Redis Servers at this time.
 
 Suggested Redis Installation Methods
 - macOS
@@ -41,7 +41,7 @@ Suggested Redis Installation Methods
 - Windows
     - [Windows with WSL (10 and higher)](https://redislabs.com/blog/redis-on-windows-10/)
     - [Windows without WSL (8.1 and lower)](https://redislabs.com/blog/redis-on-windows-8-1-and-previous-versions/)
-        - Note: it is not recommended to use Redis in production on Windows with out WSL
+        - Note: it is not recommended to use Redis in production on Windows with out WSL.
 
 # Getting Started
 After Avian is installed as a dependency of your project start avian via:
@@ -50,16 +50,16 @@ After Avian is installed as a dependency of your project start avian via:
 
 ## CLI Arguments
 - --name (name of your application, defaults to localhost)
-- --home (directory of your application, defaults to .)
+- --home (directory of your application, defaults to current working directory)
 - --port (port to start express server, defaults to 8080)
 - --mode (mode to run avian in, development or production, defaults to development)
 - --redisPort (port that your Redis server is listening on, defaults to 6379)
 - --redisHost (host where your Redis server is running, defaults to 127.0.0.1)
 - --redisSessionDB (the Redis database number to store session data, defaults to 1)
 - --redisCacheDB (the Redis database number to store general cache data, defaults to 2)
-- --webpack (directory to find webpack config files to override avian default, defaults to .)
+- --webpack (directory to find webpack config files to override avian default, defaults to)
 
-## Project Folder Structure
+## Application Structure
 ```
 ├── assets (optional, statically served at /assets)
 ├── static (optional, statically served at /static)
@@ -81,7 +81,7 @@ After Avian is installed as a dependency of your project start avian via:
 ├── public (auto-generated, for compiled component bundles, statically served at /)
 ```
 
-## Session Management
+## Understanding Session Management
 Avian uses [express-session](https://github.com/expressjs/session) to manage client sessions. All sessions are stored in a Redis database.
 
 - Browser Based Clients
@@ -96,25 +96,25 @@ headers: {
 }
 ```
 
-## Express Globals Added by Avian
+## Global Variables Added by Avian
 ### Properties Added to All Request Objects
 `req.argv` contains a copy of all arguments passed to avian at start
 
 `req.cache` is a RedisClient instance hooked to avian's config object cache. Feel free to use it for your own needs as well.
 
-### Using Typescript?
-To make typescript aware of the globals Avian adds to your project simply place the below import into any .d.ts file that is within your project
+### Using TypeScript?
+To make TypeScript aware of the globals Avian adds to your project simply place the below import into any .d.ts file that is within your project.
 ```typescript
 import * as Avian from "@flypapertech/avian"
 ```
 
 # Examples
-Examples are located in the [examples directory](https://github.com/flypapertech/avian/tree/master/examples)
+Examples are located in the [examples directory](https://github.com/flypapertech/avian/tree/master/examples).
 
 # Contributors
     Dan Stephenson
     Nick Fredricks
 
 # Copyright
-2017 - 2018 FlyPaper Technologies, LLC
-2014 - 2018 Thoughtpivot, LLC
+    2017 - 2018 FlyPaper Technologies, LLC
+    2014 - 2017 Thoughtpivot, LLC
