@@ -29,6 +29,8 @@ aliases:
       paths:
         - node_modules
       key: v1-dependencies-{{ checksum "package.json" }}
+  - &step-build
+    run: yarn build
   
 build-node-common: &common-build
   working_directory: ~/repo
@@ -37,6 +39,7 @@ build-node-common: &common-build
     - *step-restore-cache
     - *step-install
     - *step-save-cache
+    - *step-build
     - run:
         name: Testing
         command: yarn test
@@ -52,7 +55,7 @@ jobs:
       - *step-restore-cache
       - *step-install
       - *step-save-cache
-      - run: yarn build
+      - *step-build
       - run:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
