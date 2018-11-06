@@ -11,14 +11,14 @@ Create Enterprise-class component driven applications that scale.
 ## Key Features
 
 - Enterprise-class application server built on [Express](https://github.com/expressjs/express) and [Redis](https://redislabs.com/) that meets infinitely scalable demands.
-- A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
 - Multi-core / Multi-threaded application host operations remove the burden of such considerations from the application developer.
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
-- Supports multiple view engines such as Pug/Jade, Handlebars, EJS and even plain HTML.
+- A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
+- Supports multiple view engines such as Pug/Jade, Handlebars, EJS and HTML5.
 
 ## Installation
 
-The latest stable release of Avian is available via the Node Package Manager.
+The latest stable release of Avian is available on [npmjs.org](https://www.npmjs.com/package/@flypapertech/avian).
 
     npm install @flypapertech/avian
 
@@ -42,11 +42,11 @@ Suggested Redis Installation Methods
   - `brew install redis`
 - Linux
   - [Debian Installation Instructions](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-18-04)
-  - You can use other flavors of Linux, we just aren't familiar with the installation of Redis on them.
+    - Note: You can use other flavors of Linux. We just aren't familiar with the installation of Redis on them.
 - Windows
   - [Windows with WSL (10 and higher)](https://redislabs.com/blog/redis-on-windows-10/)
   - [Windows without WSL (8.1 and lower)](https://redislabs.com/blog/redis-on-windows-8-1-and-previous-versions/)
-    - Note: it is not recommended to use Redis in production on Windows with out WSL.
+    - Note: It is not recommended to use Redis in production on Windows with out WSL.
 
 ## Getting Started
 
@@ -135,6 +135,10 @@ Examples are located in the [examples directory](https://github.com/flypapertech
 ## License
 
     MIT
+
+## Contact
+
+[The Avian Team](mailto:info@flypaper.com)
 
 ## Copyright
 
