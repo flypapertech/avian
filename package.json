@@ -16,8 +16,7 @@
     "avian": "./dist/avian.cli.js"
   },
   "scripts": {
-    "build": "npm run build_cli && npm run test && npm run snyk-protect",
-    "build_cli": "node_modules/.bin/tsc --project ./;",
+    "build": "node_modules/.bin/tsc --project ./;",
     "test": "node_modules/.bin/jasmine-ts",
     "start": "node_modules/.bin/ts-node dist/avian.cli.ts",
     "snyk-protect": "node_modules/.bin/snyk protect",
