@@ -2,7 +2,7 @@
 
 Create Enterprise-class component driven applications that scale.
 
-[![Build Status](https://travis-ci.org/flypapertech/avian.svg?branch=master)](https://travis-ci.org/flypapertech/avian)
+[![CircleCI](https://circleci.com/gh/flypapertech/avian/tree/master.svg?style=svg)](https://circleci.com/gh/flypapertech/avian/tree/master)
 [![Known Vulnerabilities](https://snyk.io/test/github/flypapertech/avian/badge.svg)](https://snyk.io/test/github/flypapertech/avian)
 [![npm (scoped)](https://img.shields.io/npm/v/@flypapertech/avian.svg)](https://www.npmjs.com/package/@flypapertech/avian)
 [![NpmLicense](https://img.shields.io/npm/l/@flypapertech/avian.svg)](https://github.com/flypapertech/avian/blob/master/LICENSE)
