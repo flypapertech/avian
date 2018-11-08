@@ -14,11 +14,11 @@ Create Enterprise-class component driven applications that scale.
 - Multi-core / Multi-threaded application host operations remove the burden of such considerations from the application developer.
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
 - A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
-- Supports multiple view engines such as Pug/Jade, Handlebars, EJS and HTML5.
+- Supports popular view templating engines such as Pug, EJS and plain HTML.
 
 ## Installation
 
-The latest stable release of Avian is available on [npmjs.org](https://www.npmjs.com/package/@flypapertech/avian).
+The latest stable release of Avian is available on [npmjs.com](https://www.npmjs.com/package/@flypapertech/avian).
 
     npm install @flypapertech/avian
 
