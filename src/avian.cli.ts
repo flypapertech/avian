@@ -45,15 +45,12 @@ class AvianUtils {
     }
 
     getComponentViewExtension(pathToViewFileWithoutExtension: string): string {
+        if (fs.existsSync(`${pathToViewFileWithoutExtension}.ejs`))
+            return "ejs"
         if (fs.existsSync(`${pathToViewFileWithoutExtension}.html`))
             return "html"
         if (fs.existsSync(`${pathToViewFileWithoutExtension}.pug`))
             return "pug"
-        if (fs.existsSync(`${pathToViewFileWithoutExtension}.ejs`))
-            return "ejs"
-        if (fs.existsSync(`${pathToViewFileWithoutExtension}.hbs`))
-            return "hbs"
-
         return ""
     }
 
@@ -379,7 +376,6 @@ else {
 
         avian.set("view engine", "pug")
         avian.set("view engine", "ejs")
-        avian.set("view engine", "handlebars")
         avian.set("views", argv.home)
 
         if (argv.mode === "production") {
@@ -416,32 +412,34 @@ else {
             if (!fs.existsSync(`${subComponentPath}`)) {
                 next()
                 return
+                // TODO: Support non-scaffolded sub components, e.g. index.subname.view.ext
             }
 
             try {
 
-                let viewExtension = ""
+                let viewExtension: string = ""
+                res.setHeader("X-Powered-By", "Avian")
 
-                if (fs.existsSync(`${subComponentPath}/${req.params.subcomponent}`))
-                    viewExtension = avianUtils.getComponentViewExtension(`${subComponentPath}/${req.params.subcomponent}.view`)
-                else
+                // TODO: Make this entire fall through process more clever...
+                viewExtension = avianUtils.getComponentViewExtension(`${subComponentPath}/${req.params.subcomponent}.view`)
+                if (viewExtension = "")
                     viewExtension = avianUtils.getComponentViewExtension(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view`)
 
-                if (viewExtension !== "html") {
-
-                    avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
-                        res.locals.req = req
-                        res.setHeader("X-Powered-By", "Avian")
-
-                        res.render(`${subComponentPath}/${req.params.subcomponent}.view.${viewExtension}`, config, (err, html) => {
-                            if (err) {
-                                res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.${viewExtension}`, config)
-                            }
+                switch (viewExtension) {
+                    case "pug":
+                    case "ejs":
+                        avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
+                            res.locals.req = req
+                            res.render(`${subComponentPath}/${req.params.subcomponent}.view.${viewExtension}`, config, (err, html) => {
+                                if (err) {
+                                    res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.${viewExtension}`, config)
+                                }
+                            })
                         })
-                    })
-                }
-                else {
-                    res.sendFile(`${subComponentPath}/${req.params.subcomponent}.view.html`)
+                        break
+                    case "html":
+                        res.sendFile(`${componentRoot}/${req.params.component}.view.html`)
+                        break
                 }
             }
             catch (err) {
@@ -455,18 +453,20 @@ else {
 
             try {
 
-                let viewExtension = avianUtils.getComponentViewExtension(`${componentRoot}/${req.params.component}.view`)
+                let viewExtension: string = avianUtils.getComponentViewExtension(`${componentRoot}/${req.params.component}.view`)
+                res.setHeader("X-Powered-By", "Avian")
 
-                if (viewExtension !== "html") {
-
-                    avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
-                        res.locals.req = req
-                        res.setHeader("X-Powered-By", "Avian")
-                        res.render(`${componentRoot}/${req.params.component}.view.${viewExtension}`, config)
-                    })
-                }
-                else {
-                    res.sendFile(`${componentRoot}/${req.params.component}.view.html`)
+                switch (viewExtension) {
+                    case "pug":
+                    case "ejs":
+                        avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
+                            res.locals.req = req
+                            res.render(`${componentRoot}/${req.params.component}.view.${viewExtension}`, config)
+                        })
+                        break
+                    case "html":
+                        res.sendFile(`${componentRoot}/${req.params.component}.view.html`)
+                        break
                 }
             }
             catch (err) {
