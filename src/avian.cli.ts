@@ -61,7 +61,7 @@ const argv = yargs.env("AVIAN_APP")
 
 const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
 
-export const injectArgv: RequestHandler = (req, res, next) => {
+const injectArgv: RequestHandler = (req, res, next) => {
     req.argv = Object.assign({}, argv)
     next()
 }
