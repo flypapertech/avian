@@ -74,14 +74,14 @@ class AvianUtils {
             return `${argv.home}/components`
     }
 
-    getComponentViewExtension(pathToViewFileWithoutExtension: string): string {
-        if (fs.existsSync(`${pathToViewFileWithoutExtension}.ejs`))
-            return "ejs"
-        if (fs.existsSync(`${pathToViewFileWithoutExtension}.html`))
-            return "html"
-        if (fs.existsSync(`${pathToViewFileWithoutExtension}.pug`))
-            return "pug"
-        return ""
+    getComponentViewPath(pathToViewFileWithoutExtension: string): string {
+        try {
+            let matches = glob.sync(`${pathToViewFileWithoutExtension}.*`)
+            return matches.length === 0 ? "" : matches[0]
+        }
+        catch (err) {
+            return ""
+        }
     }
 
     setComponentConfigObjectCache(component: string, req: Request, subcomponent?: string): string {
@@ -361,6 +361,7 @@ if (cluster.isMaster) {
 }
 else {
     const avian = express()
+    avian.engine("html", require("ejs").renderFile)
     avian.use(injectArgv)
     let cookieParser = require("cookie-parser")
     avian.use(cookieParser())
@@ -446,31 +447,20 @@ else {
             }
 
             try {
-
-                let viewExtension: string = ""
                 res.setHeader("X-Powered-By", "Avian")
-
-                // TODO: Make this entire fall through process more clever...
-                viewExtension = avianUtils.getComponentViewExtension(`${subComponentPath}/${req.params.subcomponent}.view`)
-                if (viewExtension = "")
-                    viewExtension = avianUtils.getComponentViewExtension(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view`)
-
-                switch (viewExtension) {
-                    case "pug":
-                    case "ejs":
-                        avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
-                            res.locals.req = req
-                            res.render(`${subComponentPath}/${req.params.subcomponent}.view.${viewExtension}`, config, (err, html) => {
-                                if (err) {
-                                    res.render(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view.${viewExtension}`, config)
-                                }
-                            })
-                        })
-                        break
-                    case "html":
-                        res.sendFile(`${componentRoot}/${req.params.component}.view.html`)
-                        break
+                let viewPath = avianUtils.getComponentViewPath(`${subComponentPath}/${req.params.subcomponent}.view`)
+                if (viewPath = "") {
+                    viewPath = avianUtils.getComponentViewPath(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view`)
                 }
+
+                if (viewPath === "") {
+                    res.sendStatus(404)
+                    return
+                }
+
+                avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
+                    res.render(viewPath, config)
+                })
             }
             catch (err) {
                 console.error(err)
@@ -482,22 +472,18 @@ else {
             let componentRoot = avianUtils.getComponentRoot(req.params.component)
 
             try {
-
-                let viewExtension: string = avianUtils.getComponentViewExtension(`${componentRoot}/${req.params.component}.view`)
                 res.setHeader("X-Powered-By", "Avian")
 
-                switch (viewExtension) {
-                    case "pug":
-                    case "ejs":
-                        avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
-                            res.locals.req = req
-                            res.render(`${componentRoot}/${req.params.component}.view.${viewExtension}`, config)
-                        })
-                        break
-                    case "html":
-                        res.sendFile(`${componentRoot}/${req.params.component}.view.html`)
-                        break
+                let viewPath = avianUtils.getComponentViewPath(`${componentRoot}/${req.params.component}.view`)
+                if (viewPath === "") {
+                    res.sendStatus(404)
+                    return
                 }
+
+                avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
+                    console.log(config)
+                    res.render(viewPath, config)
+                })
             }
             catch (err) {
                 console.error(err)
