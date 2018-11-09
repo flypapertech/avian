@@ -18,16 +18,46 @@ import mkdirp = require("mkdirp")
 import jsonfile = require("jsonfile")
 import yargs = require("yargs")
 
-const argv = yargs.argv
-argv.name = argv.name || process.env.AVIAN_APP_NAME || process.env.HOSTNAME || "localhost"
-argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
-argv.port = argv.port || process.env.AVIAN_APP_PORT || process.env.PORT || 8080
-argv.mode = argv.mode || process.env.AVIAN_APP_MODE || process.env.NODE_MODE || "development"
-argv.redisHost = argv.redisHost || process.env.AVIAN_APP_REDIS_HOST || "127.0.0.1"
-argv.redisPort = argv.redisPort || process.env.AVIAN_APP_REDIS_PORT || 6379
-argv.redisSessionDB = argv.redisSessionDB || process.env.AVIAN_APP_REDIS_SESSION_DB || 1
-argv.redisCacheDB = argv.redisCacheDB || process.env.AVIAN_APP_REDIS_CACHE_DB || 2
-argv.webpack = argv.webpack || process.env.AVIAN_APP_WEBPACK || argv.home
+const argv = yargs.env("AVIAN_APP")
+    .option("n", {
+        alias: "name",
+        default: process.env.HOSTNAME || "localhost",
+        describe: "name of your application"
+    })
+    .option("m", {
+        alias: "mode",
+        default: process.env.NODE_ENV || "development",
+        describe: "mode to run Avian in",
+        choices: [
+            "development",
+            "production"
+        ]
+    })
+    .option("h", {
+        alias: "home",
+        default: process.cwd(),
+        defaultDescription: "current working directory",
+        describe: "directory of your application"
+    })
+    .option("p", {
+        alias: "port",
+        default: 8080
+    })
+    .option("redisHost", {
+        default: "127.0.0.1"
+    })
+    .option("redisPort", {
+        default: 6379
+    })
+    .option("redisSessionDB", {
+        default: 1
+    })
+    .option("redisCacheDB", {
+        default: 2
+    })
+    .option("webpackHome", {
+        default: process.cwd()
+    }).argv
 
 const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
 
@@ -35,7 +65,7 @@ export const injectArgv: RequestHandler = (req, res, next) => {
     req.argv = Object.assign({}, argv)
     next()
 }
-// import after argv so they can us it
+
 class AvianUtils {
     getComponentRoot(component: string): string {
         if (fs.existsSync(`${argv.home}/components/${component}`))

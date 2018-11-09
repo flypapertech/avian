@@ -64,7 +64,7 @@ After Avian is installed as a dependency of your application start Avian via:
 - --redisHost (host where your Redis server is running, defaults to 127.0.0.1)
 - --redisSessionDB (the Redis database number to store session data, defaults to 1)
 - --redisCacheDB (the Redis database number to store general cache data, defaults to 2)
-- --webpack (directory to find webpack config files to override Avian default, defaults to home)
+- --webpackHome (directory to find webpack config files to override Avian default, defaults to home)
 
 ### Application Folder Structure
 
