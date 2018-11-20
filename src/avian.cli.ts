@@ -452,7 +452,7 @@ else {
             try {
                 res.setHeader("X-Powered-By", "Avian")
                 let viewPath = avianUtils.getComponentViewPath(`${subComponentPath}/${req.params.subcomponent}.view`)
-                if (viewPath = "") {
+                if (viewPath === "") {
                     viewPath = avianUtils.getComponentViewPath(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view`)
                 }
 
@@ -462,6 +462,7 @@ else {
                 }
 
                 avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
+                    res.locals.req = req
                     res.render(viewPath, config)
                 })
             }
@@ -484,7 +485,7 @@ else {
                 }
 
                 avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
-                    console.log(config)
+                    res.locals.req = req
                     res.render(viewPath, config)
                 })
             }
