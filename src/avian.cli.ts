@@ -56,9 +56,12 @@ const argv = yargs.env("AVIAN_APP")
         default: 2
     })
     .option("webpackHome", {
-        default: process.cwd()
+        default: ""
     }).argv
 
+if (argv.webpackHome === "") {
+    argv.webpackHome = argv.home
+}
 const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
 
 const injectArgv: RequestHandler = (req, res, next) => {
@@ -315,8 +318,8 @@ if (cluster.isMaster) {
     rimraf.sync(`${argv.home}/private/*`)
     rimraf.sync(`${argv.home}/public/*`)
 
-    let webpackConfigs = glob.sync(`${argv.webpack}/webpack.development.*`)
-    webpackConfigs.push(...glob.sync(`${argv.webpack}/webpack.production.*`))
+    let webpackConfigs = glob.sync(`${argv.webpackHome}/webpack.development.*`)
+    webpackConfigs.push(...glob.sync(`${argv.webpackHome}/webpack.production.*`))
     let program = ts.createProgram(webpackConfigs, {
         noEmitOnError: true,
         noImplicityAny: true,
