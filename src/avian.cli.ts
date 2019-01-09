@@ -409,6 +409,25 @@ else {
     }))
 
     avian.use(require("express-redis")(argv.redisPort, argv.redisHost, {db: argv.redisCacheDB}, "cache"))
+    const server = avian.listen(argv.port, () => {
+        console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s",
+            process.pid,
+            argv.name,
+            argv.home,
+            argv.port,
+            argv.mode
+        )
+    })
+
+    let io = socket(server)
+    avian.use(injectIO(io))
+    io.on("connection", (socket) => {
+        console.log("user connected")
+        socket.emit("connected", { hello: "hello client"})
+        socket.on("disconnect", () => {
+            console.log("user disconnected")
+        })
+    })
 
     loadUserServiesIntoAvian(avian).then(() => {
         avian.use("/static", express.static(argv.home + "/static"))
@@ -536,24 +555,5 @@ else {
             res.redirect("/index")
         })
 
-        const server = avian.listen(argv.port, () => {
-            console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s",
-                process.pid,
-                argv.name,
-                argv.home,
-                argv.port,
-                argv.mode
-            )
-        })
-
-        let io = socket(server)
-        avian.use(injectIO(io))
-        io.on("connection", (socket) => {
-            console.log("user connected")
-            socket.emit("connected", { hello: "hello client"})
-            socket.on("disconnect", () => {
-                console.log("user disconnected")
-            })
-        })
     })
 }
