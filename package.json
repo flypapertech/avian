@@ -1,6 +1,6 @@
 {
   "name": "@flypapertech/avian",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Create Enterprise-class component driven applications that scale.",
   "publishConfig": {
     "access": "public"
@@ -59,8 +59,8 @@
     "rimraf": "^2.6.2",
     "socket.io": "^2.2.0",
     "ts-loader": "^5.3.0",
-    "vue-loader": "^15.4.2",
-    "vue-template-compiler": "^2.5.16",
+    "vue-loader": "^15.5.1",
+    "vue-template-compiler": "^2.5.21",
     "webpack": "^4.23.1",
     "webpack-merge": "^4.1.4",
     "webpack-node-externals": "^1.7.2",
