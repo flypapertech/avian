@@ -7,6 +7,7 @@ import * as glob from "glob"
 import * as os from "os"
 import * as fs from "fs"
 import * as path from "path"
+import * as socket from "socket.io"
 import * as webpack from "webpack"
 import * as rimraf from "rimraf"
 import * as defaultWebpackDev from "./webpack.development"
@@ -67,6 +68,15 @@ const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash(
 const injectArgv: RequestHandler = (req, res, next) => {
     req.argv = Object.assign({}, argv)
     next()
+}
+
+function injectIO(io: SocketIO.Server) {
+    const handler: RequestHandler = (req, res, next) => {
+        req.io = io
+        next()
+    }
+
+    return handler
 }
 
 class AvianUtils {
@@ -534,6 +544,16 @@ else {
                 argv.port,
                 argv.mode
             )
+        })
+
+        let io = socket(server)
+        avian.use(injectIO(io))
+        io.on("connection", (socket) => {
+            console.log("user connected")
+            socket.emit("connected", { hello: "hello client"})
+            socket.on("disconnect", () => {
+                console.log("user disconnected")
+            })
         })
     })
 }
