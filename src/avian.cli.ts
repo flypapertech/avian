@@ -459,6 +459,11 @@ else {
         })
 
         res.write("retry: 10000\n\n")
+
+        // heartbeat
+        setInterval(() => {
+            res.write(": \n\n")
+        }, 5000)
     })
 
     loadUserServiesIntoAvian(avian).then(() => {
