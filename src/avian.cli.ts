@@ -3,11 +3,11 @@ import * as crypto from "crypto"
 import * as cluster from "cluster"
 import * as express from "express"
 import * as session from "express-session"
+import * as redis from "redis"
 import * as glob from "glob"
 import * as os from "os"
 import * as fs from "fs"
 import * as path from "path"
-import * as socket from "socket.io"
 import * as webpack from "webpack"
 import * as rimraf from "rimraf"
 import * as defaultWebpackDev from "./webpack.development"
@@ -70,14 +70,6 @@ const injectArgv: RequestHandler = (req, res, next) => {
     next()
 }
 
-function injectIO(io: SocketIO.Server) {
-    const handler: RequestHandler = (req, res, next) => {
-        req.io = io
-        next()
-    }
-
-    return handler
-}
 
 class AvianUtils {
     getComponentRoot(component: string): string {
@@ -274,6 +266,39 @@ function startProdWebpackCompiler(webpackProd: any) {
 
 }
 
+class ServerEvent {
+    private data: string = ""
+    constructor() {
+    }
+
+    addData(data: string) {
+        let lines = data.split(/\n/)
+
+        for (let i = 0; i < lines.length; i++) {
+            let element = lines[i]
+            this.data += "data:" + element + "\n"
+        }
+    }
+    payload() {
+        return this.data + "\n"
+    }
+}
+
+function subscribe(callback: any) {
+    const subscriber = redis.createClient()
+    subscriber.subscribe("sse")
+    subscriber.on("error", (error) => {
+        console.log("Redis error: " + error)
+    })
+
+    subscriber.on("message", callback)
+}
+
+function publish(message: string) {
+    const publisher = redis.createClient()
+    publisher.publish("sse", message)
+}
+
 async function loadUserServiesIntoAvian(avian: express.Express) {
     let compiledServices = glob.sync(`${argv.home}/private/**/*.service.js`)
     for (let i = 0; i < compiledServices.length; i++) {
@@ -419,14 +444,20 @@ else {
         )
     })
 
-    let io = socket(server)
-    avian.use(injectIO(io))
-    io.on("connection", (socket) => {
-        console.log("user connected")
-        socket.emit("connected", { hello: "hello client"})
-        socket.on("disconnect", () => {
-            console.log("user disconnected")
+    avian.get("/sse", (req, res) => {
+        subscribe((channel: any, message: any) => {
+            let messageEvent = new ServerEvent()
+            messageEvent.addData(message)
+            res.write(messageEvent.payload())
         })
+
+        res.writeHead(200, {
+            "Content-Type": "text/event-stream",
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive"
+        })
+
+        res.write("retry: 10000\n\n")
     })
 
     loadUserServiesIntoAvian(avian).then(() => {
