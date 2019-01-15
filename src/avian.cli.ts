@@ -181,6 +181,7 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
         runningBuilds.components = false
     }
     if (runningBuilds.components === false && runningBuilds.services === false) {
+        console.log("Avian - Compilation Complete")
         if (pendingChunks.find(chunk => chunk.indexOf("service") !== -1)) {
             console.log("Avian - Restarting server")
             avianUtils.killAllWorkers()
