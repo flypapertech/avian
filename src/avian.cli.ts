@@ -171,7 +171,9 @@ avianEmitter.on("buildStarted", (name: string) => {
     }
 })
 
-avianEmitter.on("buildCompleted", (name) => {
+let pendingChunks: string[] = []
+avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
+    pendingChunks.push(...changedChunks)
     if (name === "services") {
         runningBuilds.services = false
     }
@@ -179,12 +181,16 @@ avianEmitter.on("buildCompleted", (name) => {
         runningBuilds.components = false
     }
     if (runningBuilds.components === false && runningBuilds.services === false) {
-        console.log("Avian - Restarting server")
-        avianUtils.killAllWorkers()
-        let cores = os.cpus()
-        for (let i = 0; i < cores.length; i++) {
-            cluster.fork()
+        if (pendingChunks.find(chunk => chunk.indexOf("service") !== -1)) {
+            console.log("Avian - Restarting server")
+            avianUtils.killAllWorkers()
+            let cores = os.cpus()
+            for (let i = 0; i < cores.length; i++) {
+                cluster.fork()
+            }
         }
+
+        pendingChunks = []
     }
 })
 
@@ -220,6 +226,7 @@ function startDevWebpackWatcher(webpackDev: any) {
 }
 
 function watcherCallback(name: string) {
+    let chunkVersions = {} as any
     const watcherCallback: webpack.ICompiler.Handler = (err, stats) => {
         if (err || stats.hasErrors()) {
             if (err) {
@@ -243,7 +250,13 @@ function watcherCallback(name: string) {
             })
         }
 
-        avianEmitter.emit("buildCompleted", name)
+        let changedChunks = stats.compilation.chunks.filter(chunk => {
+            let oldVersion = chunkVersions[chunk.name]
+            chunkVersions[chunk.name] = chunk.hash
+            return chunk.hash !== oldVersion
+          }).map(chunk => chunk.name)
+
+        avianEmitter.emit("buildCompleted", name, changedChunks)
         return
     }
 
