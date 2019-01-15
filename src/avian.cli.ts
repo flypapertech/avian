@@ -149,6 +149,10 @@ class AvianUtils {
         return existingWorkers
     }
 
+    isAvianRunning(): boolean {
+        return Object.keys(cluster.workers).length > 0
+    }
+
     setWorkersToAutoRestart() {
         cluster.on("exit", worker => {
             cluster.fork()
@@ -182,7 +186,7 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
     }
     if (runningBuilds.components === false && runningBuilds.services === false) {
         console.log("Avian - Compilation Complete")
-        if (pendingChunks.find(chunk => chunk.indexOf("service") !== -1)) {
+        if (!avianUtils.isAvianRunning() || pendingChunks.find(chunk => chunk.indexOf("service") !== -1)) {
             console.log("Avian - Restarting server")
             avianUtils.killAllWorkers()
             let cores = os.cpus()
