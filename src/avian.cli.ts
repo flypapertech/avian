@@ -210,13 +210,13 @@ function startDevWebpackWatcher(webpackDev: any) {
         aggregateTimeout: 300,
         poll: 1000,
         ignored: ["components/**/*.service.*", "node_modules", "serverless"]
-    }, watcherCallback("services"))
+    }, watcherCallback("components"))
 
     servicesCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
         ignored: ["components/**/*.component.*", "node_modules", "serverless"]
-    }, watcherCallback("components"))
+    }, watcherCallback("services"))
 }
 
 function watcherCallback(name: string) {
