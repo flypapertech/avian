@@ -368,15 +368,24 @@ async function loadUserServiesIntoAvian(avian: express.Express) {
         let routeBase = "/" + routeArray.join("/")
         try {
             let service = await import (`${compiledServices[i]}`)
-            let compiledService: express.Router
+            let compiledService: any
             if (service.default) {
                 compiledService = service.default
             }
             else {
                 compiledService = service
             }
-
-            avian.use(routeBase, compiledService)
+            if (Object.getPrototypeOf(compiledService) === express.Router) {
+                avian.use(routeBase, compiledService)
+            }
+            else if (typeof compiledService === "function") {
+                try {
+                    avian.use(routeBase, compiledService(avian))
+                }
+                catch (error) {
+                    console.log("Skipping service file " + compiledServices[i] + " it's default export isn't an express.Router")
+                }
+            }
         }
         catch (err) {
             console.error(err)
