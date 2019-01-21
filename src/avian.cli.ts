@@ -14,6 +14,7 @@ import * as defaultWebpackDev from "./webpack.development"
 import * as defaultWebpackProd from "./webpack.production"
 import * as ts from "typescript"
 import * as signature from "cookie-signature"
+import * as history from "connect-history-api-fallback"
 import { RequestHandler, Request } from "express"
 import mkdirp = require("mkdirp")
 import jsonfile = require("jsonfile")
@@ -33,6 +34,9 @@ const argv = yargs.env("AVIAN_APP")
             "development",
             "production"
         ]
+    })
+    .option("spa", {
+        default: false
     })
     .option("h", {
         alias: "home",
@@ -518,6 +522,11 @@ else {
         avian.use("/node_modules", express.static(argv.home + "/node_modules"))
         avian.use("/bower_components", express.static(argv.home + "/bower_components"))
         avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))
+        if (argv.spa) {
+            avian.use(history({
+                index: "/index"
+            }))
+        }
 
         avian.set("view engine", "pug")
         avian.set("view engine", "ejs")
