@@ -38,6 +38,10 @@ const argv = yargs.env("AVIAN_APP")
     .option("spa", {
         default: false
     })
+    .option("dc", {
+        alias: "defaultComponent",
+        default: "index"
+    })
     .option("h", {
         alias: "home",
         default: process.cwd(),
@@ -524,7 +528,7 @@ else {
         avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))
         if (argv.spa) {
             avian.use(history({
-                index: "/index"
+                index: `/${argv.defaultComponent}`
             }))
         }
 
@@ -643,7 +647,7 @@ else {
 
 
         avian.all("/", (req, res, next) => {
-            res.redirect("/index")
+            res.redirect(`/${argv.defaultComponent}`)
         })
 
     })
