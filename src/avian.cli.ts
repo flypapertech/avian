@@ -19,6 +19,7 @@ import { RequestHandler, Request } from "express"
 import mkdirp = require("mkdirp")
 import jsonfile = require("jsonfile")
 import yargs = require("yargs")
+import { json } from "express"
 
 const argv = yargs.env("AVIAN_APP")
     .option("n", {
@@ -88,8 +89,6 @@ const argv = yargs.env("AVIAN_APP")
         default: 24224
     })
     .argv
-
-    // fluentd - host: "127.0.0.1", port: 24224, timeout: 3.0, responseHeaders: ["x-userid"]
 
 if (argv.webpackHome === "") {
     argv.webpackHome = argv.home
@@ -593,7 +592,7 @@ else {
                 case "fluent":
 
                     avian.use(require("express-fluent-logger")("debug", {
-                        host: argv.loggerFluentHost, port: argv.loggerFluentPort, timeout: 3.0, responseHeaders: ["x-userid"]
+                        host: argv.loggerFluentHost, port: argv.loggerFluentPort, timeout: 3.0, responseHeaders: ["x-userid", "status", "content-length"]
                     }))
                     break
             }
@@ -683,6 +682,10 @@ else {
                 res.setHeader("X-Powered-By", "Avian")
                 res.sendStatus(404)
             }
+        })
+
+        avian.post("/logger", json(), (req, res, next) => {
+            console.log(JSON.stringify(req.body))
         })
 
 
