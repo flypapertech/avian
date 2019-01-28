@@ -73,9 +73,10 @@ const argv = yargs.env("AVIAN_APP")
     })
     .option("l", {
         alias: "logger",
-        default: "bunyan",
+        default: "console",
         describe: "Which logging framework to use in production mode.",
         choices: [
+            "console",
             "bunyan",
             "fluent"
         ]
@@ -558,45 +559,44 @@ else {
         avian.set("view engine", "ejs")
         avian.set("views", argv.home)
 
+        /**
+        * Logging Framework
+        */
+
+        switch (argv.logger) {
+
+            case "console":
+                process.env.DEBUG = "http"
+                break
+
+            case "bunyan":
+
+                mkdirp.sync(argv.home + "/logs/")
+                avian.use(require("express-bunyan-logger")({
+                    name: argv.name,
+                    streams: [
+                        {
+                            level: "debug",
+                            type: "rotating-file",
+                            path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
+                            period: "1d",
+                            count: 365
+                        }
+                    ],
+                }))
+                break
+
+            case "fluent":
+
+                avian.use(require("express-fluent-logger")("debug", {
+                    host: argv.loggerFluentHost, port: argv.loggerFluentPort, timeout: 3.0, responseHeaders: ["x-userid", "status", "content-length"]
+                }))
+                break
+        }
+
         if (argv.mode === "production") {
 
             mkdirp.sync(argv.home + "/cache/")
-
-           /**
-            * Logging Framework
-            */
-
-            switch (argv.logger) {
-
-                case "bunyan":
-
-                    mkdirp.sync(argv.home + "/logs/")
-                    avian.use(require("express-bunyan-logger")({
-                        name: argv.name,
-                        streams: [
-                            {
-                                level: "error",
-                                stream: process.stderr
-                            },
-                            {
-                                level: "info",
-                                type: "rotating-file",
-                                path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
-                                period: "1d",
-                                count: 365
-                            }
-                        ],
-                    }))
-                    break
-
-                case "fluent":
-
-                    avian.use(require("express-fluent-logger")("debug", {
-                        host: argv.loggerFluentHost, port: argv.loggerFluentPort, timeout: 3.0, responseHeaders: ["x-userid", "status", "content-length"]
-                    }))
-                    break
-            }
-
             avian.use(require("express-minify")({cache: argv.home + "/cache"}))
             avian.enable("view cache")
         }
