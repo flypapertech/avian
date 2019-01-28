@@ -24,33 +24,36 @@ const argv = yargs.env("AVIAN_APP")
     .option("n", {
         alias: "name",
         default: process.env.HOSTNAME || "localhost",
-        describe: "name of your application"
-    })
-    .option("m", {
-        alias: "mode",
-        default: process.env.NODE_ENV || "development",
-        describe: "mode to run Avian in",
-        choices: [
-            "development",
-            "production"
-        ]
-    })
-    .option("spa", {
-        default: false
-    })
-    .option("dc", {
-        alias: "defaultComponent",
-        default: "index"
+        describe: "The name of your application"
     })
     .option("h", {
         alias: "home",
         default: process.cwd(),
         defaultDescription: "current working directory",
-        describe: "directory of your application"
+        describe: "The directory of your application."
+    })
+    .option("m", {
+        alias: "mode",
+        default: process.env.NODE_ENV || "development",
+        describe: "Deployment mode to run Avian in.",
+        choices: [
+            "development",
+            "production"
+        ]
     })
     .option("p", {
         alias: "port",
-        default: 8080
+        default: 8080,
+        describe: "Which port to serve your application on."
+    })
+    .option("dc", {
+        alias: "defaultComponent",
+        default: "index",
+        describe: "The point of entry to your application."
+    })
+    .option("spa", {
+        default: false,
+        describe: "Start Avian in a single-page-application configuration."
     })
     .option("redisHost", {
         default: "127.0.0.1"
@@ -66,7 +69,17 @@ const argv = yargs.env("AVIAN_APP")
     })
     .option("webpackHome", {
         default: ""
-    }).argv
+    })
+    .option("l", {
+        alias: "logger",
+        default: "bunyan",
+        describe: "Which log file format to use in production mode.",
+        choices: [
+            "bunyan",
+            "fluent"
+        ]
+    })
+    .argv
 
 if (argv.webpackHome === "") {
     argv.webpackHome = argv.home
@@ -343,7 +356,7 @@ function publish(message: string) {
     publisher.publish("sse", message)
 }
 
-async function loadUserServiesIntoAvian(avian: express.Express) {
+async function loadUserServicesIntoAvian(avian: express.Express) {
     let compiledServices = glob.sync(`${argv.home}/private/**/*.service.js`)
     for (let i = 0; i < compiledServices.length; i++) {
         let dirname = path.dirname(compiledServices[i])
@@ -519,7 +532,7 @@ else {
         }, 5000)
     })
 
-    loadUserServiesIntoAvian(avian).then(() => {
+    loadUserServicesIntoAvian(avian).then(() => {
         avian.use("/static", express.static(argv.home + "/static"))
         avian.use("/assets", express.static(argv.home + "/assets"))
         avian.use("/", express.static(argv.home + "/public"))
