@@ -73,13 +73,23 @@ const argv = yargs.env("AVIAN_APP")
     .option("l", {
         alias: "logger",
         default: "bunyan",
-        describe: "Which log file format to use in production mode.",
+        describe: "Which logging framework to use in production mode.",
         choices: [
             "bunyan",
             "fluent"
         ]
     })
+    .option("lh", {
+        alias: "loggerFluentHost",
+        default: "127.0.0.1"
+    })
+    .option("lp", {
+        alias: "loggerFluentPort",
+        default: 24224
+    })
     .argv
+
+    // fluentd - host: "127.0.0.1", port: 24224, timeout: 3.0, responseHeaders: ["x-userid"]
 
 if (argv.webpackHome === "") {
     argv.webpackHome = argv.home
@@ -583,7 +593,7 @@ else {
                 case "fluent":
 
                     avian.use(require("express-fluent-logger")("debug", {
-                        host: "127.0.0.1", port: 24224, timeout: 3.0, responseHeaders: ["x-userid"]
+                        host: argv.loggerFluentHost, port: argv.loggerFluentPort, timeout: 3.0, responseHeaders: ["x-userid"]
                     }))
                     break
             }
