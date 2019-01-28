@@ -8,7 +8,7 @@ import yargs = require("yargs")
 const ProgressBarPlugin = require("progress-bar-webpack-plugin")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 
-const argv = yargs.argv
+const argv: any = yargs.argv
 argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
 argv.mode = argv.mode || process.env.AVIAN_APP_MODE || "development"
 

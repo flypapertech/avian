@@ -21,7 +21,7 @@ import jsonfile = require("jsonfile")
 import yargs = require("yargs")
 import { json } from "express"
 
-const argv = yargs.env("AVIAN_APP")
+const argv: any = yargs.env("AVIAN_APP")
     .option("n", {
         alias: "name",
         default: process.env.HOSTNAME || "localhost",
@@ -73,13 +73,15 @@ const argv = yargs.env("AVIAN_APP")
     })
     .option("l", {
         alias: "logger",
-        default: "console",
-        describe: "Which logging framework to use in production mode.",
+        describe: "Which logging framework to use.",
         choices: [
-            "console",
             "bunyan",
             "fluent"
         ]
+    })
+    .option("lt", {
+        alias: "loggerFluentTag",
+        default: "debug"
     })
     .option("lh", {
         alias: "loggerFluentHost",
@@ -94,6 +96,7 @@ const argv = yargs.env("AVIAN_APP")
 if (argv.webpackHome === "") {
     argv.webpackHome = argv.home
 }
+
 const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
 
 const injectArgv: RequestHandler = (req, res, next) => {
@@ -565,10 +568,6 @@ else {
 
         switch (argv.logger) {
 
-            case "console":
-                process.env.DEBUG = "http"
-                break
-
             case "bunyan":
 
                 mkdirp.sync(argv.home + "/logs/")
@@ -588,7 +587,7 @@ else {
 
             case "fluent":
 
-                avian.use(require("express-fluent-logger")("debug", {
+                avian.use(require("express-fluent-logger")(argv.loggerFluentTag, {
                     host: argv.loggerFluentHost, port: argv.loggerFluentPort, timeout: 3.0, responseHeaders: ["x-userid", "status", "content-length"]
                 }))
                 break
@@ -685,7 +684,44 @@ else {
         })
 
         avian.post("/logger", json(), (req, res, next) => {
-            console.log(JSON.stringify(req.body))
+            if (req.query && req.body) {
+
+                if (argv.mode === "development") {
+                    console.log(req.query.level, JSON.stringify(req.body))
+                }
+                if (argv.logger) {
+
+                    switch (argv.logger) {
+                        case "bunyan":
+                            if (req.query.level === "debug") {
+                                req.log.debug(req.body)
+                            }
+                            if (req.query.level === "info") {
+                                req.log.info(req.body)
+                            }
+                            if (req.query.level === "error") {
+                                req.log.error(req.body)
+                            }
+                            if (req.query.level === "warn") {
+                                req.log.warn(req.body)
+                            }
+                            if (req.query.level === "fatal") {
+                                req.log.fatal(req.body)
+                            }
+                            if (req.query.level === "trace") {
+                                req.log.trace(req.body)
+                            }
+                            break
+                        case "fluent":
+                            req.logger.emit(req.query.level, req.body)
+                            if (argv.mode === "development") {
+                                console.log(JSON.stringify(req.body))
+                            }
+                            break
+                    }
+
+                }
+            }
         })
 
 
