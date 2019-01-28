@@ -552,24 +552,41 @@ else {
         if (argv.mode === "production") {
 
             mkdirp.sync(argv.home + "/cache/")
-            mkdirp.sync(argv.home + "/logs/")
 
-            avian.use(require("express-bunyan-logger")({
-                name: argv.name,
-                streams: [
-                    {
-                        level: "error",
-                        stream: process.stderr
-                    },
-                    {
-                        level: "info",
-                        type: "rotating-file",
-                        path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
-                        period: "1d",
-                        count: 365
-                    }
-                ],
-            }))
+           /**
+            * Logging Framework
+            */
+
+            switch (argv.logger) {
+
+                case "bunyan":
+
+                    mkdirp.sync(argv.home + "/logs/")
+                    avian.use(require("express-bunyan-logger")({
+                        name: argv.name,
+                        streams: [
+                            {
+                                level: "error",
+                                stream: process.stderr
+                            },
+                            {
+                                level: "info",
+                                type: "rotating-file",
+                                path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
+                                period: "1d",
+                                count: 365
+                            }
+                        ],
+                    }))
+                    break
+
+                case "fluent":
+
+                    avian.use(require("express-fluent-logger")("debug", {
+                        host: "127.0.0.1", port: 24224, timeout: 3.0, responseHeaders: ["x-userid"]
+                    }))
+                    break
+            }
 
             avian.use(require("express-minify")({cache: argv.home + "/cache"}))
             avian.enable("view cache")
