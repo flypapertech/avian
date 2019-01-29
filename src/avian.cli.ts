@@ -710,7 +710,10 @@ else {
                             }
                             break
                         case "fluent":
-                            req.logger.emit(req.query.level, req.body, `${new Date().getTime()}.0`)
+                            let now = new Date()
+                            now.getTime()
+
+                            req.logger.emit(req.query.level, req.body, `${now}.0`)
                             break
                     }
                 }
