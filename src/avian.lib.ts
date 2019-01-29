@@ -3,7 +3,7 @@ import { RedisClient } from "redis"
 declare global {
   namespace Express {
     interface Request {
-      argv: any
+      argv: typeof argv
       cache: RedisClient
       log: any
       logger: any
