@@ -686,9 +686,6 @@ else {
         avian.post("/logger", json(), (req, res, next) => {
             if (req.query && req.body) {
 
-                if (argv.mode === "development") {
-                    console.log(req.query.level, JSON.stringify(req.body))
-                }
                 if (argv.logger) {
 
                     switch (argv.logger) {
@@ -716,7 +713,6 @@ else {
                             req.logger.emit(req.query.level, req.body)
                             break
                     }
-
                 }
             }
         })
