@@ -714,9 +714,6 @@ else {
                             break
                         case "fluent":
                             req.logger.emit(req.query.level, req.body)
-                            if (argv.mode === "development") {
-                                console.log(JSON.stringify(req.body))
-                            }
                             break
                     }
 
