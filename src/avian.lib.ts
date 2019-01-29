@@ -1,4 +1,15 @@
 import * as yargs from "yargs"
+import { RedisClient } from "redis"
+declare global {
+  namespace Express {
+    interface Request {
+      argv: any
+      cache: RedisClient
+      log: any
+      logger: any
+    }
+  }
+}
 
 export const argv = yargs.env("AVIAN_APP")
     .option("name", {

@@ -5,6 +5,7 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "removeComments": true,
+    "declaration": true,
     "outDir": "dist",
     "rootDirs": [
       "src",
@@ -13,6 +14,6 @@
   },
   "files": [
     "./src/avian.cli.ts",
-    "./index.d.ts"
+    "./src/avian.lib.ts"
   ]
 }
