@@ -516,8 +516,16 @@ else {
 
             case "fluent":
 
-                avian.use(require("express-fluent-logger")(argv.loggerFluentTag, {
-                    host: argv.loggerFluentHost, port: argv.loggerFluentPort, timeout: 3.0, responseHeaders: ["x-userid", "status", "content-length"]
+                avian.use(require("avian-fluentd-logger")({
+                    level: "info",
+                    mode: argv.mode,
+                    tag: argv.loggerFluentTag,
+                    label: "server",
+                    configure: {
+                        host: argv.loggerFluentHost,
+                        port: argv.loggerFluentPort,
+                        timeout: 3.0
+                    }
                 }))
                 break
         }
@@ -639,10 +647,7 @@ else {
                             }
                             break
                         case "fluent":
-                            let now = new Date()
-                            now.getTime()
-
-                            req.logger.emit(req.query.level, req.body, `${now}.0`)
+                            req.logger.emit(req.query.label || "client", { component: req.query.component.toLowerCase() || null, level: req.query.level || "info", mode: argv.mode, record: req.body })
                             break
                     }
                 }
