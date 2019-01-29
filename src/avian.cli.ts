@@ -21,7 +21,6 @@ import jsonfile = require("jsonfile")
 import { json } from "express"
 import { argv } from "./avian.lib"
 
-
 if (argv.webpackHome === "") {
     argv.webpackHome = argv.home
 }
@@ -33,6 +32,13 @@ const injectArgv: RequestHandler = (req, res, next) => {
     next()
 }
 
+declare global {
+  namespace Express {
+    interface Request {
+      log: any
+    }
+  }
+}
 
 class AvianUtils {
     getComponentRoot(component: string): string {
@@ -500,7 +506,7 @@ else {
             case "bunyan":
 
                 mkdirp.sync(argv.home + "/logs/")
-                avian.use(require("express-bunyan-logger")({
+                avian.use(() => require("express-bunyan-logger")({
                     name: argv.name,
                     streams: [
                         {

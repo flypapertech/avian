@@ -5,7 +5,6 @@ declare global {
     interface Request {
       argv: typeof argv
       cache: RedisClient
-      log: any
       logger: any
     }
   }
