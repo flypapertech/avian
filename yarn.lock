@@ -1317,6 +1317,13 @@ atob@^2.1.1:
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
+"avian-fluentd-logger@github:flypapertech/avian-fluentd-logger":
+  version "0.0.1"
+  resolved "https://codeload.github.com/flypapertech/avian-fluentd-logger/tar.gz/577a35d9c6038cc06a3a8edd1db884cd47ed54d2"
+  dependencies:
+    debug "^4.1.1"
+    fluent-logger "^3.2.3"
+
 aws-sign2@~0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.7.0.tgz#b46e890934a9591f2d2f6f86d7e6a9f1b3fe76a8"
@@ -2621,13 +2628,6 @@ express-bunyan-logger@^1.3.1:
     lodash.set "^4.3.2"
     useragent "^2.2.1"
     uuid "^3.1.0"
-
-express-fluent-logger@flypapertech/avian-fluentd-logger:
-  version "0.3.3"
-  resolved "https://codeload.github.com/flypapertech/avian-fluentd-logger/tar.gz/b8a444bdaf9da995473c2656d5731a7061c17ac0"
-  dependencies:
-    debug "^4.1.1"
-    fluent-logger "^3.2.3"
 
 express-minify@^1.0.0:
   version "1.0.0"
