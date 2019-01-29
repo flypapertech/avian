@@ -18,80 +18,9 @@ import * as history from "connect-history-api-fallback"
 import { RequestHandler, Request } from "express"
 import mkdirp = require("mkdirp")
 import jsonfile = require("jsonfile")
-import yargs = require("yargs")
 import { json } from "express"
+import { argv } from "./avian.lib"
 
-const argv: any = yargs.env("AVIAN_APP")
-    .option("n", {
-        alias: "name",
-        default: process.env.HOSTNAME || "localhost",
-        describe: "The name of your application"
-    })
-    .option("h", {
-        alias: "home",
-        default: process.cwd(),
-        defaultDescription: "current working directory",
-        describe: "The directory of your application."
-    })
-    .option("m", {
-        alias: "mode",
-        default: process.env.NODE_ENV || "development",
-        describe: "Deployment mode to run Avian in.",
-        choices: [
-            "development",
-            "production"
-        ]
-    })
-    .option("p", {
-        alias: "port",
-        default: 8080,
-        describe: "Which port to serve your application on."
-    })
-    .option("dc", {
-        alias: "defaultComponent",
-        default: "index",
-        describe: "The point of entry to your application."
-    })
-    .option("spa", {
-        default: false,
-        describe: "Start Avian in a single-page-application configuration."
-    })
-    .option("redisHost", {
-        default: "127.0.0.1"
-    })
-    .option("redisPort", {
-        default: 6379
-    })
-    .option("redisSessionDB", {
-        default: 1
-    })
-    .option("redisCacheDB", {
-        default: 2
-    })
-    .option("webpackHome", {
-        default: ""
-    })
-    .option("l", {
-        alias: "logger",
-        describe: "Which logging framework to use.",
-        choices: [
-            "bunyan",
-            "fluent"
-        ]
-    })
-    .option("lt", {
-        alias: "loggerFluentTag",
-        default: "debug"
-    })
-    .option("lh", {
-        alias: "loggerFluentHost",
-        default: "127.0.0.1"
-    })
-    .option("lp", {
-        alias: "loggerFluentPort",
-        default: 24224
-    })
-    .argv
 
 if (argv.webpackHome === "") {
     argv.webpackHome = argv.home

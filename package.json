@@ -10,7 +10,7 @@
     "url": "https://github.com/flypapertech/avian.git"
   },
   "preferGlobal": true,
-  "main": "./dist/avian.cli.js",
+  "main": "./dist/avian.lib.js",
   "types": "./index.d.ts",
   "bin": {
     "avian": "./dist/avian.cli.js"

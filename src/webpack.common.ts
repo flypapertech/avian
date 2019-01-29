@@ -3,14 +3,10 @@ import * as VueLoader from "vue-loader"
 import chalk from "chalk"
 import * as path from "path"
 import nodeExternals = require("webpack-node-externals")
-import yargs = require("yargs")
+import { argv } from "./avian.lib"
 
 const ProgressBarPlugin = require("progress-bar-webpack-plugin")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
-
-const argv: any = yargs.argv
-argv.home = argv.home || process.env.AVIAN_APP_HOME || process.cwd()
-argv.mode = argv.mode || process.env.AVIAN_APP_MODE || "development"
 
 function srcPath(subdir: string) {
     return path.join(argv.home, subdir)
