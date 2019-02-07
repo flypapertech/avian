@@ -627,37 +627,43 @@ else {
         })
 
         avian.post("/logger", json(), (req, res, next) => {
-            if (req.query && req.body) {
-
-                if (argv.logger) {
-
-                    switch (argv.logger) {
-                        case "bunyan":
-                            if (req.query.level === "debug") {
-                                req.log.debug(req.body)
-                            }
-                            if (req.query.level === "info") {
-                                req.log.info(req.body)
-                            }
-                            if (req.query.level === "error") {
-                                req.log.error(req.body)
-                            }
-                            if (req.query.level === "warn") {
-                                req.log.warn(req.body)
-                            }
-                            if (req.query.level === "fatal") {
-                                req.log.fatal(req.body)
-                            }
-                            if (req.query.level === "trace") {
-                                req.log.trace(req.body)
-                            }
-                            break
-                        case "fluent":
-                            req.logger.emit(req.query.label || "client", { component: req.query.component.toLowerCase() || null, level: req.query.level || "info", mode: argv.mode, record: req.body })
-                            break
-                    }
-                }
+            if (!req.query || !req.body) {
+                res.sendStatus(400)
+                return
             }
+
+            if (!argv.logger) {
+                res.sendStatus(404)
+                return
+            }
+
+            switch (argv.logger) {
+                case "bunyan":
+                    if (req.query.level === "debug") {
+                        req.log.debug(req.body)
+                    }
+                    if (req.query.level === "info") {
+                        req.log.info(req.body)
+                    }
+                    if (req.query.level === "error") {
+                        req.log.error(req.body)
+                    }
+                    if (req.query.level === "warn") {
+                        req.log.warn(req.body)
+                    }
+                    if (req.query.level === "fatal") {
+                        req.log.fatal(req.body)
+                    }
+                    if (req.query.level === "trace") {
+                        req.log.trace(req.body)
+                    }
+                    break
+                case "fluent":
+                    req.logger.emit(req.query.label || "client", { component: req.query.component.toLowerCase() || null, level: req.query.level || "info", mode: argv.mode, record: req.body })
+                    break
+                    }
+
+            res.sendStatus(200)
         })
 
 
