@@ -94,7 +94,7 @@ class AvianUtils {
                     return
                 }
 
-                let configString = avianUtils.setComponentConfigObjectCache(component, req)
+                let configString = avianUtils.setComponentConfigObjectCache(component, req, subcomponent)
                 callback(JSON.parse(configString))
             })
 
