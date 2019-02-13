@@ -659,7 +659,7 @@ else {
                     }
                     break
                 case "fluent":
-                    req.logger.emit(req.query.label || "client", { component: req.query.component.toLowerCase() || null, level: req.query.level || "info", mode: argv.mode, record: req.body })
+                    req.logger.emit(req.query.label || "client", { component: req.query.component || null, level: req.query.level || "info", mode: argv.mode, record: req.body })
                     break
                     }
 
