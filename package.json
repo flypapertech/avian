@@ -33,7 +33,7 @@
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.1.0",
-    "avian-fluentd-logger": "flypapertech/avian-fluentd-logger",
+    "fluentd-logger-middleware": "flypapertech/fluentd-logger-middleware",
     "babel-loader": "^8.0.4",
     "bunyan": "^1.8.4",
     "chalk": "^2.4.1",

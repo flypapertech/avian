@@ -522,11 +522,11 @@ else {
 
             case "fluent":
 
-                avian.use(require("avian-fluentd-logger")({
+                avian.use(require("fluentd-logger-middleware")({
                     level: "info",
                     mode: argv.mode,
                     tag: argv.loggerFluentTag,
-                    label: "server",
+                    label: "server.avian",
                     configure: {
                         host: argv.loggerFluentHost,
                         port: argv.loggerFluentPort,
