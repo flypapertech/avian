@@ -136,6 +136,7 @@ let runningBuilds = {
 }
 
 avianEmitter.on("buildStarted", (name: string) => {
+    console.log(`Avian - Started Bundling ${capitalizeFirstLetter(name)}`)
     if (name === "services") {
         runningBuilds.services = true
     }
@@ -144,9 +145,14 @@ avianEmitter.on("buildStarted", (name: string) => {
     }
 })
 
+function capitalizeFirstLetter(str: string) {
+    return str.charAt(0).toUpperCase() + str.slice(1)
+}
+
 let pendingChunks: string[] = []
 avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
     pendingChunks.push(...changedChunks)
+    console.log(`Avian - Finished Bundling ${capitalizeFirstLetter(name)}`)
     if (name === "services") {
         runningBuilds.services = false
     }
@@ -154,7 +160,6 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
         runningBuilds.components = false
     }
     if (runningBuilds.components === false && runningBuilds.services === false) {
-        console.log("Avian - Compilation Complete")
         if (!avianUtils.isAvianRunning() || pendingChunks.find(chunk => chunk.indexOf("service") !== -1)) {
             console.log("Avian - Restarting server")
             avianUtils.killAllWorkers()
@@ -244,7 +249,7 @@ function startProdWebpackCompiler(webpackProd: any) {
         webpackProd.ServicesConfig
     ])
 
-    console.log("Avian - Starting Webpack")
+    console.log("Avian - Started Bundling")
     webpackCompiler.run((err, stats) => {
         if (err || stats.hasErrors()) {
             if (err) {
