@@ -1317,13 +1317,6 @@ atob@^2.1.1:
   resolved "https://registry.yarnpkg.com/atob/-/atob-2.1.2.tgz#6d9517eb9e030d2436666651e86bd9f6f13533c9"
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
-avian-fluentd-logger@flypapertech/avian-fluentd-logger:
-  version "0.0.1"
-  resolved "https://codeload.github.com/flypapertech/avian-fluentd-logger/tar.gz/0ef9861c3d214b182d2bf40b60465710c20edefb"
-  dependencies:
-    debug "^4.1.1"
-    fluent-logger "^3.2.3"
-
 aws-sign2@~0.7.0:
   version "0.7.0"
   resolved "https://registry.yarnpkg.com/aws-sign2/-/aws-sign2-0.7.0.tgz#b46e890934a9591f2d2f6f86d7e6a9f1b3fe76a8"
@@ -2838,6 +2831,13 @@ fluent-logger@^3.2.3:
   integrity sha512-wq0kVmmdZc2IIoqeAR3N52A0AnlXtz55NzJ3ZR4Ls9yIut09ZSb0y6kbJcM6EfsB9mu4oNKw3KJ+0N6BWoTmKg==
   dependencies:
     msgpack-lite "*"
+
+fluentd-logger-middleware@flypapertech/fluentd-logger-middleware:
+  version "0.0.1"
+  resolved "https://codeload.github.com/flypapertech/fluentd-logger-middleware/tar.gz/bf99f6def838cad5cfdfc9ac7cf7a8186c6a5359"
+  dependencies:
+    debug "^4.1.1"
+    fluent-logger "^3.2.3"
 
 flush-write-stream@^1.0.0:
   version "1.0.3"
