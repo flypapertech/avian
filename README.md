@@ -60,6 +60,7 @@ After Avian is installed as a dependency of your application start Avian via:
 - --home (directory of your application, defaults to current working directory)
 - --port (port to start express server, defaults to 8080)
 - --mode (mode to run Avian in, development or production, defaults to development)
+- --noBundle (Avian will just start and use the files already in the public and private folders)
 - --redisPort (port that your Redis server is listening on, defaults to 6379)
 - --redisHost (host where your Redis server is running, defaults to 127.0.0.1)
 - --redisSessionDB (the Redis database number to store session data, defaults to 1)
