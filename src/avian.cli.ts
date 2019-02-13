@@ -535,7 +535,7 @@ else {
             case "bunyan":
 
                 mkdirp.sync(argv.home + "/logs/")
-                avian.use(() => require("express-bunyan-logger")({
+                avian.use(require("express-bunyan-logger")({
                     name: argv.name,
                     streams: [
                         {
@@ -551,7 +551,7 @@ else {
 
             case "fluent":
 
-                avian.use(require("fluentd-logger-middleware")({
+                avian.use(require("@flypapertech/fluentd-logger-middleware")({
                     level: "info",
                     mode: argv.mode,
                     tag: argv.loggerFluentTag,
