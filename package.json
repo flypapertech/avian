@@ -1,6 +1,6 @@
 {
   "name": "@flypapertech/avian",
-  "version": "0.3.5",
+  "version": "0.3.6",
   "description": "Create Enterprise-class component driven applications that scale.",
   "publishConfig": {
     "access": "public"
@@ -33,7 +33,6 @@
     "@babel/preset-env": "^7.1.0",
     "@babel/preset-react": "^7.0.0",
     "@babel/preset-typescript": "^7.1.0",
-    "fluentd-logger-middleware": "flypapertech/fluentd-logger-middleware",
     "babel-loader": "^8.0.4",
     "bunyan": "^1.8.4",
     "chalk": "^2.4.1",
@@ -48,6 +47,7 @@
     "express-minify": "^1.0.0",
     "express-redis": "^2.0.1",
     "express-session": "^1.15.6",
+    "fluentd-logger-middleware": "flypapertech/fluentd-logger-middleware",
     "glob": "^7.1.2",
     "handlebars": "^4.0.12",
     "jsonfile": "^5.0.0",
