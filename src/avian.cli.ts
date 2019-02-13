@@ -194,7 +194,7 @@ function startDevWebpackWatcher(webpackDev: any) {
         avianEmitter.emit("buildStarted", "services")
     })
 
-    console.log("Avian - Starting Webpack Watchers")
+    console.log("Avian - Watching For Changes")
     const watching = componentsCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
