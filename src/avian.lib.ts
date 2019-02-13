@@ -45,7 +45,10 @@ export const argv = yargs.env("AVIAN_APP")
         default: false,
         describe: "Start Avian in a single-page-application configuration."
     })
-    .option("noBundle", {
+    .option("bundleSkip", {
+        default: false
+    })
+    .option("bundleOnly", {
         default: false
     })
     .option("redisHost", {

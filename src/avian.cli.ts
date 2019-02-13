@@ -167,8 +167,18 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
         runningBuilds.components = false
     }
     if (runningBuilds.components === false && runningBuilds.services === false) {
-        if (!avianUtils.isAvianRunning() || pendingChunks.find(chunk => chunk.indexOf("service") !== -1)) {
-            console.log("Avian - Restarting server")
+        if (argv.bundleOnly) {
+            console.log("Avian - Bundle Only Enabled Shutting Down")
+            process.exit()
+            return
+        }
+
+        if (!avianUtils.isAvianRunning()) {
+            console.log("Avian - Starting Server")
+            avianUtils.startAllWorkers()
+        }
+        else if (pendingChunks.some(chunk => chunk.includes("service"))) {
+            console.log("Avian - Restarting Server")
             avianUtils.killAllWorkers()
             avianUtils.startAllWorkers()
         }
@@ -270,8 +280,15 @@ function startProdWebpackCompiler(webpackProd: any) {
             return
         }
 
-        avianUtils.startAllWorkers()
-        avianUtils.setWorkersToAutoRestart()
+        if (argv.bundleOnly) {
+            console.log("Avian - Bundle Only Enabled Shutting Down")
+            process.exit()
+            return
+        }
+        else {
+            console.log("Avian - Starting Server")
+            avianUtils.startAllWorkers()
+        }
     })
 
 }
@@ -369,7 +386,8 @@ async function loadUserServicesIntoAvian(avian: express.Express) {
 
 const avianUtils = new AvianUtils()
 if (cluster.isMaster) {
-    if (argv.noBundle) {
+    if (argv.bundleSkip) {
+        console.log("Avian - Skipped Bundling")
         avianUtils.startAllWorkers()
         avianUtils.setWorkersToAutoRestart()
     }
