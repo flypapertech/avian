@@ -392,6 +392,8 @@ async function loadUserServicesIntoAvian(avian: express.Express) {
 
 const avianUtils = new AvianUtils()
 if (cluster.isMaster) {
+    const packageJson = require("../package.json")
+    console.log(`Avian - Version ${packageJson.version}`)
     if (argv.bundleSkip) {
         console.log("Avian - Skipped Bundling")
         avianUtils.startAllWorkers()
