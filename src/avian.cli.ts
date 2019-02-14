@@ -228,6 +228,13 @@ function watcherCallback(name: string) {
                 })
             }
 
+            if (argv.bundleOnly) {
+                console.error("Avian - Bundling Failed Due To Compilation Errors")
+                console.log("Avian - Shutting Down")
+                process.exit(1)
+                return
+            }
+
             console.error("Avian - Encountered compile errors, stopping server")
             avianUtils.killAllWorkers()
             console.error("Avian - Waiting for you to fix compile errors")
@@ -272,8 +279,10 @@ function startProdWebpackCompiler(webpackProd: any) {
                 })
             }
 
-            console.error("Avian - Encountered compile errors, please fix and restart")
+            console.error("Avian - Bundling Failed Due To Compilation Errors")
+            console.log("Avian - Shutting Down")
             avianUtils.killAllWorkers()
+            process.exit(1)
             return
         }
 
