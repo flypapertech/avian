@@ -1,11 +1,9 @@
 import * as webpack from "webpack"
 import * as VueLoader from "vue-loader"
-import chalk from "chalk"
 import * as path from "path"
 import nodeExternals = require("webpack-node-externals")
 import { argv } from "./avian.lib"
 
-const ProgressBarPlugin = require("progress-bar-webpack-plugin")
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 
 function srcPath(subdir: string) {
@@ -31,10 +29,6 @@ const componentsCommonConfig: webpack.Configuration = {
     },
     plugins: [
         new WebpackWatchedGlobEntries(),
-        new ProgressBarPlugin({
-            format: "Compiling Component Files [:bar] " + chalk.green.bold(" :percent"),
-            clear: false
-        }),
         new VueLoader.VueLoaderPlugin()
     ],
     module : {
@@ -130,11 +124,7 @@ const servicesCommonConfig: webpack.Configuration = {
         }
     },
     plugins: [
-        new WebpackWatchedGlobEntries(),
-        new ProgressBarPlugin({
-            format: "Compiling Service Files [:bar] " + chalk.green.bold(" :percent"),
-            clear: false
-        })
+        new WebpackWatchedGlobEntries()
     ],
     // externals: [nodeExternals(), /\.pug$/, /\.less$/, /\.css$/],
     externals: [nodeExternals()],
