@@ -1,6 +1,6 @@
-import "jasmine"
+import mocha = require("mocha")
 
-describe("Avian Distribution Files", () => {
+mocha.describe("Avian Distribution Files", () => {
     it("Checks to see if all distribution files have been built.", () => {
 
     })
