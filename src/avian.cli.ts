@@ -10,9 +10,6 @@ import * as fs from "fs"
 import * as path from "path"
 import * as webpack from "webpack"
 import * as rimraf from "rimraf"
-import * as defaultWebpackDev from "./webpack.development"
-import * as defaultWebpackProd from "./webpack.production"
-import * as ts from "typescript"
 import * as signature from "cookie-signature"
 import * as history from "connect-history-api-fallback"
 import { RequestHandler, Request } from "express"
@@ -392,52 +389,62 @@ if (cluster.isMaster) {
         avianUtils.setWorkersToAutoRestart()
     }
     else {
-        rimraf.sync(`${argv.home}/private/*`)
-        rimraf.sync(`${argv.home}/public/*`)
+        import("typescript").then(ts => {
+            rimraf.sync(`${argv.home}/private/*`)
+            rimraf.sync(`${argv.home}/public/*`)
 
-        let webpackConfigs = glob.sync(`${argv.webpackHome}/webpack.development.*`)
-        webpackConfigs.push(...glob.sync(`${argv.webpackHome}/webpack.production.*`))
-        let program = ts.createProgram(webpackConfigs, {
-            noEmitOnError: true,
-            noImplicityAny: true,
-            target: ts.ScriptTarget.ES5,
-            modules: ts.ModuleKind.CommonJS,
-            outDir: `${argv.home}/private`,
-            skipLibCheck: true,
-            lib: [
-                "lib.es2015.d.ts"
-            ]
-        })
-        let emitResult = program.emit()
+            let webpackConfigs = glob.sync(`${argv.webpackHome}/webpack.development.*`)
+            webpackConfigs.push(...glob.sync(`${argv.webpackHome}/webpack.production.*`))
+            let program = ts.createProgram(webpackConfigs, {
+                noEmitOnError: true,
+                noImplicityAny: true,
+                target: ts.ScriptTarget.ES5,
+                modules: ts.ModuleKind.CommonJS,
+                outDir: `${argv.home}/private`,
+                skipLibCheck: true,
+                lib: [
+                    "lib.es2015.d.ts"
+                ]
+            })
+            let emitResult = program.emit()
 
-        let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
-        allDiagnostics.forEach(diagnostic => {
-            if (diagnostic.file) {
-                let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
-                let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
-                console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
+            let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
+            allDiagnostics.forEach(diagnostic => {
+                if (diagnostic.file) {
+                    let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
+                    let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
+                    console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
+                }
+                else {
+                    console.log(`${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`)
+                }
+            })
+
+            if (argv.mode === "development") {
+                import(argv.home + "/private/webpack.development").then(webpackDev => {
+                    startDevWebpackWatcher(webpackDev)
+                }).catch(error => {
+                    console.log("Avian - Falling back to default dev webpack config")
+                    import("./webpack.development").then(defaultWebpackDev => {
+                        startDevWebpackWatcher(defaultWebpackDev)
+                    }).catch(error => {
+                        console.log("Avian - Failed to load default development webpack config")
+                    })
+                })
             }
             else {
-                console.log(`${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`)
+                import(argv.home + "/private/webpack.production").then(webpackProd => {
+                    startProdWebpackCompiler(webpackProd)
+                }).catch(error => {
+                    console.log("Avian - Falling back to default prod webpack config")
+                    import("./webpack.production").then(defaultWebpackProd => {
+                        startProdWebpackCompiler(defaultWebpackProd)
+                    }).catch(error => {
+                        console.log("Avian - Failed to load default production webpack config")
+                    })
+                })
             }
         })
-
-        if (argv.mode === "development") {
-            import(argv.home + "/private/webpack.development").then(webpackDev => {
-                startDevWebpackWatcher(webpackDev)
-            }).catch(error => {
-                console.log("Avian - Falling back to default dev webpack config")
-                startDevWebpackWatcher(defaultWebpackDev)
-            })
-        }
-        else {
-            import(argv.home + "/private/webpack.production").then(webpackProd => {
-                startProdWebpackCompiler(webpackProd)
-            }).catch(error => {
-                console.log("Avian - Falling back to default prod webpack config")
-                startProdWebpackCompiler(defaultWebpackProd)
-            })
-        }
     }
 }
 else {
