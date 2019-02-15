@@ -590,6 +590,7 @@ else {
                     mode: argv.mode,
                     tag: argv.loggerFluentTag,
                     label: "server.avian",
+                    source: "Access",
                     configure: {
                         host: argv.loggerFluentHost,
                         port: argv.loggerFluentPort,
@@ -722,7 +723,7 @@ else {
                     }
                     break
                 case "fluent":
-                    req.logger.emit(req.query.label || "client", { component: req.query.component || null, level: req.query.level || "info", mode: argv.mode, record: req.body })
+                    req.logger.emit(req.query.label || "client", { source: req.query.source || null, level: req.query.level || "info", mode: argv.mode, record: req.body })
                     break
                     }
 

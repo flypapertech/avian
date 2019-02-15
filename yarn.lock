@@ -680,10 +680,10 @@
     lodash "^4.17.10"
     to-fast-properties "^2.0.0"
 
-"@flypapertech/fluentd-logger-middleware@0.3.7":
-  version "0.3.7"
-  resolved "https://registry.yarnpkg.com/@flypapertech/fluentd-logger-middleware/-/fluentd-logger-middleware-0.3.7.tgz#cb8a7f21dd372e0f32a44c30889fb092e4162a4b"
-  integrity sha512-eSTA02ML1eigeC7NEO6JfH6wrGir4SHD69glbRihYQ/9SM+ezvgLfJJqKMdO9ZBpZcNnffgwA9kDD8d5/r09ZA==
+"@flypapertech/fluentd-logger-middleware@^0.3.8":
+  version "0.3.8"
+  resolved "https://registry.yarnpkg.com/@flypapertech/fluentd-logger-middleware/-/fluentd-logger-middleware-0.3.8.tgz#cd6164bd6c592275277462c144fef3e47a4eaf90"
+  integrity sha512-OXfTXSeh7TgKqMlt0KgUCNxlWnSs48CWFeI1ClHjtIotcSraZUghHUAeKvdsKUXZhgEGL+7pXtsWVNLeOlSwxw==
   dependencies:
     debug "^4.1.1"
     fluent-logger "^3.2.3"
