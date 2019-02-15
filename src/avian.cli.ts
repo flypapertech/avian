@@ -17,6 +17,7 @@ import mkdirp = require("mkdirp")
 import jsonfile = require("jsonfile")
 import { json } from "express"
 import { argv } from "./avian.lib"
+import * as cookie from "cookie"
 
 if (argv.webpackHome === "") {
     argv.webpackHome = argv.home
@@ -462,8 +463,6 @@ else {
     const avian = express()
     avian.engine("html", require("ejs").renderFile)
     avian.use(injectArgv)
-    let cookieParser = require("cookie-parser")
-    avian.use(cookieParser())
 
     avian.locals.argv = argv
     let redisStore = require("connect-redis")(session)
@@ -473,7 +472,24 @@ else {
             if (authParts[0].toLowerCase() === "bearer" && authParts.length > 1) {
                 // We need to sign this exactly like how express-session signs cookies
                 let signed = "s:" + signature.sign(authParts[1], sessionSecret)
-                req.cookies["connect.sid"] = signed
+
+                if (!req.headers.cookie) {
+                    req.headers.cookie = `connect.sid=${signed};`
+                    next()
+                    return
+                }
+
+                const cookies = cookie.parse(req.headers.cookie)
+                const updatedCookies = Object.assign({}, cookies, {
+                    "connect.sid": signed
+                })
+
+                const cookieKeys = Object.keys(updatedCookies)
+                const updatedCookieArray = cookieKeys.map(key => {
+                    return `${key}=${encodeURIComponent(updatedCookies[key])}`
+                })
+
+                req.headers.cookie = updatedCookieArray.join(";")
             }
         }
 
