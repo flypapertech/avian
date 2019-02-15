@@ -461,6 +461,45 @@ if (cluster.isMaster) {
 }
 else {
     const avian = express()
+    /**
+    * Logging Framework
+    */
+    switch (argv.logger) {
+
+        case "bunyan":
+
+            mkdirp.sync(argv.home + "/logs/")
+            avian.use(require("express-bunyan-logger")({
+                name: argv.name,
+                streams: [
+                    {
+                        level: "debug",
+                        type: "rotating-file",
+                        path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
+                        period: "1d",
+                        count: 365
+                    }
+                ],
+            }))
+            break
+
+        case "fluent":
+
+            avian.use(require("@flypapertech/fluentd-logger-middleware")({
+                level: "info",
+                mode: argv.mode,
+                tag: argv.loggerFluentTag,
+                label: "server.avian",
+                source: "Access",
+                configure: {
+                    host: argv.loggerFluentHost,
+                    port: argv.loggerFluentPort,
+                    timeout: 3.0
+                }
+            }))
+            break
+    }
+
     avian.engine("html", require("ejs").renderFile)
     avian.use(injectArgv)
 
@@ -559,46 +598,6 @@ else {
         avian.set("view engine", "pug")
         avian.set("view engine", "ejs")
         avian.set("views", argv.home)
-
-        /**
-        * Logging Framework
-        */
-
-        switch (argv.logger) {
-
-            case "bunyan":
-
-                mkdirp.sync(argv.home + "/logs/")
-                avian.use(require("express-bunyan-logger")({
-                    name: argv.name,
-                    streams: [
-                        {
-                            level: "debug",
-                            type: "rotating-file",
-                            path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
-                            period: "1d",
-                            count: 365
-                        }
-                    ],
-                }))
-                break
-
-            case "fluent":
-
-                avian.use(require("@flypapertech/fluentd-logger-middleware")({
-                    level: "info",
-                    mode: argv.mode,
-                    tag: argv.loggerFluentTag,
-                    label: "server.avian",
-                    source: "Access",
-                    configure: {
-                        host: argv.loggerFluentHost,
-                        port: argv.loggerFluentPort,
-                        timeout: 3.0
-                    }
-                }))
-                break
-        }
 
         if (argv.mode === "production") {
 
