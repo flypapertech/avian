@@ -84,8 +84,6 @@ workflows:
     jobs:
       - build-node8:
           <<: *filter-run-always
-      - build-node9:
-          <<: *filter-run-always
       - build-node10:
           <<: *filter-run-always
       - build-node11:
@@ -93,7 +91,6 @@ workflows:
       - deploy:
           requires:
             - build-node8
-            - build-node9
             - build-node10
             - build-node11
           <<: *filter-run-on-master-and-version-tag-only
