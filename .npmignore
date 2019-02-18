@@ -8,3 +8,5 @@ tsconfig.json
 tslint.json
 yarn.lock
 package-lock.json
+examples
+test
