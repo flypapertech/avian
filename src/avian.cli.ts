@@ -27,6 +27,7 @@ const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash(
 
 const injectArgv: RequestHandler = (req, res, next) => {
     req.argv = Object.assign({}, argv)
+    req.sessionSecret = sessionSecret
     next()
 }
 
