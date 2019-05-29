@@ -89,4 +89,10 @@ export const argv = yargs.env("AVIAN_APP")
     .option("loggerFluentPort", {
         alias: "lp",
         default: 24224
+    })
+    .option("sslCert", {
+        type: "string"
+    })
+    .option("sslKey", {
+        type: "string"
     }).argv

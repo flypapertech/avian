@@ -18,6 +18,7 @@ import jsonfile = require("jsonfile")
 import { json } from "express"
 import { argv } from "./avian.lib"
 import * as cookie from "cookie"
+import * as https from "https"
 
 if (argv.webpackHome === "") {
     argv.webpackHome = argv.home
@@ -391,11 +392,26 @@ async function loadUserServicesIntoAvian(avian: express.Express) {
         }
     }
 }
+if (argv.sslCert && argv.sslKey){
+    if (!path.isAbsolute(argv.sslCert)) {
+        argv.sslCert = path.join(argv.home, argv.sslCert)
+    }
+
+    if (!path.isAbsolute(argv.sslKey)) {
+        argv.sslKey = path.join(argv.home, argv.sslKey)
+    }
+}
 
 const avianUtils = new AvianUtils()
 if (cluster.isMaster) {
     const packageJson = require("../package.json")
     console.log(`Avian - Version ${packageJson.version}`)
+    if (argv.sslCert && argv.sslKey) {
+        console.log("Avian - SSL Enabled")
+        console.log(`Avian - Cert Path ${argv.sslCert}`)
+        console.log(`Avian - Key Path ${argv.sslKey}`)
+    }
+    
     if (argv.bundleSkip) {
         console.log("Avian - Skipped Bundling")
         avianUtils.startAllWorkers()
@@ -551,15 +567,31 @@ else {
     }))
 
     avian.use(require("express-redis")(argv.redisPort, argv.redisHost, {db: argv.redisCacheDB}, "cache"))
-    const server = avian.listen(argv.port, () => {
-        console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s",
-            process.pid,
-            argv.name,
-            argv.home,
-            argv.port,
-            argv.mode
-        )
-    })
+    if (argv.sslCert && argv.sslKey) {
+        https.createServer({
+            cert: fs.readFileSync(argv.sslCert),
+            key: fs.readFileSync(argv.sslKey)
+        }, avian).listen(argv.port, () => {
+            console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s",
+                process.pid,
+                argv.name,
+                argv.home,
+                argv.port,
+                argv.mode
+            )
+        })
+    }
+    else {
+        avian.listen(argv.port, () => {
+            console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s",
+                process.pid,
+                argv.name,
+                argv.home,
+                argv.port,
+                argv.mode
+            )
+        })
+    }
 
     avian.get("/sse", (req, res) => {
         subscribe((channel: any, message: any) => {
