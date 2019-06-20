@@ -214,7 +214,7 @@ function startDevWebpackWatcher(webpackDev: any) {
     servicesCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
-        ignored: ["components/**/*.component.*", "node_modules", "serverless"]
+        ignored: ["components/**/*.client.*", "node_modules", "serverless"]
     }, watcherCallback("services"))
 }
 

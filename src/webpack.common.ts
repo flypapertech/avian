@@ -12,7 +12,7 @@ function srcPath(subdir: string) {
 
 const componentsCommonConfig: webpack.Configuration = {
     entry: WebpackWatchedGlobEntries.getEntries([
-        `${argv.home}/components/**/*.component.*`
+        `${argv.home}/components/**/*.client.*`
         ]
     ),
     output: {
