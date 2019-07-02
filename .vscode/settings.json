@@ -1,5 +1,8 @@
 {
     "files.trimFinalNewlines": true,
     "files.insertFinalNewline": true,
-    "tslint.autoFixOnSave": true
+    "editor.codeActionsOnSave": {
+        "source.fixAll.tslint": true
+    },
+    "editor.formatOnSave": false,
 }

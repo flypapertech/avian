@@ -1,59 +1,49 @@
 {
+    "$schema": "http://json.schemastore.org/tslint",
     "rules": {
         "class-name": true,
-        "comment-format": [
-            true,
-            "check-space"
-        ],
-        "indent": [
-            true,
-            "spaces"
-        ],
+        "jsdoc-format": [true, "check-multiline-start"],
+        "completed-docs": [false, "classes", "functions", "methods"],
+        "comment-format": [true, "check-space", "check-lowercase", { "ignore-words": ["TODO", "HACK", "NOTE"] }],
         "no-duplicate-variable": true,
         "no-eval": true,
         "no-internal-module": true,
-        "no-trailing-whitespace": true,
         "no-unsafe-finally": true,
         "no-var-keyword": true,
-        "one-line": [
+        "triple-equals": [true, "allow-null-check"],
+        "variable-name": [true, "ban-keywords", "check-format"],
+        "no-submodule-imports": [
             true,
-            "check-open-brace",
-            "check-whitespace"
+            "common",
+            "components",
+            "lodash",
+            "nativescript-ui-dataform",
+            "nativescript-ui-listview",
+            "tns-core-modules",
+            "nativescript-plugin-firebase",
+            "pdfmake"
         ],
-        "quotemark": [
-            true,
-            "double"
-        ],
-        "semicolon": [
-            true,
-            "never"
-        ],
-        "triple-equals": [
-            true,
-            "allow-null-check"
-        ],
-        "typedef-whitespace": [
+        "indent": [true, "spaces", 4],
+        "semicolon": [false, "always"],
+        "no-console": false,
+        "max-line-length": [true, 150],
+        "object-literal-sort-keys": false,
+        "interface-name": [true, "never-prefix"],
+        "no-object-literal-type-assertion": false,
+        "no-angle-bracket-type-assertion": false,
+        "no-shadowed-variable": false,
+        "no-for-in-array": true,
+        "one-variable-per-declaration": false,
+        "curly": false,
+        "member-ordering": [
             true,
             {
-                "call-signature": "nospace",
-                "index-signature": "nospace",
-                "parameter": "nospace",
-                "property-declaration": "nospace",
-                "variable-declaration": "nospace"
+                "alphabetize": true,
+                "order": "statics-first"
             }
-        ],
-        "variable-name": [
-            true,
-            "ban-keywords"
-        ],
-        "whitespace": [
-            true,
-            "check-branch",
-            "check-decl",
-            "check-operator",
-            "check-separator",
-            "check-module",
-            "check-type"
         ]
+    },
+    "linterOptions": {
+        "exclude": ["node_modules/*"]
     }
 }
