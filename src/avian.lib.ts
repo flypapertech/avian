@@ -95,8 +95,8 @@ export const argv = yargs
   .option("sslKey", {
     type: "string"
   })
-  .option("jobScheduler", {
-    alias: "js",
+  .option("cronJobScheduler", {
+    alias: "cjs",
     default: false,
     describe:
       "Avian components are capable of scheduling cron-like jobs that are executed on the server.",

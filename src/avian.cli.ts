@@ -28,12 +28,14 @@ declare global {
     }
 }
 
+if (argv.webpackHome === "") argv.webpackHome = argv.home
+
 /**
- * Avian Component Job Schedular
+ * Avian Component Cron Job Schedular
  * @description The Avian component job scheduling framework.
  */
 
-if (argv.jobScheduler) {
+if (argv.cronJobScheduler) {
 
     setTimeout(() => {
 
@@ -44,22 +46,19 @@ if (argv.jobScheduler) {
 
             try {
 
-                if(require(config).jobScheduler) {
+                if(require(config).cronJobs) {
 
-                    const jobs = require(config).jobScheduler
+                    const jobs = require(config).cronJobs
 
                     jobs.forEach((job: any) => {
                         
                         if (job.enabled) {
 
-                            const componentJob = new schedule.Job(job.title, function() {
+                            const cronJob = new schedule.Job(job.title, function() {
                                 
                                 const { spawn } = require("child_process")
-
                                 const shell = spawn(job.command, job.args, { cwd: argv.home, env: process.env, detached: true })
-
-                                componentJob.schedule(job.expression)
-                                console.log(schedule.scheduledJobs)
+                                cronJob.schedule(job.expression)
 
                             })
                         }
