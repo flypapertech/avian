@@ -1,80 +1,156 @@
-import * as events from "events"
-import * as crypto from "crypto"
 import * as cluster from "cluster"
-import * as express from "express"
-import * as session from "express-session"
-import * as redis from "redis"
-import * as glob from "glob"
-import * as os from "os"
-import * as fs from "fs"
-import * as path from "path"
-import * as webpack from "webpack"
-import * as rimraf from "rimraf"
-import * as signature from "cookie-signature"
 import * as history from "connect-history-api-fallback"
-import { RequestHandler, Request } from "express"
-import mkdirp = require("mkdirp")
-import jsonfile = require("jsonfile")
-import { json } from "express"
-import { argv } from "./avian.lib"
 import * as cookie from "cookie"
+import * as signature from "cookie-signature"
+import * as crypto from "crypto"
+import * as events from "events"
+import { Request, RequestHandler } from "express"
+import * as express from "express"
+import { json } from "express"
+import * as session from "express-session"
+import * as fs from "fs"
+import * as glob from "glob"
 import * as https from "https"
+import jsonfile = require("jsonfile")
+import mkdirp = require("mkdirp")
+import * as os from "os"
+import * as path from "path"
+import * as redis from "redis"
+import * as rimraf from "rimraf"
+import * as webpack from "webpack"
+import { argv } from "./avian.lib"
 
-if (argv.webpackHome === "") {
-    argv.webpackHome = argv.home
+declare global {
+    namespace Express {
+        interface Request {
+        log: any
+        }
+    }
+}
+
+/**
+ * Avian Component Job Schedular
+ * @description The Avian component job scheduling framework.
+ */
+
+if (argv.jobScheduler) {
+
+    setTimeout(() => {
+
+        const componentConfigFiles = glob.sync(argv.home + "/components/**/*.config.json")
+        const schedule = require("node-schedule")
+
+        componentConfigFiles.forEach((config) => {
+
+            try {
+
+                if(require(config).jobScheduler) {
+
+                    const jobs = require(config).jobScheduler
+
+                    jobs.forEach((job: any) => {
+                        
+                        if (job.enabled) {
+
+                            const componentJob = new schedule.Job(job.title, function() {
+                                
+                                const { spawn } = require("child_process")
+
+                                const shell = spawn(job.command, job.args, { cwd: argv.home, env: process.env, detached: true })
+
+                                componentJob.schedule(job.expression)
+                                console.log(schedule.scheduledJobs)
+
+                            })
+                        }
+                    })
+                }
+            }
+            catch(error) {
+                // console.error(error)
+            }
+        })
+
+    }, 300000)
 }
 
 const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
 
 const injectArgv: RequestHandler = (req, res, next) => {
-    req.argv = Object.assign({}, argv)
+    req.argv = {...argv}
     req.sessionSecret = sessionSecret
     next()
 }
 
-declare global {
-  namespace Express {
-    interface Request {
-      log: any
-    }
-  }
-}
-
 class AvianUtils {
-    getComponentRoot(component: string): string {
+
+    public getComponentConfigObject(component: string, req: Request, subcomponent: string | undefined, callback: Function) {
+        try {
+            const cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component
+            const config: any = {}
+            req.cache.get(cacheKey, (err, config) => {
+                if (config) {
+                    callback(JSON.parse(config))
+                    return
+                }
+
+                const configString = avianUtils.setComponentConfigObjectCache(component, req, subcomponent)
+                callback(JSON.parse(configString))
+            })
+
+            return config
+        } catch (error) {
+            console.error(error)
+            callback({})
+        }
+    }
+    public getComponentRoot(component: string): string {
         if (fs.existsSync(`${argv.home}/components/${component}`))
             return `${argv.home}/components/${component}`
         else
             return `${argv.home}/components`
     }
 
-    getComponentViewPath(pathToViewFileWithoutExtension: string): string {
+    public getComponentViewPath(pathToViewFileWithoutExtension: string): string {
         try {
-            let matches = glob.sync(`${pathToViewFileWithoutExtension}.*`)
+            const matches = glob.sync(`${pathToViewFileWithoutExtension}.*`)
             return matches.length === 0 ? "" : matches[0]
-        }
-        catch (err) {
+        } catch (err) {
             return ""
         }
     }
 
-    setComponentConfigObjectCache(component: string, req: Request, subcomponent?: string): string {
-        let parentComponentRoot = this.getComponentRoot(component)
-        let componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`
-        let configFilePath = (subcomponent) ? `${componentPath}/${subcomponent}.config.json` : `${componentPath}/${component}.config.json`
-        let fallbackFilePath = (subcomponent) ? `${componentPath}/${component}.${subcomponent}.config.json` : undefined
+    public isAvianRunning(): boolean {
+        return Object.keys(cluster.workers).length > 0
+    }
+
+    public killAllWorkers(): boolean {
+        let existingWorkers = false
+        for (const id in cluster.workers) {
+            existingWorkers = true
+            const worker = cluster.workers[id]
+            if (worker)
+                worker.kill()
+        }
+
+        return existingWorkers
+    }
+
+    public setComponentConfigObjectCache(component: string, req: Request, subcomponent?: string): string {
+        const parentComponentRoot = this.getComponentRoot(component)
+        const componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`
+        const configFilePath = (subcomponent) ? `${componentPath}/${subcomponent}.config.json` : `${componentPath}/${component}.config.json`
+        const fallbackFilePath = (subcomponent) ? `${componentPath}/${component}.${subcomponent}.config.json` : undefined
         let configStringJSON: string
         try {
             configStringJSON = JSON.stringify(jsonfile.readFileSync(configFilePath))
         } catch (err) {
             if (!fallbackFilePath) {
                 configStringJSON = JSON.stringify({})
-            }
-            else {
+            } else {
                 try {
                     configStringJSON = JSON.stringify(jsonfile.readFileSync(fallbackFilePath))
-                }
-                catch {
+                } catch {
                     configStringJSON = JSON.stringify({})
                 }
             }
@@ -84,70 +160,31 @@ class AvianUtils {
         return configStringJSON
     }
 
-    getComponentConfigObject(component: string, req: Request, subcomponent: string | undefined, callback: Function) {
-        try {
-            let cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component
-            let config = undefined
-            req.cache.get(cacheKey, (err, config) => {
-                if (config) {
-                    callback(JSON.parse(config))
-                    return
-                }
-
-                let configString = avianUtils.setComponentConfigObjectCache(component, req, subcomponent)
-                callback(JSON.parse(configString))
-            })
-
-            return config
-        }
-        catch (error) {
-            console.error(error)
-            callback({})
-        }
-    }
-
-    killAllWorkers(): boolean {
-        let existingWorkers = false
-        for (const id in cluster.workers) {
-            existingWorkers = true
-            let worker = cluster.workers[id]
-            if (worker)
-                worker.kill()
-        }
-
-        return existingWorkers
-    }
-
-    startAllWorkers() {
-        let cores = os.cpus()
-        for (let i = 0; i < cores.length; i++) {
-            cluster.fork()
-        }
-    }
-
-    isAvianRunning(): boolean {
-        return Object.keys(cluster.workers).length > 0
-    }
-
-    setWorkersToAutoRestart() {
-        cluster.on("exit", worker => {
+    public setWorkersToAutoRestart() {
+        cluster.on("exit", (worker) => {
             cluster.fork()
         })
+    }
+
+    public startAllWorkers() {
+        const cores = os.cpus()
+        for (let i = 0 ; i < cores.length ; i++) {
+            cluster.fork()
+        }
     }
 }
 
 const avianEmitter = new events.EventEmitter()
-let runningBuilds = {
+const runningBuilds = {
     services: false,
-    components: false
+    components: false,
 }
 
 avianEmitter.on("buildStarted", (name: string) => {
     console.log(`Avian - Started Bundling ${capitalizeFirstLetter(name)}`)
     if (name === "services") {
         runningBuilds.services = true
-    }
-    else if (name === "components") {
+    } else if (name === "components") {
         runningBuilds.components = true
     }
 })
@@ -162,8 +199,7 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
     console.log(`Avian - Finished Bundling ${capitalizeFirstLetter(name)}`)
     if (name === "services") {
         runningBuilds.services = false
-    }
-    else if (name === "components") {
+    } else if (name === "components") {
         runningBuilds.components = false
     }
     if (runningBuilds.components === false && runningBuilds.services === false) {
@@ -176,8 +212,7 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
         if (!avianUtils.isAvianRunning()) {
             console.log("Avian - Starting Server")
             avianUtils.startAllWorkers()
-        }
-        else if (pendingChunks.some(chunk => chunk.includes("service"))) {
+        } else if (pendingChunks.some((chunk) => chunk.includes("service"))) {
             console.log("Avian - Restarting Server")
             avianUtils.killAllWorkers()
             avianUtils.startAllWorkers()
@@ -190,7 +225,7 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
 function startDevWebpackWatcher(webpackDev: any) {
     let componentsCompiler: webpack.Compiler
     componentsCompiler = webpack(
-        webpackDev.ComponentsConfig
+        webpackDev.ComponentsConfig,
     )
     componentsCompiler.hooks.watchRun.tap("Starting", () => {
         avianEmitter.emit("buildStarted", "components")
@@ -198,7 +233,7 @@ function startDevWebpackWatcher(webpackDev: any) {
 
     let servicesCompiler: webpack.Compiler
     servicesCompiler = webpack(
-        webpackDev.ServicesConfig
+        webpackDev.ServicesConfig,
     )
     servicesCompiler.hooks.watchRun.tap("Starting", () => {
         avianEmitter.emit("buildStarted", "services")
@@ -208,24 +243,23 @@ function startDevWebpackWatcher(webpackDev: any) {
     const watching = componentsCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
-        ignored: ["components/**/*.service.*", "node_modules", "serverless"]
+        ignored: ["components/**/*.service.*", "node_modules", "serverless"],
     }, watcherCallback("components"))
 
     servicesCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
-        ignored: ["components/**/*.client.*", "node_modules", "serverless"]
+        ignored: ["components/**/*.client.*", "node_modules", "serverless"],
     }, watcherCallback("services"))
 }
 
 function watcherCallback(name: string) {
-    let chunkVersions = {} as any
+    const chunkVersions = {} as any
     const watcherCallback: webpack.ICompiler.Handler = (err, stats) => {
         if (err || stats.hasErrors()) {
             if (err) {
                 console.error(err)
-            }
-            else if (stats) {
+            } else if (stats) {
                 stats.toJson().errors.forEach((err: any) => {
                     console.error(err)
                 })
@@ -250,11 +284,11 @@ function watcherCallback(name: string) {
             })
         }
 
-        let changedChunks = stats.compilation.chunks.filter(chunk => {
-            let oldVersion = chunkVersions[chunk.name]
+        const changedChunks = stats.compilation.chunks.filter((chunk) => {
+            const oldVersion = chunkVersions[chunk.name]
             chunkVersions[chunk.name] = chunk.hash
             return chunk.hash !== oldVersion
-          }).map(chunk => chunk.name)
+          }).map((chunk) => chunk.name)
 
         avianEmitter.emit("buildCompleted", name, changedChunks)
         return
@@ -267,7 +301,7 @@ function startProdWebpackCompiler(webpackProd: any) {
     let webpackCompiler: webpack.MultiCompiler
     webpackCompiler = webpack([
         webpackProd.ComponentsConfig,
-        webpackProd.ServicesConfig
+        webpackProd.ServicesConfig,
     ])
 
     console.log("Avian - Started Bundling")
@@ -275,8 +309,7 @@ function startProdWebpackCompiler(webpackProd: any) {
         if (err || stats.hasErrors()) {
             if (err) {
                 console.error(err)
-            }
-            else if (stats) {
+            } else if (stats) {
                 stats.toJson().errors.forEach((err: any) => {
                     console.error(err)
                 })
@@ -293,8 +326,7 @@ function startProdWebpackCompiler(webpackProd: any) {
             console.log("Avian - Bundle Only Enabled Shutting Down")
             process.exit()
             return
-        }
-        else {
+        } else {
             console.log("Avian - Starting Server")
             avianUtils.startAllWorkers()
         }
@@ -307,15 +339,15 @@ class ServerEvent {
     constructor() {
     }
 
-    addData(data: string) {
-        let lines = data.split(/\n/)
+    public addData(data: string) {
+        const lines = data.split(/\n/)
 
-        for (let i = 0; i < lines.length; i++) {
-            let element = lines[i]
+        for (let i = 0 ; i < lines.length ; i++) {
+            const element = lines[i]
             this.data += "data:" + element + "\n"
         }
     }
-    payload() {
+    public payload() {
         return this.data + "\n"
     }
 }
@@ -336,63 +368,57 @@ function publish(message: string) {
 }
 
 async function loadUserServicesIntoAvian(avian: express.Express) {
-    let compiledServices = glob.sync(`${argv.home}/private/**/*.service.js`)
-    for (let i = 0; i < compiledServices.length; i++) {
-        let dirname = path.dirname(compiledServices[i])
-        let directories = dirname.split("/")
-        let routeArray = []
-        for (let j = directories.length - 1; j >= 0; j--) {
+    const compiledServices = glob.sync(`${argv.home}/private/**/*.service.js`)
+    for (let i = 0 ; i < compiledServices.length ; i++) {
+        const dirname = path.dirname(compiledServices[i])
+        const directories = dirname.split("/")
+        const routeArray = []
+        for (let j = directories.length - 1 ; j >= 0 ; j--) {
             if (directories[j] !== "private") {
                 routeArray.unshift(directories[j])
-            }
-            else {
+            } else {
                 break
             }
         }
 
         if (routeArray.length === 0) {
-            let basename = path.basename(compiledServices[i])
+            const basename = path.basename(compiledServices[i])
             if (basename !== "avian.service.js") {
-                let nameArray = basename.split(".")
-                for (let j = 0; j < nameArray.length; j++) {
+                const nameArray = basename.split(".")
+                for (let j = 0 ; j < nameArray.length ; j++) {
                     if (nameArray[j] !== "service") {
                         routeArray.push(nameArray[j])
-                    }
-                    else {
+                    } else {
                         break
                     }
                 }
             }
         }
 
-        let routeBase = "/" + routeArray.join("/")
+        const routeBase = "/" + routeArray.join("/")
         try {
-            let service = await import (`${compiledServices[i]}`)
+            const service = await import (`${compiledServices[i]}`)
             let compiledService: any
             if (service.default) {
                 compiledService = service.default
-            }
-            else {
+            } else {
                 compiledService = service
             }
             if (Object.getPrototypeOf(compiledService) === express.Router) {
                 avian.use(routeBase, compiledService)
-            }
-            else if (typeof compiledService === "function") {
+            } else if (typeof compiledService === "function") {
                 try {
                     avian.use(routeBase, compiledService(avian))
-                }
-                catch (error) {
+                } catch (error) {
                     console.log("Skipping service file " + compiledServices[i] + " it's default export isn't an express.Router")
                 }
             }
-        }
-        catch (err) {
+        } catch (err) {
             console.error(err)
         }
     }
 }
-if (argv.sslCert && argv.sslKey){
+if (argv.sslCert && argv.sslKey) {
     if (!path.isAbsolute(argv.sslCert)) {
         argv.sslCert = path.join(argv.home, argv.sslCert)
     }
@@ -411,20 +437,20 @@ if (cluster.isMaster) {
         console.log(`Avian - Cert Path ${argv.sslCert}`)
         console.log(`Avian - Key Path ${argv.sslKey}`)
     }
-    
+
     if (argv.bundleSkip) {
         console.log("Avian - Skipped Bundling")
         avianUtils.startAllWorkers()
         avianUtils.setWorkersToAutoRestart()
-    }
-    else {
-        import("typescript").then(ts => {
+    } else {
+        import("typescript").then((ts) => {
             rimraf.sync(`${argv.home}/private/*`)
             rimraf.sync(`${argv.home}/public/*`)
 
-            let webpackConfigs = glob.sync(`${argv.webpackHome}/webpack.development.*`)
+            const webpackConfigs = glob.sync(`${argv.webpackHome}/webpack.development.*`)
             webpackConfigs.push(...glob.sync(`${argv.webpackHome}/webpack.production.*`))
-            let program = ts.createProgram(webpackConfigs, {
+            const program = ts.createProgram(webpackConfigs, {
+                allowJs: true,
                 noEmitOnError: true,
                 noImplicityAny: true,
                 target: ts.ScriptTarget.ES5,
@@ -432,55 +458,52 @@ if (cluster.isMaster) {
                 outDir: `${argv.home}/private`,
                 skipLibCheck: true,
                 lib: [
-                    "lib.es2015.d.ts"
-                ]
+                    "lib.es2015.d.ts",
+                ],
             })
-            let emitResult = program.emit()
+            const emitResult = program.emit()
 
-            let allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
-            allDiagnostics.forEach(diagnostic => {
+            const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
+            allDiagnostics.forEach((diagnostic) => {
                 if (diagnostic.file) {
-                    let { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
-                    let message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
+                    const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
+                    const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
                     console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
-                }
-                else {
+                } else {
                     console.log(`${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`)
                 }
             })
 
             if (argv.mode === "development") {
-                import(argv.home + "/private/webpack.development").then(webpackDev => {
+                import(argv.home + "/private/webpack.development").then((webpackDev) => {
                     startDevWebpackWatcher(webpackDev)
-                }).catch(error => {
+                }).catch((error) => {
                     console.log("Avian - Falling back to default dev webpack config")
-                    import("./webpack.development").then(defaultWebpackDev => {
+                    import("./webpack.development").then((defaultWebpackDev) => {
                         startDevWebpackWatcher(defaultWebpackDev)
-                    }).catch(error => {
+                    }).catch((error) => {
                         console.log("Avian - Failed to load default development webpack config")
                     })
                 })
-            }
-            else {
-                import(argv.home + "/private/webpack.production").then(webpackProd => {
+            } else {
+                import(argv.home + "/private/webpack.production").then((webpackProd) => {
                     startProdWebpackCompiler(webpackProd)
-                }).catch(error => {
+                }).catch((error) => {
                     console.log("Avian - Falling back to default prod webpack config")
-                    import("./webpack.production").then(defaultWebpackProd => {
+                    import("./webpack.production").then((defaultWebpackProd) => {
                         startProdWebpackCompiler(defaultWebpackProd)
-                    }).catch(error => {
+                    }).catch((error) => {
                         console.log("Avian - Failed to load default production webpack config")
                     })
                 })
             }
         })
     }
-}
-else {
+} else {
     const avian = express()
     /**
-    * Logging Framework
-    */
+     * Logging Framework
+     */
     switch (argv.logger) {
 
         case "bunyan":
@@ -494,8 +517,8 @@ else {
                         type: "rotating-file",
                         path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
                         period: "1d",
-                        count: 365
-                    }
+                        count: 365,
+                    },
                 ],
             }))
             break
@@ -511,41 +534,44 @@ else {
                 configure: {
                     host: argv.loggerFluentHost,
                     port: argv.loggerFluentPort,
-                    timeout: 3.0
-                }
+                    timeout: 3.0,
+                },
             }))
             break
     }
+
+    /**
+     * Template / View File Engines
+     */
 
     avian.engine("html", require("ejs").renderFile)
     avian.use(injectArgv)
 
     avian.locals.argv = argv
-    let redisStore = require("connect-redis")(session)
+    const redisStore = require("connect-redis")(session)
     const enableAuthHeadersForExpressSession: RequestHandler = (req, res, next) => {
         if (req.headers.authorization) {
-            let authParts = req.headers.authorization.split(" ")
+            const authParts = req.headers.authorization.split(" ")
             if (authParts[0].toLowerCase() === "bearer" && authParts.length > 1) {
-                // We need to sign this exactly like how express-session signs cookies
-                let signed = "s:" + signature.sign(authParts[1], sessionSecret)
+                // TODO We need to sign this exactly like how express-session signs cookies
+                const signed = "s:" + signature.sign(authParts[1], sessionSecret)
 
                 if (!req.headers.cookie) {
-                    req.headers.cookie = `connect.sid=${signed};`
+                    req.headers.cookie = `connect.sid=${signed}`
                     next()
                     return
                 }
 
                 const cookies = cookie.parse(req.headers.cookie)
-                const updatedCookies = Object.assign({}, cookies, {
-                    "connect.sid": signed
-                })
+                const updatedCookies: any = {...cookies,
+                                        "connect.sid": signed}
 
                 const cookieKeys = Object.keys(updatedCookies)
-                const updatedCookieArray = cookieKeys.map(key => {
+                const updatedCookieArray = cookieKeys.map((key) => {
                     return `${key}=${encodeURIComponent(updatedCookies[key])}`
                 })
 
-                req.headers.cookie = updatedCookieArray.join(";")
+                req.headers.cookie = updatedCookieArray.join("")
             }
         }
 
@@ -562,40 +588,39 @@ else {
         saveUninitialized: true,
         cookie: {
             httpOnly: true,
-            maxAge: 2592000000
-        }
+            maxAge: 2592000000,
+        },
     }))
 
     avian.use(require("express-redis")(argv.redisPort, argv.redisHost, {db: argv.redisCacheDB}, "cache"))
     if (argv.sslCert && argv.sslKey) {
         https.createServer({
             cert: fs.readFileSync(argv.sslCert),
-            key: fs.readFileSync(argv.sslKey)
+            key: fs.readFileSync(argv.sslKey),
         }, avian).listen(argv.port, () => {
             console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s",
                 process.pid,
                 argv.name,
                 argv.home,
                 argv.port,
-                argv.mode
+                argv.mode,
             )
         })
-    }
-    else {
+    } else {
         avian.listen(argv.port, () => {
             console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s",
                 process.pid,
                 argv.name,
                 argv.home,
                 argv.port,
-                argv.mode
+                argv.mode,
             )
         })
     }
 
     avian.get("/sse", (req, res) => {
         subscribe((channel: any, message: any) => {
-            let messageEvent = new ServerEvent()
+            const messageEvent = new ServerEvent()
             messageEvent.addData(message)
             res.write(messageEvent.payload())
         })
@@ -604,7 +629,7 @@ else {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "X-Accel-Buffering": "no"
+            "X-Accel-Buffering": "no",
         })
 
         res.write("retry: 10000\n\n")
@@ -624,7 +649,7 @@ else {
         avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))
         if (argv.spa) {
             avian.use(history({
-                index: `/${argv.defaultComponent}`
+                index: `/${argv.defaultComponent}`,
             }))
         }
 
@@ -640,8 +665,8 @@ else {
         }
 
         avian.get("/:component/:subcomponent", express.urlencoded({ extended: true }), (req, res, next) => {
-            let componentRoot = avianUtils.getComponentRoot(req.params.component)
-            let subComponentPath = `${componentRoot}/${req.params.subcomponent}`
+            const componentRoot = avianUtils.getComponentRoot(req.params.component)
+            const subComponentPath = `${componentRoot}/${req.params.subcomponent}`
 
             // if the subcomponent directory doesn't exist, move on
             if (!fs.existsSync(`${subComponentPath}`)) {
@@ -666,20 +691,19 @@ else {
                     res.locals.req = req
                     res.render(viewPath, config)
                 })
-            }
-            catch (err) {
+            } catch (err) {
                 console.error(err)
                 res.redirect("/errors")
             }
         })
 
         avian.get("/:component", express.urlencoded({ extended: true }), (req, res, next) => {
-            let componentRoot = avianUtils.getComponentRoot(req.params.component)
+            const componentRoot = avianUtils.getComponentRoot(req.params.component)
 
             try {
                 res.setHeader("X-Powered-By", "Avian")
 
-                let viewPath = avianUtils.getComponentViewPath(`${componentRoot}/${req.params.component}.view`)
+                const viewPath = avianUtils.getComponentViewPath(`${componentRoot}/${req.params.component}.view`)
                 if (viewPath === "") {
                     res.sendStatus(404)
                     return
@@ -689,8 +713,7 @@ else {
                     res.locals.req = req
                     res.render(viewPath, config)
                 })
-            }
-            catch (err) {
+            } catch (err) {
                 console.error(err)
                 res.redirect("/errors")
             }
@@ -702,8 +725,7 @@ else {
                     res.setHeader("X-Powered-By", "Avian")
                     res.json(config)
                 })
-            }
-            catch (err) {
+            } catch (err) {
                 res.setHeader("X-Powered-By", "Avian")
                 res.sendStatus(404)
             }
@@ -715,8 +737,7 @@ else {
                     res.setHeader("X-Powered-By", "Avian")
                     res.json(config)
                 })
-            }
-            catch (err) {
+            } catch (err) {
                 res.setHeader("X-Powered-By", "Avian")
                 res.sendStatus(404)
             }
@@ -755,17 +776,17 @@ else {
                     }
                     break
                 case "fluent":
-                    req.logger.emit(req.query.label || "client", { source: req.query.source || null, level: req.query.level || "info", mode: argv.mode, record: req.body })
+                    req.logger.emit(
+                        req.query.label || "client", 
+                        { source: req.query.source || null, level: req.query.level || "info", mode: argv.mode, record: req.body })
                     break
-                    }
+                }
 
             res.sendStatus(200)
         })
 
-
         avian.all("/", (req, res, next) => {
             res.redirect(`/${argv.defaultComponent}`)
         })
-
     })
 }

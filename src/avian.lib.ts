@@ -1,5 +1,9 @@
 import * as yargs from "yargs";
 import { RedisClient } from "redis";
+
+/** 
+ * Avian Library 
+ */
 declare global {
   namespace Express {
     interface Request {
