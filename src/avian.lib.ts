@@ -69,8 +69,11 @@ export const argv = yargs
   .option("redisCacheDB", {
     default: 2
   })
+  .option("redisCronSchedulerDB", {
+    default: 3
+  })
   .option("webpackHome", {
-    default: process.cwd()
+    default: ""
   })
   .option("logger", {
     alias: "l",
