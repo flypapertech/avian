@@ -1,6 +1,5 @@
 import * as yargs from "yargs"
 import { RedisClient } from "redis"
-import * as os from "os"
 
 /** 
  * Avian Library
@@ -30,7 +29,7 @@ export const argv = yargs
   .env("AVIAN_APP")
   .option("name", {
     alias: "n",
-    default: process.env.HOSTNAME || os.hostname(),
+    default: process.env.HOSTNAME || "localhost",
     describe: "The name of your application"
   })
   .option("home", {
@@ -69,7 +68,7 @@ export const argv = yargs
     type: "boolean"
   })
   .option("redisHost", {
-    default: os.hostname()
+    default: "127.0.0.1"
   })
   .option("redisPort", {
     default: 6379
@@ -101,7 +100,7 @@ export const argv = yargs
   })
   .option("loggerFluentHost", {
     alias: "lfh",
-    default: os.hostname()
+    default: "127.0.0.1"
   })
   .option("loggerFluentPort", {
     alias: "lfp",
