@@ -4,44 +4,32 @@ import * as cookie from "cookie"
 import * as signature from "cookie-signature"
 import * as crypto from "crypto"
 import * as events from "events"
-import { Request, RequestHandler } from "express"
+import { Request, Response, RequestHandler, Router } from "express"
 import * as express from "express"
 import { json } from "express"
 import * as session from "express-session"
 import * as fs from "fs"
 import * as glob from "glob"
 import * as https from "https"
-import jsonfile = require("jsonfile")
 import mkdirp = require("mkdirp")
-import * as os from "os"
 import * as path from "path"
 import * as redis from "redis"
 import * as rimraf from "rimraf"
 import * as webpack from "webpack"
-import { argv } from "./avian.lib"
-
-/** 
- * Avian CLI Interfaces
- * @description To be exported at build time to avian.cli.d.ts
- */
-declare global {
-    namespace Express {
-        interface Request {
-            log: any
-        }
-    }
-}
+import { argv, utils } from "./avian.lib"
 
 if (argv.webpackHome === "") argv.webpackHome = argv.home
 
 /**
  * Avian Cron Job Schedular
- * @description Avian cron job scheduling for individual components
+ * @description Every Avian component has cron job like scheduling capabilities.
  */
 
 if (argv.cronJobScheduler) {
 
     setTimeout(() => {
+
+        console.log("Avian - Cron Job Scheduling")
 
         const componentConfigFiles = glob.sync(argv.home + "/components/**/*.config.json")
         const schedule = require("node-schedule")
@@ -64,7 +52,7 @@ if (argv.cronJobScheduler) {
                                 const shell = spawn(job.command, job.args, { cwd: argv.home, env: process.env, detached: true })
                             })
                             cronJob.schedule(job.expression)
-                            console.log(`Avian - Cron Job ${name} has been scheduled to run.`)
+                            console.log(`Avian - Cron job ${name} has been scheduled to run.`)
                         }
                     })
                 }
@@ -84,137 +72,7 @@ const injectArgv: RequestHandler = (req, res, next) => {
     req.sessionSecret = sessionSecret
     next()
 }
-/**
- * Avian utils
- * @description A class filled with useful utilities that are very specific to this file
- */
-class AvianUtils {
 
-    /**
-     * Gets component config object
-     * @param component 
-     * @param req 
-     * @param subcomponent 
-     * @param callback 
-     * @returns  
-     */
-    public getComponentConfigObject(component: string, req: Request, subcomponent: string | undefined, callback: Function) {
-        try {
-            const cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component
-            const config: any = {}
-            req.cache.get(cacheKey, (err, config) => {
-                if (config) {
-                    callback(JSON.parse(config))
-                    return
-                }
-
-                const configString = avianUtils.setComponentConfigObjectCache(component, req, subcomponent)
-                callback(JSON.parse(configString))
-            })
-
-            return config
-        } catch (error) {
-            console.error(error)
-            callback({})
-        }
-    }
-    /**
-     * Gets component root
-     * @param component 
-     * @returns component root 
-     */
-    public getComponentRoot(component: string): string {
-        if (fs.existsSync(`${argv.home}/components/${component}`))
-            return `${argv.home}/components/${component}`
-        else
-            return `${argv.home}/components`
-    }
-    /**
-     * Gets component view path
-     * @param pathToViewFileWithoutExtension 
-     * @returns component view path 
-     */
-    public getComponentViewPath(pathToViewFileWithoutExtension: string): string {
-        try {
-            const matches = glob.sync(`${pathToViewFileWithoutExtension}.*`)
-            return matches.length === 0 ? "" : matches[0]
-        } catch (err) {
-            return ""
-        }
-    }
-    /**
-     * Determines whether avian running is
-     * @returns true if avian running 
-     */
-    public isAvianRunning(): boolean {
-        return Object.keys(cluster.workers).length > 0
-    }
-    /**
-     * Kills all workers
-     * @returns true if all workers 
-     */
-    public killAllWorkers(): boolean {
-        let existingWorkers = false
-        for (const id in cluster.workers) {
-            existingWorkers = true
-            const worker = cluster.workers[id]
-            if (worker)
-                worker.kill()
-        }
-
-        return existingWorkers
-    }
-
-    /**
-     * Sets component config object cache
-     * @param component 
-     * @param req 
-     * @param [subcomponent] 
-     * @returns component config object cache 
-     */
-    public setComponentConfigObjectCache(component: string, req: Request, subcomponent?: string): string {
-        const parentComponentRoot = this.getComponentRoot(component)
-        const componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`
-        const configFilePath = (subcomponent) ? `${componentPath}/${subcomponent}.config.json` : `${componentPath}/${component}.config.json`
-        const fallbackFilePath = (subcomponent) ? `${componentPath}/${component}.${subcomponent}.config.json` : undefined
-        let configStringJSON: string
-        try {
-            configStringJSON = JSON.stringify(jsonfile.readFileSync(configFilePath))
-        } catch (err) {
-            if (!fallbackFilePath) {
-                configStringJSON = JSON.stringify({})
-            } else {
-                try {
-                    configStringJSON = JSON.stringify(jsonfile.readFileSync(fallbackFilePath))
-                } catch {
-                    configStringJSON = JSON.stringify({})
-                }
-            }
-        }
-
-        req.cache.set(component, configStringJSON)
-        return configStringJSON
-    }
-
-    /**
-     * Sets workers to auto restart
-     */
-    public setWorkersToAutoRestart() {
-        cluster.on("exit", (worker) => {
-            cluster.fork()
-        })
-    }
-
-    /**
-     * Starts all workers
-     */
-    public startAllWorkers() {
-        const cores = os.cpus()
-        for (let i = 0 ; i < cores.length ; i++) {
-            cluster.fork()
-        }
-    }
-}
 
 const avianEmitter = new events.EventEmitter()
 const runningBuilds = {
@@ -251,13 +109,13 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
             return
         }
 
-        if (!avianUtils.isAvianRunning()) {
+        if (!utils.isAvianRunning()) {
             console.log("Avian - Starting Server")
-            avianUtils.startAllWorkers()
+            utils.startAllWorkers()
         } else if (pendingChunks.some((chunk) => chunk.includes("service"))) {
             console.log("Avian - Restarting Server")
-            avianUtils.killAllWorkers()
-            avianUtils.startAllWorkers()
+            utils.killAllWorkers()
+            utils.startAllWorkers()
         }
 
         pendingChunks = []
@@ -315,7 +173,7 @@ function watcherCallback(name: string) {
             }
 
             console.error("Avian - Encountered compile errors, stopping server")
-            avianUtils.killAllWorkers()
+            utils.killAllWorkers()
             console.error("Avian - Waiting for you to fix compile errors")
             return
         }
@@ -359,7 +217,7 @@ function startProdWebpackCompiler(webpackProd: any) {
 
             console.error("Avian - Bundling Failed Due To Compilation Errors")
             console.log("Avian - Shutting Down")
-            avianUtils.killAllWorkers()
+            utils.killAllWorkers()
             process.exit(1)
             return
         }
@@ -370,7 +228,7 @@ function startProdWebpackCompiler(webpackProd: any) {
             return
         } else {
             console.log("Avian - Starting Server")
-            avianUtils.startAllWorkers()
+            utils.startAllWorkers()
         }
     })
 
@@ -470,7 +328,6 @@ if (argv.sslCert && argv.sslKey) {
     }
 }
 
-const avianUtils = new AvianUtils()
 if (cluster.isMaster) {
     const packageJson = require("../package.json")
     console.log(`Avian - Version ${packageJson.version}`)
@@ -482,8 +339,8 @@ if (cluster.isMaster) {
 
     if (argv.bundleSkip) {
         console.log("Avian - Skipped Bundling")
-        avianUtils.startAllWorkers()
-        avianUtils.setWorkersToAutoRestart()
+        utils.startAllWorkers()
+        utils.setWorkersToAutoRestart()
     } else {
         import("typescript").then((ts) => {
             rimraf.sync(`${argv.home}/private/*`)
@@ -540,10 +397,6 @@ if (cluster.isMaster) {
                 })
             }
         })
-
-        if (argv.cronJobScheduler) {
-            console.log("Avian - Cron Job Scheduling Enabled for Components")
-        }
     }
 } else {
     const avian = express()
@@ -707,7 +560,7 @@ if (cluster.isMaster) {
         }
 
         avian.get("/:component/:subcomponent", express.urlencoded({ extended: true }), (req, res, next) => {
-            const componentRoot = avianUtils.getComponentRoot(req.params.component)
+            const componentRoot = utils.getComponentRoot(req.params.component)
             const subComponentPath = `${componentRoot}/${req.params.subcomponent}`
 
             // if the subcomponent directory doesn't exist, move on
@@ -719,9 +572,9 @@ if (cluster.isMaster) {
 
             try {
                 res.setHeader("X-Powered-By", "Avian")
-                let viewPath = avianUtils.getComponentViewPath(`${subComponentPath}/${req.params.subcomponent}.view`)
+                let viewPath = utils.getComponentViewPath(`${subComponentPath}/${req.params.subcomponent}.view`)
                 if (viewPath === "") {
-                    viewPath = avianUtils.getComponentViewPath(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view`)
+                    viewPath = utils.getComponentViewPath(`${subComponentPath}/${req.params.component}.${req.params.subcomponent}.view`)
                 }
 
                 if (viewPath === "") {
@@ -729,7 +582,7 @@ if (cluster.isMaster) {
                     return
                 }
 
-                avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
+                utils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
                     res.locals.req = req
                     res.render(viewPath, config)
                 })
@@ -740,18 +593,18 @@ if (cluster.isMaster) {
         })
 
         avian.get("/:component", express.urlencoded({ extended: true }), (req, res, next) => {
-            const componentRoot = avianUtils.getComponentRoot(req.params.component)
+            const componentRoot = utils.getComponentRoot(req.params.component)
 
             try {
                 res.setHeader("X-Powered-By", "Avian")
 
-                const viewPath = avianUtils.getComponentViewPath(`${componentRoot}/${req.params.component}.view`)
+                const viewPath = utils.getComponentViewPath(`${componentRoot}/${req.params.component}.view`)
                 if (viewPath === "") {
                     res.sendStatus(404)
                     return
                 }
 
-                avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
+                utils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
                     res.locals.req = req
                     res.render(viewPath, config)
                 })
@@ -763,7 +616,7 @@ if (cluster.isMaster) {
 
         avian.get("/:component/config/objects.json", (req, res, next) => {
             try {
-                avianUtils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
+                utils.getComponentConfigObject(req.params.component, req, undefined, (config: any) => {
                     res.setHeader("X-Powered-By", "Avian")
                     res.json(config)
                 })
@@ -775,7 +628,7 @@ if (cluster.isMaster) {
 
         avian.get("/:component/:subcomponent/config/objects.json", (req, res, next) => {
             try {
-                avianUtils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
+                utils.getComponentConfigObject(req.params.component, req, req.params.subcomponent, (config: any) => {
                     res.setHeader("X-Powered-By", "Avian")
                     res.json(config)
                 })
@@ -827,8 +680,22 @@ if (cluster.isMaster) {
             res.sendStatus(200)
         })
 
+        /** 
+         *  Avian Service Routes
+         *  @description Avian provides numerous out of the box helper service routes for application developers.
+         */
+        /*services.forEach((route: any) => {
+            route.method(route.path, (req: Request, res: Response, next: Function) => {
+
+                route.action(req, res, next)
+                    .then(() => next)
+                    .catch((error: any) => next(error))
+            })
+        })*/
+
         avian.all("/", (req, res, next) => {
             res.redirect(`/${argv.defaultComponent}`)
         })
-    })
+    
+    }).catch(err => console.log(err))
 }
