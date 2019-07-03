@@ -1,19 +1,20 @@
 {
-  "compilerOptions": {
-    "strict": true,
-    "target": "es6",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "removeComments": true,
-    "declaration": true,
-    "outDir": "dist",
-    "rootDirs": [
-      "src",
-      "spec"
-    ]
-  },
-  "files": [
-    "./src/avian.cli.ts",
-    "./src/avian.lib.ts"
-  ]
+	"$schema": "http://json.schemastore.org/tsconfig",
+	"compilerOptions": {
+		"strict": true,
+		"target": "es6",
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"removeComments": true,
+		"declaration": true,
+		"outDir": "dist",
+		"rootDirs": [
+			"src",
+			"spec"
+		]
+	},
+	"files": [
+		"./src/avian.cli.ts",
+		"./src/avian.lib.ts"
+	]
 }
