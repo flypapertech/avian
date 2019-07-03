@@ -96,6 +96,7 @@
     "@types/webpack": "^4.4.17",
     "@types/webpack-merge": "^4.1.3",
     "@types/webpack-node-externals": "^1.6.3",
+    "@types/webpack-watched-glob-entries-plugin": "^2.1.0",
     "@types/yargs": "^12.0.9",
     "mocha": "^5.2.0",
     "snyk": "^1.130.0",

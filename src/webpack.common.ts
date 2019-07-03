@@ -4,14 +4,14 @@ import * as path from "path"
 import nodeExternals = require("webpack-node-externals")
 import { argv } from "./avian.lib"
 
-const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
+import webpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 
 function srcPath(subdir: string) {
     return path.join(argv.name, subdir)
 }
 
 const componentsCommonConfig: webpack.Configuration = {
-    entry: WebpackWatchedGlobEntries.getEntries([
+    entry: webpackWatchedGlobEntries.getEntries([
         `${argv.home}/components/**/*.client.*`
         ]
     ),
@@ -28,7 +28,7 @@ const componentsCommonConfig: webpack.Configuration = {
         }
     },
     plugins: [
-        new WebpackWatchedGlobEntries(),
+        new webpackWatchedGlobEntries(),
         new VueLoader.VueLoaderPlugin()
     ],
     module : {
@@ -108,7 +108,7 @@ const componentsCommonConfig: webpack.Configuration = {
 
 const servicesCommonConfig: webpack.Configuration = {
     target: "node",
-    entry: WebpackWatchedGlobEntries.getEntries([
+    entry: webpackWatchedGlobEntries.getEntries([
             `${argv.home}/components/**/*.service.*`
         ]
     ),
@@ -124,7 +124,7 @@ const servicesCommonConfig: webpack.Configuration = {
         }
     },
     plugins: [
-        new WebpackWatchedGlobEntries()
+        new webpackWatchedGlobEntries()
     ],
     // externals: [nodeExternals(), /\.pug$/, /\.less$/, /\.css$/],
     externals: [nodeExternals()],
