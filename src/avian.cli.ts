@@ -118,13 +118,22 @@ class AvianUtils {
             callback({})
         }
     }
+    /**
+     * Gets component root
+     * @param component 
+     * @returns component root 
+     */
     public getComponentRoot(component: string): string {
         if (fs.existsSync(`${argv.home}/components/${component}`))
             return `${argv.home}/components/${component}`
         else
             return `${argv.home}/components`
     }
-
+    /**
+     * Gets component view path
+     * @param pathToViewFileWithoutExtension 
+     * @returns component view path 
+     */
     public getComponentViewPath(pathToViewFileWithoutExtension: string): string {
         try {
             const matches = glob.sync(`${pathToViewFileWithoutExtension}.*`)
@@ -133,11 +142,17 @@ class AvianUtils {
             return ""
         }
     }
-
+    /**
+     * Determines whether avian running is
+     * @returns true if avian running 
+     */
     public isAvianRunning(): boolean {
         return Object.keys(cluster.workers).length > 0
     }
-
+    /**
+     * Kills all workers
+     * @returns true if all workers 
+     */
     public killAllWorkers(): boolean {
         let existingWorkers = false
         for (const id in cluster.workers) {
@@ -150,6 +165,13 @@ class AvianUtils {
         return existingWorkers
     }
 
+    /**
+     * Sets component config object cache
+     * @param component 
+     * @param req 
+     * @param [subcomponent] 
+     * @returns component config object cache 
+     */
     public setComponentConfigObjectCache(component: string, req: Request, subcomponent?: string): string {
         const parentComponentRoot = this.getComponentRoot(component)
         const componentPath = (subcomponent) ? `${parentComponentRoot}/${subcomponent}` : `${parentComponentRoot}`
@@ -174,12 +196,18 @@ class AvianUtils {
         return configStringJSON
     }
 
+    /**
+     * Sets workers to auto restart
+     */
     public setWorkersToAutoRestart() {
         cluster.on("exit", (worker) => {
             cluster.fork()
         })
     }
 
+    /**
+     * Starts all workers
+     */
     public startAllWorkers() {
         const cores = os.cpus()
         for (let i = 0 ; i < cores.length ; i++) {
