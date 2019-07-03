@@ -20,10 +20,14 @@ import * as rimraf from "rimraf"
 import * as webpack from "webpack"
 import { argv } from "./avian.lib"
 
+/** 
+ * Avian CLI Interfaces
+ * @description To be exported at build time to avian.cli.d.ts
+ */
 declare global {
     namespace Express {
         interface Request {
-        log: any
+            log: any
         }
     }
 }
@@ -31,8 +35,8 @@ declare global {
 if (argv.webpackHome === "") argv.webpackHome = argv.home
 
 /**
- * Avian Component Cron Job Schedular
- * @description The Avian component job scheduling framework.
+ * Avian Cron Job Schedular
+ * @description Avian cron job scheduling for individual components
  */
 
 if (argv.cronJobScheduler) {
@@ -80,9 +84,20 @@ const injectArgv: RequestHandler = (req, res, next) => {
     req.sessionSecret = sessionSecret
     next()
 }
-
+/**
+ * Avian utils
+ * @description A class filled with useful utilities that are very specific to this file
+ */
 class AvianUtils {
 
+    /**
+     * Gets component config object
+     * @param component 
+     * @param req 
+     * @param subcomponent 
+     * @param callback 
+     * @returns  
+     */
     public getComponentConfigObject(component: string, req: Request, subcomponent: string | undefined, callback: Function) {
         try {
             const cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component
@@ -528,7 +543,7 @@ if (cluster.isMaster) {
                 level: "info",
                 mode: argv.mode,
                 tag: argv.loggerFluentTag,
-                label: "server.avian",
+                label: argv.loggerFluentLabel,
                 source: "Access",
                 configure: {
                     host: argv.loggerFluentHost,
@@ -540,7 +555,7 @@ if (cluster.isMaster) {
     }
 
     /**
-     * Template / View File Engines
+     * Template / View Engines Files
      */
 
     avian.engine("html", require("ejs").renderFile)

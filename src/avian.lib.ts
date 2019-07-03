@@ -1,25 +1,36 @@
-import * as yargs from "yargs";
-import { RedisClient } from "redis";
+import * as yargs from "yargs"
+import { RedisClient } from "redis"
+import * as os from "os"
 
 /** 
- * Avian Library 
+ * Avian Library
+ * @description Responsible for various exports that can be used in Avian applications.
+ */
+
+/** 
+ * Avian Library Interfaces
+ * @description To be exported at build time to avian.lib.d.ts
  */
 declare global {
   namespace Express {
     interface Request {
-      argv: typeof argv;
-      cache: RedisClient;
-      logger: any;
-      sessionSecret: string;
+      argv: typeof argv
+      cache: RedisClient
+      logger: any
+      sessionSecret: string
     }
   }
 }
 
+/** 
+ * Avian CLI Arguments
+ * @description Both Avian as well as Avian applications can import these objects 
+ */
 export const argv = yargs
   .env("AVIAN_APP")
   .option("name", {
     alias: "n",
-    default: process.env.HOSTNAME || "localhost",
+    default: process.env.HOSTNAME || os.hostname,
     describe: "The name of your application"
   })
   .option("home", {
@@ -58,7 +69,7 @@ export const argv = yargs
     type: "boolean"
   })
   .option("redisHost", {
-    default: "127.0.0.1"
+    default: os.hostname
   })
   .option("redisPort", {
     default: 6379
@@ -80,16 +91,20 @@ export const argv = yargs
     describe: "Which logging framework to use.",
     choices: ["bunyan", "fluent"]
   })
+  .option("loggerFluentLabel", {
+    alias: "lfl",
+    default: "debug"
+  })
   .option("loggerFluentTag", {
-    alias: "lt",
+    alias: "lft",
     default: "debug"
   })
   .option("loggerFluentHost", {
-    alias: "lh",
-    default: "127.0.0.1"
+    alias: "lfh",
+    default: os.hostname
   })
   .option("loggerFluentPort", {
-    alias: "lp",
+    alias: "lfp",
     default: 24224
   })
   .option("sslCert", {
