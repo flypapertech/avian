@@ -7,7 +7,7 @@ import { argv } from "./avian.lib"
 const WebpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 
 function srcPath(subdir: string) {
-    return path.join(argv.home, subdir)
+    return path.join(argv.name, subdir)
 }
 
 const componentsCommonConfig: webpack.Configuration = {
