@@ -63,6 +63,7 @@ if (argv.cronJobScheduler) {
                                 const { spawn } = require("child_process")
                                 const shell = spawn(job.command, job.args, { cwd: argv.home, env: process.env, detached: true })
                                 cronJob.schedule(job.expression)
+                                console.log(`Avian - Cron Job ${name} has been scheduled to run.`)
 
                             })
                         }
@@ -585,10 +586,6 @@ if (cluster.isMaster) {
             }))
             break
     }
-
-    /**
-     * Template / View Engines Files
-     */
 
     avian.engine("html", require("ejs").renderFile)
     avian.use(injectArgv)
