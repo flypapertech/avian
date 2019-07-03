@@ -337,6 +337,46 @@ if (cluster.isMaster) {
         console.log(`Avian - Key Path ${argv.sslKey}`)
     }
 
+    if (argv.cronJobScheduler) {
+
+        setTimeout(() => {
+
+            console.log("Avian - Cron Job Scheduling")
+
+            const componentConfigFiles = glob.sync(argv.home + "/components/**/*.config.json")
+            const schedule = require("node-schedule")
+
+            componentConfigFiles.forEach((config) => {
+
+                try {
+
+                    if(require(config).cronJobs) {
+
+                        const jobs = require(config).cronJobs
+
+                        jobs.forEach((job: any) => {
+                            
+                            if (job.enabled) {
+
+                                const cronJob = new schedule.Job(job.name, () => {
+                                    
+                                    const { spawn } = require("child_process")
+                                    const shell = spawn(job.command, job.args, { cwd: argv.home, env: process.env, detached: true })
+                                })
+                                cronJob.schedule(job.expression)
+                                console.log(`Avian - Cron job ${name} has been scheduled to run.`)
+                            }
+                        })
+                    }
+                }
+                catch(error) {
+                    // console.error(error)
+                }
+            })
+
+        }, 300000)
+    }
+
     if (argv.bundleSkip) {
         console.log("Avian - Skipped Bundling")
         utils.startAllWorkers()
