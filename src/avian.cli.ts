@@ -20,51 +20,6 @@ import { argv, utils } from "./avian.lib"
 
 if (argv.webpackHome === "") argv.webpackHome = argv.home
 
-/**
- * Avian Cron Job Schedular
- * @description Every Avian component has cron job like scheduling capabilities.
- */
-
-if (argv.cronJobScheduler) {
-
-    setTimeout(() => {
-
-        console.log("Avian - Cron Job Scheduling")
-
-        const componentConfigFiles = glob.sync(argv.home + "/components/**/*.config.json")
-        const schedule = require("node-schedule")
-
-        componentConfigFiles.forEach((config) => {
-
-            try {
-
-                if(require(config).cronJobs) {
-
-                    const jobs = require(config).cronJobs
-
-                    jobs.forEach((job: any) => {
-                        
-                        if (job.enabled) {
-
-                            const cronJob = new schedule.Job(job.name, function() {
-                                
-                                const { spawn } = require("child_process")
-                                const shell = spawn(job.command, job.args, { cwd: argv.home, env: process.env, detached: true })
-                            })
-                            cronJob.schedule(job.expression)
-                            console.log(`Avian - Cron job ${name} has been scheduled to run.`)
-                        }
-                    })
-                }
-            }
-            catch(error) {
-                // console.error(error)
-            }
-        })
-
-    }, 300000)
-}
-
 const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
 
 const injectArgv: RequestHandler = (req, res, next) => {
