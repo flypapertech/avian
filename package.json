@@ -17,8 +17,8 @@
   },
   "scripts": {
     "build": "node_modules/.bin/tsc --project ./;",
-    "test": "node_modules/.bin/mocha --exit --require ts-node/register test/**/*.spec.ts",
-    "start": "node_modules/.bin/ts-node dist/avian.cli.ts",
+    "test": "node_modules/.bin/mocha --exit --require ts-node/register spec/**/*.spec.ts",
+    "start": "node_modules/.bin/ts-node src/avian.cli.ts",
     "snyk-protect": "node_modules/.bin/snyk protect",
     "security-check": "node_modules/.bin/snyk test"
   },
