@@ -30,7 +30,7 @@ export const argv = yargs
   .env("AVIAN_APP")
   .option("name", {
     alias: "n",
-    default: process.env.HOSTNAME || os.hostname,
+    default: process.env.HOSTNAME || os.hostname(),
     describe: "The name of your application"
   })
   .option("home", {
@@ -69,7 +69,7 @@ export const argv = yargs
     type: "boolean"
   })
   .option("redisHost", {
-    default: os.hostname
+    default: os.hostname()
   })
   .option("redisPort", {
     default: 6379
@@ -101,7 +101,7 @@ export const argv = yargs
   })
   .option("loggerFluentHost", {
     alias: "lfh",
-    default: os.hostname
+    default: os.hostname()
   })
   .option("loggerFluentPort", {
     alias: "lfp",
