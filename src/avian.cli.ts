@@ -540,6 +540,10 @@ if (cluster.isMaster) {
                 })
             }
         })
+
+        if (argv.cronJobScheduler) {
+            console.log("Avian - Cron Job Scheduling Enabled for Components")
+        }
     }
 } else {
     const avian = express()
