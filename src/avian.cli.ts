@@ -58,7 +58,7 @@ if (argv.cronJobScheduler) {
                         
                         if (job.enabled) {
 
-                            const cronJob = new schedule.Job(job.title, function() {
+                            const cronJob = new schedule.Job(job.name, function() {
                                 
                                 const { spawn } = require("child_process")
                                 const shell = spawn(job.command, job.args, { cwd: argv.home, env: process.env, detached: true })
