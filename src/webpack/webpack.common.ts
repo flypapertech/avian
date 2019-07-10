@@ -2,13 +2,9 @@ import * as webpack from "webpack"
 import * as VueLoader from "vue-loader"
 import * as path from "path"
 import nodeExternals = require("webpack-node-externals")
-import { argv } from "./avian.lib"
-
+import { argv } from "../avian.lib"
+import { srcPath } from "../functions/srcPath"
 import webpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
-
-function srcPath(subdir: string) {
-    return path.join(argv.name, subdir)
-}
 
 const componentsCommonConfig: webpack.Configuration = {
     entry: webpackWatchedGlobEntries.getEntries([
@@ -147,5 +143,5 @@ const servicesCommonConfig: webpack.Configuration = {
     }
 }
 
-export let ComponentsCommmonConfg = componentsCommonConfig
+export let ComponentsCommmonConfig = componentsCommonConfig
 export let ServicesCommonConfig = servicesCommonConfig
