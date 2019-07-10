@@ -3,10 +3,10 @@
     "rules": {
         "class-name": true,
         "jsdoc-format": [true, "check-multiline-start"],
-        "completed-docs": [false, "classes", "functions", "methods"],
+        "completed-docs": [true, "classes", "functions", "methods", "interfaces", "namespaces"],
         "comment-format": [true, "check-space", "check-lowercase", { "ignore-words": ["TODO", "HACK", "NOTE"] }],
         "no-duplicate-variable": true,
-        "no-eval": true,
+        "no-eval": false,
         "no-internal-module": true,
         "no-unsafe-finally": true,
         "no-var-keyword": true,

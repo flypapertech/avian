@@ -10,7 +10,7 @@
 		"outDir": "dist",
 		"rootDirs": [
 			"src",
-			"spec"
+			"spec",
 		]
 	},
 	"files": [
