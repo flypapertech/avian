@@ -355,9 +355,14 @@ if (cluster.isMaster) {
                                 if (job) {
 
                                     // NOTE remove the job from the queue and send this job to a worker.
-                                    cronJobQueue.del(JSON.parse(job).name.toString())
-                                    cluster.workers[id]!.send(JSON.parse(job))
-                                    index++
+                                    try { 
+                                        cronJobQueue.del(JSON.parse(job).name.toString())
+                                        cluster.workers[id]!.send(JSON.parse(job))
+                                        index++
+                                    }
+                                    catch (error) {
+                                        console.error("Avian - Something went wrong placing a job on this worker.")
+                                    }
                                 }
                             })
                         }
