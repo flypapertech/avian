@@ -4,7 +4,7 @@ import * as cookie from "cookie"
 import * as signature from "cookie-signature"
 import * as crypto from "crypto"
 import * as events from "events"
-import { Request, Response, RequestHandler, Router } from "express"
+import { RequestHandler } from "express"
 import * as express from "express"
 import { json } from "express"
 import * as session from "express-session"
@@ -16,18 +16,14 @@ import * as path from "path"
 import * as redis from "redis"
 import * as rimraf from "rimraf"
 import * as webpack from "webpack"
-import { argv, utils } from "./avian.lib"
+import { argv, utils, services } from "./avian.lib"
+
+import injectArgv from "./middlewares/injectArgv"
 
 if (argv.webpackHome === "") argv.webpackHome = argv.home
 
+// TODO consider moving to avian.lib.ts as this is a constant that is used in multiple files.
 const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash("sha512").digest("hex")
-
-const injectArgv: RequestHandler = (req, res, next) => {
-    req.argv = {...argv}
-    req.sessionSecret = sessionSecret
-    next()
-}
-
 
 const avianEmitter = new events.EventEmitter()
 const runningBuilds = {
@@ -217,12 +213,13 @@ function subscribe(callback: any) {
     subscriber.on("message", callback)
 }
 
+// TODO do we use this function any longer?
 function publish(message: string) {
     const publisher = redis.createClient()
     publisher.publish("sse", message)
 }
 
-async function loadUserServicesIntoAvian(avian: express.Express) {
+async function loadAppServicesIntoAvian(avian: express.Express) {
     const compiledServices = glob.sync(`${argv.home}/private/**/*.service.js`)
     for (let i = 0 ; i < compiledServices.length ; i++) {
         const dirname = path.dirname(compiledServices[i])
@@ -292,14 +289,22 @@ if (cluster.isMaster) {
         console.log(`Avian - Key Path ${argv.sslKey}`)
     }
 
+    /**  
+     * Cron Job Scheduler
+     * @description Avian provides the ability for individual components to have an array of cron jobs to be executed. 
+     */
+
     if (argv.cronJobScheduler) {
 
-        setTimeout(() => {
+        const cronJobQueue = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCronSchedulerDB})
 
-            console.log("Avian - Cron Job Scheduling")
+        setInterval(() => {
+
+            const schedule = require("node-schedule")
+
+            console.log("Avian - Checking Components for Cron Jobs")
 
             const componentConfigFiles = glob.sync(argv.home + "/components/**/*.config.json")
-            const schedule = require("node-schedule")
 
             componentConfigFiles.forEach((config) => {
 
@@ -307,19 +312,21 @@ if (cluster.isMaster) {
 
                     if(require(config).cronJobs) {
 
-                        const jobs = require(config).cronJobs
+                        const cronJobs = require(config).cronJobs
+                        
+                        cronJobs.forEach((cronJob: CronJob) => {
 
-                        jobs.forEach((job: any) => {
-                            
-                            if (job.enabled) {
-
-                                const cronJob = new schedule.Job(job.name, () => {
-                                    
-                                    const { spawn } = require("child_process")
-                                    const shell = spawn(job.command, job.args, { cwd: argv.home, env: process.env, detached: true })
+                            if (cronJob.enabled) {
+                                const job = schedule.scheduleJob(cronJob.expression, () => {
+                                    cronJobQueue.get(cronJob.name.toString(), (error, reply) => {
+                                        if (error) return console.error(error)
+                                        
+                                        if (!reply) {
+                                            cronJobQueue.set(cronJob.name.toString(), JSON.stringify(cronJob))
+                                            console.log(`Avian - Cron Job "${cronJob.name}" added to the job queue.`)
+                                        }
+                                    })
                                 })
-                                cronJob.schedule(job.expression)
-                                console.log(`Avian - Cron job ${name} has been scheduled to run.`)
                             }
                         })
                     }
@@ -329,7 +336,57 @@ if (cluster.isMaster) {
                 }
             })
 
-        }, 300000)
+        }, 3000)
+
+        setInterval(() => {
+
+            cronJobQueue.keys("*", (error, cronJobsInQueue) => {
+                if (error) return console.error(error)
+                if (cronJobsInQueue.length > 0) {
+                    
+                    for (const id in cluster.workers) {
+
+                        let index: number = 0
+
+                        if (cluster.workers[id]) {
+
+                            cronJobQueue.get(cronJobsInQueue[index], (error, job) => {
+                                if (error) return console.error(error)
+                                if (job) {
+
+                                    // NOTE remove the job from the queue and send this job to a worker.
+                                    cronJobQueue.del(JSON.parse(job).name.toString())
+                                    cluster.workers[id]!.send(JSON.parse(job))
+                                    index++
+                                }
+                            })
+                        }
+                    }
+                }
+                else {
+                    console.log("Avian - The component cron job queue appears to be empty. Nothing to run...")
+                }
+            })
+
+        }, 30000)
+
+        /** Cron Job Completion Confirmation from Worker */
+
+        cluster.on("message", (worker, cronJobResults: CronJobResults) => {
+            if (!cronJobResults.success) {
+                console.log(`Avian - Worker ${worker.id} failed to run job: ${cronJobResults.name}`)
+                // NOTE since the job failed we should re-queue it for other nodes to consider for execution.
+                console.log(`Avian - Job ${cronJobResults.name} is set for requeue.`)
+                cronJobQueue.set(cronJobResults.name.toString(), JSON.stringify(cronJobResults))
+                return
+            }
+
+            console.log(`Avian - Worker ${worker.id} has completed the job: ${cronJobResults.name}`)
+            // NOTE remove this job from the redis queue so no other nodes will consider it.
+            console.log(`Avian - Job ${cronJobResults.name} is being removed from the queue.`)
+            cronJobQueue.del(cronJobResults.name.toString())
+            return
+        })
     }
 
     if (argv.bundleSkip) {
@@ -373,7 +430,7 @@ if (cluster.isMaster) {
                     startDevWebpackWatcher(webpackDev)
                 }).catch((error) => {
                     console.log("Avian - Falling back to default dev webpack config")
-                    import("./webpack.development").then((defaultWebpackDev) => {
+                    import("./webpack/webpack.development").then((defaultWebpackDev) => {
                         startDevWebpackWatcher(defaultWebpackDev)
                     }).catch((error) => {
                         console.log("Avian - Failed to load default development webpack config")
@@ -384,7 +441,7 @@ if (cluster.isMaster) {
                     startProdWebpackCompiler(webpackProd)
                 }).catch((error) => {
                     console.log("Avian - Falling back to default prod webpack config")
-                    import("./webpack.production").then((defaultWebpackProd) => {
+                    import("./webpack/webpack.production").then((defaultWebpackProd) => {
                         startProdWebpackCompiler(defaultWebpackProd)
                     }).catch((error) => {
                         console.log("Avian - Failed to load default production webpack config")
@@ -394,6 +451,36 @@ if (cluster.isMaster) {
         })
     }
 } else {
+
+    /**  
+     * Cron Job Runtime
+     */
+    
+    if (argv.cronJobScheduler) {
+        process.on('message', (job) => {
+
+            if (job.name) {
+
+                const schedule = require("node-schedule")
+                
+                const cronJob = new schedule.Job(job.name, () => {
+                                        
+                    const { spawn } = require("child_process")
+                    const cronJobRuntime = spawn(job.command, job.args, { cwd: argv.home, env: process.env, detached: false })
+
+                    cronJobRuntime.on("close", (code: number) => {
+                        if (code > 0) { 
+                            process.send!({job: job.name, success: false })
+                            return
+                        }
+                        process.send!({name: job.name, success: true})
+                    })
+                })
+                cronJob.schedule(Date.now())
+            }
+        })
+    }
+
     const avian = express()
     /**
      * Logging Framework
@@ -444,7 +531,7 @@ if (cluster.isMaster) {
             const authParts = req.headers.authorization.split(" ")
             if (authParts[0].toLowerCase() === "bearer" && authParts.length > 1) {
                 // TODO We need to sign this exactly like how express-session signs cookies
-                const signed = "s:" + signature.sign(authParts[1], sessionSecret)
+                const signed = "s:" + signature.sign(authParts[1], req.sessionSecret)
 
                 if (!req.headers.cookie) {
                     req.headers.cookie = `connect.sid=${signed}`
@@ -453,8 +540,7 @@ if (cluster.isMaster) {
                 }
 
                 const cookies = cookie.parse(req.headers.cookie)
-                const updatedCookies: any = {...cookies,
-                                        "connect.sid": signed}
+                const updatedCookies: any = {...cookies, "connect.sid": signed}
 
                 const cookieKeys = Object.keys(updatedCookies)
                 const updatedCookieArray = cookieKeys.map((key) => {
@@ -530,7 +616,7 @@ if (cluster.isMaster) {
         }, 5000)
     })
 
-    loadUserServicesIntoAvian(avian).then(() => {
+    loadAppServicesIntoAvian(avian).then(() => {
         avian.use("/static", express.static(argv.home + "/static"))
         avian.use("/assets", express.static(argv.home + "/assets"))
         avian.use("/", express.static(argv.home + "/public"))
@@ -679,7 +765,8 @@ if (cluster.isMaster) {
          *  Avian Service Routes
          *  @description Avian provides numerous out of the box helper service routes for application developers.
          */
-        /*services.forEach((route: any) => {
+        
+         /* services.forEach((route: any) => {
             route.method(route.path, (req: Request, res: Response, next: Function) => {
 
                 route.action(req, res, next)

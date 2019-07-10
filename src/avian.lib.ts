@@ -1,19 +1,26 @@
 import jsonfile = require("jsonfile")
 import * as yargs from "yargs"
 import { RedisClient } from "redis"
+import { DateTime } from "luxon"
 
-// import * as ComponentRoutes from "./component.routes"
+import * as ComponentServices from "./services/Component"
+
 // import * as LoggerRoutes from "./logger.routes"
 
-import { Request } from "express"
+// import { LoggerService } from "./services/Logger"
+
+// new LoggerService().entry
+
+import { Request, Router } from "express"
 import * as glob from "glob"
 import * as cluster from "cluster"
 import * as os from "os"
 import * as fs from "fs"
 
 /** 
- * Avian Library Interfaces
+ * Avian Express Namespace & Interfaces
  * @description To be exported at build time to avian.lib.d.ts
+ * @interface
  */
 declare global {
     namespace Express {
@@ -25,17 +32,29 @@ declare global {
             sessionSecret: string
         }
     }
+    interface CronJob {
+        args: string[],
+        command: string,
+        description: string
+        enabled: boolean,
+        expression: string,
+        name: string
+    }
+    interface CronJobResults extends CronJob {
+        success: boolean
+    }
 }
 
-/** 
- * Avian Arguments (Argv)
- * @description Both Avian as well as Avian applications can import these objects 
+/**
+ * Avian Argv
+ * @description All command line arguments and options, as well as environment variables honored by then, are available to Avian here.
+ * @class
+ * @global
  */
-
-class Argv {
+export class Argv {
     
     public argv = yargs
-    .env("AVIAN_APP")
+    .env("AVIAN_APP") 
     .option("name", {
         alias: "n",
         default: process.env.HOSTNAME || "localhost",
@@ -133,61 +152,90 @@ class Argv {
 export const argv = new Argv().argv
 
 /**  
- * Avian Server Class
- * @description This class exists for programatic creation of Avian servers.
+ * Avian Server Namespace
+ * @namespace
  */
-class Server {
-    
-    constructor() {
-    
+export namespace Server {
+
+    /** 
+     * Server Constructor Interface 
+     * @interface
+     */
+    export interface IServerConstructorParams {
+        argv: typeof argv
     }
+    export interface IStartMethodParams {
+            argv: typeof argv,
+            timeout: DateTime
+        }
+    }
+/**
+ * Avian Server
+ * @description
+ * @class
+ * @global
+ * @
+ */
+
+/*export class Server implements Server {
+
+    public avian: object
     
-    public start(options: Argv) {
-        
+    constructor(argv: Server.IServerConstructorParams) {
+        this.avian = { ...argv }
+
+        this.avian
+    }
+    public start(params?: any) {
+
+        if (this.avian. === "development") {
+
+        }
+
+        if (params.timeout)
     }
 }
 
-export const server = new Server()
+export const server = new Server(argv)*/
 
 /** 
- * Avian Component Routes
+ * Avian Services
  * @description Responsible for various exports that can be used in Avian applications.
  */
 
-class Routes {
-/*
+export class Services {
+
     public routes = [
         {
             path: "/:component",
             method: Router().get,
-            action: new AvianService.ComponentView
+            action: new ComponentServices.View().component
         },
         {
             path: "/:component/config/objects.json",
             method: Router().get,
-            action: new ComponentServices().componentConfig
+            action: new ComponentServices.Config().component
         },
         {
             path: "/:component/:subcomponent",
             method: Router().get,
-            action: new ComponentServices().subComponentView
+            action: new ComponentServices.View().subComponent
         },
         {
             path: "/:component/:subcomponent/config/objects.json",
             method: Router().get,
-            action: new ComponentServices().componentConfig
+            action: new ComponentServices.Config().subComponent
         },
     ]
-    */
 }
 
-// export const routes = new Routes().routes
+export const services = new Services().routes
 
 /**
  * Avian Utilities
  * @description A class filled with useful utilities that are very specific to Avian core development.
  */
-class Utils {
+export class Utils {
 
     /**
      * Gets component config object
