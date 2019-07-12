@@ -56,17 +56,42 @@ After Avian is installed as a dependency of your application start Avian via:
 
 ### CLI Arguments
 
-- --name (name of your application, defaults to localhost)
-- --home (directory of your application, defaults to current working directory)
-- --port (port to start express server, defaults to 8080)
-- --mode (mode to run Avian in, development or production, defaults to development)
-- --bundleSkip (Avian will just start and use the files already in the public and private folders)
-- --bundleOnly (Avian will bundle your files and place them in public and private and then exit without starting the server)
-- --redisPort (port that your Redis server is listening on, defaults to 6379)
-- --redisHost (host where your Redis server is running, defaults to 127.0.0.1)
-- --redisSessionDB (the Redis database number to store session data, defaults to 1)
-- --redisCacheDB (the Redis database number to store general cache data, defaults to 2)
-- --webpackHome (directory to find webpack config files to override Avian default, defaults to home)
+
+```
+    Options:
+    --help                      Show help                                [boolean]
+    --version                   Show version number                      [boolean]
+    --name, -n                  The name of your application[default: "localhost"]
+    --home, -h                  The directory of your application.
+                                                [default: current working directory]
+    --mode, -m                  Deployment mode to run Avian in.
+                    [choices: "development", "production"] [default: "development"]
+    --port, -p                  Which port to serve your application on.
+                                                                    [default: 8080]
+    --defaultComponent, --dc    The point of entry to your application.
+                                                                [default: "index"]
+    --spa                       Start Avian in a single-page-application
+                                configuration.          [boolean] [default: false]
+    --bundleSkip                                        [boolean] [default: false]
+    --bundleOnly                                        [boolean] [default: false]
+    --redisHost                                             [default: "127.0.0.1"]
+    --redisPort                                                    [default: 6379]
+    --redisSessionDB                                                  [default: 1]
+    --redisCacheDB                                                    [default: 2]
+    --redisCronSchedulerDB                                            [default: 3]
+    --webpackHome                                                    [default: ""]
+    --logger, -l                Which logging framework to use.
+                                                    [choices: "bunyan", "fluent"]
+    --loggerFluentLabel, --lfl                                  [default: "debug"]
+    --loggerFluentTag, --lft                                    [default: "debug"]
+    --loggerFluentHost, --lfh                               [default: "127.0.0.1"]
+    --loggerFluentPort, --lfp                                     [default: 24224]
+    --sslCert                                                             [string]
+    --sslKey                                                              [string]
+    --cronJobScheduler, --cjs   Avian components are capable of scheduling
+                                cron-like jobs that are executed on the server.
+                                                        [boolean] [default: false]
+```
 
 ### Application Folder Structure
 
