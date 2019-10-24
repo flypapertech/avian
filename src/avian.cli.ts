@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 import * as cluster from "cluster"
 import * as history from "connect-history-api-fallback"
 import * as cookie from "cookie"
