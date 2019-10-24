@@ -1,14 +1,7 @@
 {
 
     "cronJobs": [
-        {
-            "enabled": true,
-            "name": "Touch a file locally.",
-            "description": "Will deploy the latest version of Protest to AWS",
-            "expression": "* * * * *",
-            "command": "touch",
-            "args": ["myotherfile.txt"]
-        },
+        
         {
             "enabled": true,
             "name": "Touch a file locally again.",
