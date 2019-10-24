@@ -291,7 +291,7 @@ if (cluster.isMaster) {
 
     /**  
      * Cron Job Scheduler
-     * @description Avian provides the ability for individual components to have an array of cron jobs to be executed. 
+     * @description Avian provides the ability for individual components to have an array of cron jobs to be executed by workers. 
      */
 
     if (argv.cronJobScheduler) {
@@ -314,7 +314,7 @@ if (cluster.isMaster) {
 
                         const cronJobs = require(config).cronJobs
                         
-                        cronJobs.forEach((cronJob: CronJob) => {
+                        cronJobs.forEach((cronJob: CronJob.Params) => {
 
                             if (cronJob.enabled) {
                                 const job = schedule.scheduleJob(cronJob.expression, () => {
@@ -332,7 +332,7 @@ if (cluster.isMaster) {
                     }
                 }
                 catch(error) {
-                    // console.error(error)
+                    console.error(error)
                 }
             })
 
@@ -377,7 +377,7 @@ if (cluster.isMaster) {
 
         /** Cron Job Completion Confirmation from Worker */
 
-        cluster.on("message", (worker, cronJobResults: CronJobResults) => {
+        cluster.on("message", (worker, cronJobResults: CronJob.Results) => {
             if (!cronJobResults.success) {
                 console.log(`Avian - Worker ${worker.id} failed to run job: ${cronJobResults.name}`)
                 // NOTE since the job failed we should re-queue it for other nodes to consider for execution.
@@ -387,9 +387,10 @@ if (cluster.isMaster) {
             }
 
             console.log(`Avian - Worker ${worker.id} has completed the job: ${cronJobResults.name}`)
-            // NOTE remove this job from the redis queue so no other nodes will consider it.
-            console.log(`Avian - Job ${cronJobResults.name} is being removed from the queue.`)
-            cronJobQueue.del(cronJobResults.name.toString())
+            cronJobQueue.del(cronJobResults.name.toString(), (error, response) => {
+                if (response === 1)
+                    console.log(`Avian - Job ${cronJobResults.name} has been removed from the job queue.`)
+            })
             return
         })
     }
@@ -458,7 +459,7 @@ if (cluster.isMaster) {
 } else {
 
     /**  
-     * Cron Job Runtime
+     * Cron Job Runtime Messaging
      */
     
     if (argv.cronJobScheduler) {
@@ -479,6 +480,7 @@ if (cluster.isMaster) {
                             return
                         }
                         process.send!({name: job.name, success: true})
+                        return
                     })
                 })
                 cronJob.schedule(Date.now())
