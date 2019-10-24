@@ -32,16 +32,19 @@ declare global {
             sessionSecret: string
         }
     }
-    interface CronJob {
-        args: string[],
-        command: string,
-        description: string
-        enabled: boolean,
-        expression: string,
-        name: string
-    }
-    interface CronJobResults extends CronJob {
-        success: boolean
+
+    namespace CronJob {
+         interface Params {
+            args: string[],
+            command: string,
+            description: string
+            enabled: boolean,
+            expression: string,
+            name: string
+        }
+        interface Results extends Params {
+            success: boolean
+        }
     }
 }
 
