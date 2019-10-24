@@ -11,7 +11,7 @@ Create Enterprise-class component driven applications that scale.
 ## Key Features
 
 - Enterprise-class application server built on [Express](https://github.com/expressjs/express) and [Redis](https://redislabs.com/) that meets infinitely scalable demands.
-- Multi-core / Multi-threaded application host operations remove the burden of such considerations from the application developer.
+- Multi-core / Multi-threaded application host operations remove the burden load balancing across cpu cores.
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
 - A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
 - Supports popular view templating engines such as Pug, EJS and plain HTML.
@@ -50,9 +50,21 @@ Suggested Redis Installation Methods
 
 ## Getting Started
 
-After Avian is installed as a dependency of your application start Avian via:
+The most common scenario is to install Avian as a dependency of your project.
+
+    npm install @flypapertech/avian
+
+And can be accessed as...
 
     node ./node_modules/.bin/avian
+
+Alternatively, Avian can be installed globally, making it possible to serve multiple applications with a single installation of Avian. 
+
+    npm install @flypapertech/avian -g
+
+And can be accessed globally, but will need to be told where your Avian application is located...
+
+    avian --home /path/to/avian/app/home
 
 ### CLI Arguments
 
