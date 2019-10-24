@@ -20,11 +20,29 @@ Create Enterprise-class component driven applications that scale.
 
 The latest stable release of Avian is available on [npmjs.com](https://www.npmjs.com/package/@flypapertech/avian).
 
+The most common scenario is to install Avian as a dependency of your project.
+
     npm install @flypapertech/avian
+
+    or 
+
+    yarn add @flypapertech/avian
+
+And can be accessed as...
+
+    node ./node_modules/.bin/avian
+
+Alternatively, Avian can be installed globally, making it possible to serve multiple applications with a single installation of Avian. 
+
+    npm install @flypapertech/avian -g
 
     or
 
-    yarn add @flypapertech/avian
+    yarn global add @flypapertech/avian
+
+And can be accessed globally, but will need to be told where your Avian application is located...
+
+    avian --home /path/to/avian/app/home
 
 ### System Requirements
 
@@ -49,22 +67,6 @@ Suggested Redis Installation Methods
     - Note: It is not recommended to use Redis in production on Windows with out WSL.
 
 ## Getting Started
-
-The most common scenario is to install Avian as a dependency of your project.
-
-    npm install @flypapertech/avian
-
-And can be accessed as...
-
-    node ./node_modules/.bin/avian
-
-Alternatively, Avian can be installed globally, making it possible to serve multiple applications with a single installation of Avian. 
-
-    npm install @flypapertech/avian -g
-
-And can be accessed globally, but will need to be told where your Avian application is located...
-
-    avian --home /path/to/avian/app/home
 
 ### CLI Arguments
 
