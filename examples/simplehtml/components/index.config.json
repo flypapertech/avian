@@ -4,8 +4,8 @@
         
         {
             "enabled": true,
-            "name": "Touch a file locally again.",
-            "description": "Will deploy the latest version of Protest to AWS",
+            "name": "Touch File",
+            "description": "Will touch a file every minute in the minute.",
             "expression": "* * * * *",
             "command": "touch",
             "args": ["myfile.txt"]
