@@ -9,8 +9,8 @@ import { RequestHandler } from "express"
 import * as express from "express"
 import { json } from "express"
 import * as session from "express-session"
-import * as fs from "fs"
-import * as glob from "glob"
+import * as fs from "graceful-fs"
+import * as glob from "fast-glob"
 import * as https from "https"
 import mkdirp = require("mkdirp")
 import * as path from "path"
@@ -20,6 +20,7 @@ import * as webpack from "webpack"
 import { argv, utils, services } from "./avian.lib"
 
 import injectArgv from "./middlewares/injectArgv"
+import loadAppServersIntoAvian from "./functions/loadAppServersIntoAvian"
 
 if (argv.webpackHome === "") argv.webpackHome = argv.home
 
@@ -220,57 +221,6 @@ function publish(message: string) {
     publisher.publish("sse", message)
 }
 
-async function loadAppServicesIntoAvian(avian: express.Express) {
-    const compiledServices = glob.sync(`${argv.home}/private/**/*.service.js`)
-    for (let i = 0 ; i < compiledServices.length ; i++) {
-        const dirname = path.dirname(compiledServices[i])
-        const directories = dirname.split("/")
-        const routeArray = []
-        for (let j = directories.length - 1 ; j >= 0 ; j--) {
-            if (directories[j] !== "private") {
-                routeArray.unshift(directories[j])
-            } else {
-                break
-            }
-        }
-
-        if (routeArray.length === 0) {
-            const basename = path.basename(compiledServices[i])
-            if (basename !== "avian.service.js") {
-                const nameArray = basename.split(".")
-                for (let j = 0 ; j < nameArray.length ; j++) {
-                    if (nameArray[j] !== "service") {
-                        routeArray.push(nameArray[j])
-                    } else {
-                        break
-                    }
-                }
-            }
-        }
-
-        const routeBase = "/" + routeArray.join("/")
-        try {
-            const service = await import (`${compiledServices[i]}`)
-            let compiledService: any
-            if (service.default) {
-                compiledService = service.default
-            } else {
-                compiledService = service
-            }
-            if (Object.getPrototypeOf(compiledService) === express.Router) {
-                avian.use(routeBase, compiledService)
-            } else if (typeof compiledService === "function") {
-                try {
-                    avian.use(routeBase, compiledService(avian))
-                } catch (error) {
-                    console.log("Skipping service file " + compiledServices[i] + " it's default export isn't an express.Router")
-                }
-            }
-        } catch (err) {
-            console.error(err)
-        }
-    }
-}
 if (argv.sslCert && argv.sslKey) {
     if (!path.isAbsolute(argv.sslCert)) {
         argv.sslCert = path.join(argv.home, argv.sslCert)
@@ -624,7 +574,7 @@ if (cluster.isMaster) {
         }, 5000)
     })
 
-    loadAppServicesIntoAvian(avian).then(() => {
+    loadAppServersIntoAvian(avian).then(() => {
         avian.use("/static", express.static(argv.home + "/static"))
         avian.use("/assets", express.static(argv.home + "/assets"))
         avian.use("/", express.static(argv.home + "/public"))
@@ -652,17 +602,14 @@ if (cluster.isMaster) {
         avian.use((req, res, next) => {
             req.epilogues = []
             res.on("finish", async () => {
-                // NOTE only run epilogues if the response was a success
                 if (res.statusCode) {
-                    if (res.statusCode >= 200 && res.statusCode < 300) {
-                        for (const epilogue of req.epilogues) {
+                    if (res.statusCode >= 200 && res.statusCode < 300) 
+                        for (const epilogue of req.epilogues) 
                             await epilogue(req, res, next)
-                        }
-                    }
-                }
-            })
+                }})
             next()
         })
+
 
         avian.get("/:component/:subcomponent", express.urlencoded({ extended: true }), (req, res, next) => {
             const componentRoot = utils.getComponentRoot(req.params.component)
@@ -790,7 +737,7 @@ if (cluster.isMaster) {
          *  @description Avian provides numerous out of the box helper service routes for application developers.
          */
         
-         /* services.forEach((route: any) => {
+        /*services.forEach((route: any) => {
             route.method(route.path, (req: Request, res: Response, next: Function) => {
 
                 route.action(req, res, next)

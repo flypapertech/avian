@@ -58,99 +58,99 @@ declare global {
 export class Argv {
     
     public argv = yargs
-    .env("AVIAN_APP") 
-    .option("name", {
-        alias: "n",
-        default: process.env.HOSTNAME || "localhost",
-        describe: "The name of your application"
-    })
-    .option("home", {
-        alias: "h",
-        default: process.cwd(),
-        defaultDescription: "current working directory",
-        describe: "The directory of your application."
-    })
-    .option("mode", {
-        alias: "m",
-        default: process.env.NODE_ENV || "development",
-        describe: "Deployment mode to run Avian in.",
-        choices: ["development", "production"]
-    })
-    .option("port", {
-        alias: "p",
-        default: 8080,
-        describe: "Which port to serve your application on."
-    })
-    .option("defaultComponent", {
-        alias: "dc",
-        default: "index",
-        describe: "The point of entry to your application."
-    })
-    .option("spa", {
-        default: false,
-        describe: "Start Avian in a single-page-application configuration.",
-        type: "boolean"
-    })
-    .option("bundleSkip", {
-        default: false,
-        type: "boolean"
-    })
-    .option("bundleOnly", {
-        default: false,
-        type: "boolean"
-    })
-    .option("redisHost", {
-        default: "127.0.0.1"
-    })
-    .option("redisPort", {
-        default: 6379
-    })
-    .option("redisSessionDB", {
-        default: 1
-    })
-    .option("redisCacheDB", {
-        default: 2
-    })
-    .option("redisCronSchedulerDB", {
-        default: 3
-    })
-    .option("webpackHome", {
-        default: ""
-    })
-    .option("logger", {
-        alias: "l",
-        describe: "Which logging framework to use.",
-        choices: ["bunyan", "fluent"]
-    })
-    .option("loggerFluentLabel", {
-        alias: "lfl",
-        default: "debug"
-    })
-    .option("loggerFluentTag", {
-        alias: "lft",
-        default: "debug"
-    })
-    .option("loggerFluentHost", {
-        alias: "lfh",
-        default: "127.0.0.1"
-    })
-    .option("loggerFluentPort", {
-        alias: "lfp",
-        default: 24224
-    })
-    .option("sslCert", {
-        type: "string"
-    })
-    .option("sslKey", {
-        type: "string"
-    })
-    .option("cronJobScheduler", {
-        alias: "cjs",
-        default: false,
-        describe:
-        "Avian components are capable of scheduling cron-like jobs that are executed on the server.",
-        type: "boolean"
-    }).argv
+        .env("AVIAN_APP") 
+        .option("name", {
+            alias: "n",
+            default: process.env.HOSTNAME || "localhost",
+            describe: "The name of your application"
+        })
+        .option("home", {
+            alias: "h",
+            default: process.cwd(),
+            defaultDescription: "Current working directory",
+            describe: "The directory of your application."
+        })
+        .option("mode", {
+            alias: "m",
+            default: process.env.NODE_ENV || "development",
+            describe: "Deployment mode to run Avian in.",
+            choices: ["development", "production"]
+        })
+        .option("port", {
+            alias: "p",
+            default: 8080,
+            describe: "Which port to serve your application on."
+        })
+        .option("defaultComponent", {
+            alias: "dc",
+            default: "index",
+            describe: "The point of entry to your application."
+        })
+        .option("spa", {
+            default: false,
+            describe: "Start Avian in a single-page-application (SPA) configuration.",
+            type: "boolean"
+        })
+        .option("bundleSkip", {
+            default: false,
+            type: "boolean"
+        })
+        .option("bundleOnly", {
+            default: false,
+            type: "boolean"
+        })
+        .option("redisHost", {
+            default: "127.0.0.1"
+        })
+        .option("redisPort", {
+            default: 6379
+        })
+        .option("redisSessionDB", {
+            default: 1
+        })
+        .option("redisCacheDB", {
+            default: 2
+        })
+        .option("redisCronSchedulerDB", {
+            default: 3
+        })
+        .option("webpackHome", {
+            default: ""
+        })
+        .option("logger", {
+            alias: "l",
+            describe: "Which logging framework to use.",
+            choices: ["bunyan", "fluent"]
+        })
+        .option("loggerFluentLabel", {
+            alias: "lfl",
+            default: "debug"
+        })
+        .option("loggerFluentTag", {
+            alias: "lft",
+            default: "debug"
+        })
+        .option("loggerFluentHost", {
+            alias: "lfh",
+            default: "127.0.0.1"
+        })
+        .option("loggerFluentPort", {
+            alias: "lfp",
+            default: 24224
+        })
+        .option("sslCert", {
+            type: "string"
+        })
+        .option("sslKey", {
+            type: "string"
+        })
+        .option("cronJobScheduler", {
+            alias: "cjs",
+            default: false,
+            describe:
+            "Avian components are capable of scheduling cron-like jobs that are executed on the server.",
+            type: "boolean"
+        }).argv
 }
 
 export const argv = new Argv().argv
@@ -165,9 +165,14 @@ export namespace Server {
      * Server Constructor Interface 
      * @interface
      */
+    // tslint:disable-next-line: interface-name
     export interface IServerConstructorParams {
         argv: typeof argv
     }
+    /**
+     * Start Method Params Interface
+     */
+    // tslint:disable-next-line: interface-name
     export interface IStartMethodParams {
             argv: typeof argv,
             timeout: DateTime
@@ -181,26 +186,27 @@ export namespace Server {
  * @
  */
 
-/*export class Server implements Server {
+export class Server implements Server {
 
-    public avian: object
+    public avian: any
     
-    constructor(argv: Server.IServerConstructorParams) {
+    constructor(argv?: Server.IServerConstructorParams) {
         this.avian = { ...argv }
-
-        this.avian
     }
+
+    /**
+     * Starts server
+     * @param [params] 
+     */
     public start(params?: any) {
 
-        if (this.avian. === "development") {
-
+        if (this.avian.mode === "development") {
+            // do something...
         }
-
-        if (params.timeout)
     }
 }
 
-export const server = new Server(argv)*/
+export const server = new Server()
 
 /** 
  * Avian Services
@@ -208,32 +214,38 @@ export const server = new Server(argv)*/
  */
 
 export class Services {
-
-    public routes = [
+    
+    /**
+     * Routes
+     * @returns  
+     */
+    public routes() { 
+            
+        return [
         {
             path: "/:component",
-            method: Router().get,
-            action: new ComponentServices.View().component
+            method: () => { return Router().get },
+            action: () => { new ComponentServices.View().component }
         },
         {
             path: "/:component/config/objects.json",
-            method: Router().get,
-            action: new ComponentServices.Config().component
+            method: () => { return Router().get },
+            action: () => { new ComponentServices.Config().component }
         },
         {
             path: "/:component/:subcomponent",
-            method: Router().get,
-            action: new ComponentServices.View().subComponent
+            method: () => { return Router().get },
+            action: () => { new ComponentServices.View().subComponent }
         },
         {
             path: "/:component/:subcomponent/config/objects.json",
-            method: Router().get,
-            action: new ComponentServices.Config().subComponent
+            method: () => { return Router().get },
+            action: () => { new ComponentServices.Config().subComponent }
         },
-    ]
+    ]}
 }
 
-export const services = new Services().routes
+export const services = new Services().routes()
 
 /**
  * Avian Utilities
@@ -294,7 +306,7 @@ export class Utils {
         }
     }
     /**
-     * Determines whether avian running is
+     * Determines whether avian is running
      * @returns true if avian running 
      */
     public isAvianRunning(): boolean {
