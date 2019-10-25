@@ -648,6 +648,22 @@ if (cluster.isMaster) {
             avian.enable("view cache")
         }
 
+         /** Component Epilogue Hook */
+        avian.use((req, res, next) => {
+            req.epilogues = []
+            res.on("finish", async () => {
+                // NOTE only run epilogues if the response was a success
+                if (res.statusCode) {
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
+                        for (const epilogue of req.epilogues) {
+                            await epilogue(req, res, next)
+                        }
+                    }
+                }
+            })
+            next()
+        })
+
         avian.get("/:component/:subcomponent", express.urlencoded({ extended: true }), (req, res, next) => {
             const componentRoot = utils.getComponentRoot(req.params.component)
             const subComponentPath = `${componentRoot}/${req.params.subcomponent}`

@@ -27,9 +27,10 @@ declare global {
         interface Request {
             argv: typeof argv
             cache: RedisClient
+            epilogues: any
             log: any
             logger: any
-            sessionSecret: string
+            sessionSecret: string,
         }
     }
 
