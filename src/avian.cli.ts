@@ -611,7 +611,7 @@ if (cluster.isMaster) {
         })
 
 
-        avian.get("/:component/:subcomponent", express.urlencoded({ extended: true }), (req, res, next) => {
+        /* avian.get("/:component/:subcomponent", express.urlencoded({ extended: true }), (req, res, next) => {
             const componentRoot = utils.getComponentRoot(req.params.component)
             const subComponentPath = `${componentRoot}/${req.params.subcomponent}`
 
@@ -688,7 +688,7 @@ if (cluster.isMaster) {
                 res.setHeader("X-Powered-By", "Avian")
                 res.sendStatus(404)
             }
-        })
+        })*/
 
         avian.post("/logger", json(), (req, res, next) => {
             if (!req.query || !req.body) {
@@ -737,14 +737,14 @@ if (cluster.isMaster) {
          *  @description Avian provides numerous out of the box helper service routes for application developers.
          */
         
-        /*services.forEach((route: any) => {
+        services.forEach((route: any) => {
             route.method(route.path, (req: Request, res: Response, next: Function) => {
 
                 route.action(req, res, next)
                     .then(() => next)
                     .catch((error: any) => next(error))
             })
-        })*/
+        })
 
         avian.all("/", (req, res, next) => {
             res.redirect(`/${argv.defaultComponent}`)
