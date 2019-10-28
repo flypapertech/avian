@@ -1,11 +1,9 @@
-"use strict"
 
-const express = require("express")
-const router = express.Router()
+import { Router } from "express"
 
-router.get("/test", (req, res) => {
+const index = Router()
+
+index.get("/test", (req: any, res: any) => {
     res.json({success: true})
 })
-
-
-module.exports = router
+export default index
