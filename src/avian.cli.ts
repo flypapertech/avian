@@ -17,7 +17,7 @@ import * as path from "path"
 import * as redis from "redis"
 import * as rimraf from "rimraf"
 import * as webpack from "webpack"
-import { argv, utils, services } from "./avian.lib"
+import { argv, utils } from "./avian.lib"
 
 import injectArgv from "./middlewares/injectArgv"
 import loadAppServersIntoAvian from "./functions/loadAppServersIntoAvian"

@@ -1,14 +1,14 @@
 {
-
-    "cronJobs": [
-        
-        {
-            "enabled": true,
-            "name": "Touch File",
-            "description": "Will touch a file every minute in the minute.",
-            "expression": "* * * * *",
-            "command": "touch",
-            "args": ["myfile.txt"]
-        }
-    ]
+	"cronJobs": [
+		{
+			"enabled": true,
+			"name": "Touch File",
+			"description": "Will touch a file every minute in the minute.",
+			"expression": "* * * * *",
+			"command": "touch",
+			"args": [
+				"myfile.txt"
+			]
+		}
+	]
 }

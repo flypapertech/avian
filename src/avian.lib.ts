@@ -3,8 +3,6 @@ import * as yargs from "yargs"
 import { RedisClient } from "redis"
 import { DateTime } from "luxon"
 
-import * as ComponentServices from "./services/Component"
-
 // import * as LoggerRoutes from "./logger.routes"
 
 // import { LoggerService } from "./services/Logger"
@@ -207,45 +205,6 @@ export class Server implements Server {
 }
 
 export const server = new Server()
-
-/** 
- * Avian Services
- * @description Responsible for various exports that can be used in Avian applications.
- */
-
-export class Services {
-    
-    /**
-     * Routes
-     * @returns  
-     */
-    public routes() { 
-            
-        return [
-        {
-            path: "/:component",
-            method: () => { return Router().get },
-            action: () => { new ComponentServices.View().component }
-        },
-        {
-            path: "/:component/config/objects.json",
-            method: () => { return Router().get },
-            action: () => { new ComponentServices.Config().component }
-        },
-        {
-            path: "/:component/:subcomponent",
-            method: () => { return Router().get },
-            action: () => { new ComponentServices.View().subComponent }
-        },
-        {
-            path: "/:component/:subcomponent/config/objects.json",
-            method: () => { return Router().get },
-            action: () => { new ComponentServices.Config().subComponent }
-        },
-    ]}
-}
-
-export const services = new Services().routes()
 
 /**
  * Avian Utilities
