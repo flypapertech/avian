@@ -11,10 +11,10 @@ Create Enterprise-class component driven applications that scale.
 ## Key Features
 
 - Enterprise-class application server built on [Express](https://github.com/expressjs/express) and [Redis](https://redislabs.com/) that meets infinitely scalable demands.
-- Multi-core / Multi-threaded application host operations remove the burden load balancing across cpu cores.
+- Multi-core / Multi-threaded application host operations remove the burden of load balancing across cpu cores.
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
 - A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
-- Supports popular view templating engines such as Pug, EJS and plain HTML.
+- Supports popular view templating engines such as Pug, EJS, Handlebars and plain HTML.
 
 ## Installation
 
@@ -130,7 +130,7 @@ Suggested Redis Installation Methods
 
 ### Session Management
 
-Avian uses [express-session](https://github.com/expressjs/session) to manage client sessions. All sessions are stored in a Redis database.
+Avian uses [express-session](https://github.com/expressjs/session) to manage client sessions. All sessions are stored in a Redis store.
 
 - Browser Based Clients
   - Avian uses secure [HttpOnly Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Secure_and_HttpOnly_cookies) for managing browser based client sessions.
