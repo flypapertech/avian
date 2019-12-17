@@ -105,6 +105,7 @@ Suggested Redis Installation Methods
     --cronJobScheduler, --cjs   Avian components are capable of scheduling
                                 cron-like jobs that are executed on the server.
                                                         [boolean] [default: false]
+    --compression               Use express-compression [boolean] [default: false]
 ```
 
 ### Application Folder Structure
