@@ -255,7 +255,7 @@ if (cluster.isMaster) {
 
             console.log("Avian - Checking Components for Cron Jobs")
 
-            const componentConfigFiles = glob.sync(argv.home + "/components/**/*.config.json")
+            const componentConfigFiles = glob.sync(argv.home + "/components/**/*.config.json") as string[]
 
             componentConfigFiles.forEach((config) => {
 
@@ -355,8 +355,8 @@ if (cluster.isMaster) {
             rimraf.sync(`${argv.home}/private/*`)
             rimraf.sync(`${argv.home}/public/*`)
 
-            const webpackConfigs = glob.sync(`${argv.webpackHome}/webpack.development.*`)
-            webpackConfigs.push(...glob.sync(`${argv.webpackHome}/webpack.production.*`))
+            const webpackConfigs = glob.sync(`${argv.webpackHome}/webpack.development.*`) as string[]
+            webpackConfigs.push(...glob.sync(`${argv.webpackHome}/webpack.production.*`) as string[])
             const program = ts.createProgram(webpackConfigs, {
                 allowJs: true,
                 noEmitOnError: true,
