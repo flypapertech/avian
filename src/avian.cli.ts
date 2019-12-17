@@ -440,6 +440,11 @@ if (cluster.isMaster) {
     }
 
     const avian = express()
+
+    if (argv.compression) {
+        const compression = require('compression')
+        avian.use(compression)
+    }
     /**
      * Logging Framework
      */

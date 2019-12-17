@@ -142,6 +142,10 @@ export class Argv {
         .option("sslKey", {
             type: "string"
         })
+        .option("compression", {
+            type: "boolean",
+            default: false
+        })
         .option("cronJobScheduler", {
             alias: "cjs",
             default: false,
