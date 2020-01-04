@@ -556,14 +556,17 @@ if (cluster.isMaster) {
         })
     }
 
+    let sseClients: Array<{interval: NodeJS.Timeout, res: express.Response }> = []
+    subscribe((channel: any, message: any) => {
+        const messageEvent = new ServerEvent()
+        messageEvent.addData(message)
+        for (const client of sseClients) {
+            client.res.write(messageEvent.payload())
+        }
+    })
+
     avian.get("/sse", (req, res) => {
         req.doNotCompress = true;
-        subscribe((channel: any, message: any) => {
-            const messageEvent = new ServerEvent()
-            messageEvent.addData(message)
-            res.write(messageEvent.payload())
-        })
-
         res.writeHead(200, {
             "Content-Type": "text/event-stream",
             "Cache-Control": "no-cache",
@@ -574,9 +577,15 @@ if (cluster.isMaster) {
         res.write("retry: 10000\n\n")
 
         // heartbeat
-        setInterval(() => {
+        const interval = setInterval(() => {
             res.write(": \n\n")
         }, 5000)
+
+        sseClients.push({res, interval})
+        res.on("close", () => {
+            sseClients = sseClients.filter(client => client.interval !== interval)
+            clearInterval(interval)
+        })
     })
 
     loadAppServersIntoAvian(avian).then(() => {
