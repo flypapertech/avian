@@ -438,7 +438,11 @@ if (cluster.isMaster) {
 
     if (argv.compression) {
         const compression = require('compression')
-        avian.use(compression())
+        avian.use(compression({
+            filter: (req: express.Request, res: express.Response) => {
+                return !req.doNotCompress
+            }
+        }))
     }
     /**
      * Logging Framework
@@ -553,6 +557,7 @@ if (cluster.isMaster) {
     }
 
     avian.get("/sse", (req, res) => {
+        req.doNotCompress = true;
         subscribe((channel: any, message: any) => {
             const messageEvent = new ServerEvent()
             messageEvent.addData(message)

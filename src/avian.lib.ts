@@ -25,6 +25,7 @@ declare global {
         interface Request {
             argv: typeof argv
             cache: RedisClient
+            doNotCompress: boolean | undefined
             epilogues: any
             log: any
             logger: any
