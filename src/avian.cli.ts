@@ -206,7 +206,7 @@ class ServerEvent {
 }
 
 function subscribe(callback: any) {
-    const subscriber = redis.createClient()
+    const subscriber = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDB})
     subscriber.subscribe("sse")
     subscriber.on("error", (error) => {
         console.log("Redis error: " + error)
@@ -215,11 +215,6 @@ function subscribe(callback: any) {
     subscriber.on("message", callback)
 }
 
-// TODO do we use this function any longer?
-function publish(message: string) {
-    const publisher = redis.createClient()
-    publisher.publish("sse", message)
-}
 
 if (argv.sslCert && argv.sslKey) {
     if (!path.isAbsolute(argv.sslCert)) {
