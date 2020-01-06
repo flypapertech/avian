@@ -1,7 +1,4 @@
-# Javascript Node CircleCI 2.0 configuration file
-#
-# Check https://circleci.com/docs/2.0/language-javascript/ for more details
-#
+
 filter-run-always: &filter-run-always
   filters:
     tags:
@@ -23,14 +20,14 @@ aliases:
       - v1-dependencies-{{ checksum "package.json" }}
       - v1-dependencies-
   - &step-install
-    run: yarn install
+    run: npm install
   - &step-save-cache
     save_cache:
       paths:
         - node_modules
       key: v1-dependencies-{{ checksum "package.json" }}
   - &step-build
-    run: yarn build
+    run: npm run build
   
 build-node-common: &common-build
   working_directory: ~/repo
@@ -42,7 +39,7 @@ build-node-common: &common-build
     - *step-build
     - run:
         name: Testing
-        command: yarn test
+        command: npm run test
 
 version: 2
 jobs:
@@ -91,6 +88,8 @@ workflows:
       - build-node10:
           <<: *filter-run-always
       - build-node11:
+          <<: *filter-run-always
+      - build-node12:
           <<: *filter-run-always
       - deploy:
           requires:

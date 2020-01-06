@@ -6,19 +6,26 @@ Create Enterprise-class component driven applications that scale.
 [![Known Vulnerabilities](https://snyk.io/test/github/flypapertech/avian/badge.svg)](https://snyk.io/test/github/flypapertech/avian)
 [![npm (scoped)](https://img.shields.io/npm/v/@flypapertech/avian.svg)](https://www.npmjs.com/package/@flypapertech/avian)
 [![NpmLicense](https://img.shields.io/npm/l/@flypapertech/avian.svg)](https://github.com/flypapertech/avian/blob/master/LICENSE)
-[![dependencies Status](https://david-dm.org/flypapertech/avian/status.svg)](https://david-dm.org/flypapertech/avian)
+[![Dependencies Status](https://david-dm.org/flypapertech/avian/status.svg)](https://david-dm.org/flypapertech/avian)
+[![Docker Pulls](https://img.shields.io/docker/pulls/flypapertech/avian)](https://hub.docker.com/r/flypapertech/avian)
+[![Docker Automated Build](https://img.shields.io/docker/automated/flypapertech/avian)](https://hub.docker.com/repository/docker/flypapertech/avian/builds)
+[![Docker Build Status](https://img.shields.io/docker/build/flypapertech/avian)](https://hub.docker.com/repository/docker/flypapertech/avian/builds)
+
+## Synopsis
+
+Avian is an application server based on years of experience, built on [Express](https://github.com/expressjs/express) and [Redis](https://redislabs.com/) that meets infinitely scalable demands.
 
 ## Key Features
 
-- Enterprise-class application server built on [Express](https://github.com/expressjs/express) and [Redis](https://redislabs.com/) that meets infinitely scalable demands.
 - Multi-core / Multi-threaded application host operations remove the burden of load balancing across cpu cores.
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
-- A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
+- A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS.
 - Supports popular view templating engines such as Pug, EJS, Handlebars and plain HTML.
-- Official Docker image is now in development.
+- Supports Fluentd and Bunyan logging frameworks out of the box
 
 ## Installation
 
+### NPM
 The latest stable release of Avian is available on [npmjs.com](https://www.npmjs.com/package/@flypapertech/avian).
 
 The most common scenario is to install Avian as a dependency of your project.
@@ -57,12 +64,13 @@ Avian uses Redis Server for storing session data, caching component config objec
 
 Suggested Redis Installation Methods
 
-- macOS
-  - `brew install redis`
-- Linux
-  - [Debian Installation Instructions](https://www.digitalocean.com/community/tutorials/how-to-install-and-secure-redis-on-ubuntu-18-04)
-    - Note: You can use other flavors of Linux. We just aren't familiar with the installation of Redis on them.
-- Windows
+##### macOS
+`brew install redis`
+##### Ubuntu Linux
+`apt install redis-server`
+##### Alpine Linux
+`apk add redis`
+##### Windows (experimental)
   - [Windows with WSL (10 and higher)](https://redislabs.com/blog/redis-on-windows-10/)
   - [Windows without WSL (8.1 and lower)](https://redislabs.com/blog/redis-on-windows-8-1-and-previous-versions/)
     - Note: It is not recommended to use Redis in production on Windows with out WSL.
@@ -71,8 +79,6 @@ Suggested Redis Installation Methods
 
 ### CLI Arguments
 
-
-```
     Options:
     --help                      Show help                                [boolean]
     --version                   Show version number                      [boolean]
@@ -107,7 +113,6 @@ Suggested Redis Installation Methods
                                 cron-like jobs that are executed on the server.
                                                         [boolean] [default: false]
     --compression               Use express-compression [boolean] [default: false]
-```
 
 ### Application Folder Structure
 
@@ -179,11 +184,7 @@ Examples are located in the [examples directory](https://github.com/flypapertech
 
     MIT
 
-## Contact
-
-[The Avian Team](mailto:info@flypaper.com)
-
 ## Copyright
 
-    2018 - 2019 FlyPaper Technologies, LLC
+    2018 - 2020 FlyPaper Technologies, LLC
     2016 - 2018 Thoughtpivot, LLC
