@@ -2,14 +2,13 @@
 
 Create Enterprise-class component driven applications that scale.
 
-[![CircleCI](https://circleci.com/gh/flypapertech/avian/tree/master.svg?style=svg)](https://circleci.com/gh/flypapertech/avian/tree/master)
+[![CircleCI](https://img.shields.io/circleci/build/github/flypapertech/avian/master)](https://circleci.com/gh/flypapertech/avian/tree/master)
+[![Docker Cloud Build Status](https://img.shields.io/docker/cloud/build/flypapertech/avian)](https://hub.docker.com/repository/docker/flypapertech/avian/builds)
 [![Known Vulnerabilities](https://snyk.io/test/github/flypapertech/avian/badge.svg)](https://snyk.io/test/github/flypapertech/avian)
 [![npm (scoped)](https://img.shields.io/npm/v/@flypapertech/avian.svg)](https://www.npmjs.com/package/@flypapertech/avian)
-[![NpmLicense](https://img.shields.io/npm/l/@flypapertech/avian.svg)](https://github.com/flypapertech/avian/blob/master/LICENSE)
-[![Dependencies Status](https://david-dm.org/flypapertech/avian/status.svg)](https://david-dm.org/flypapertech/avian)
+[![License](https://img.shields.io/npm/l/@flypapertech/avian.svg)](https://github.com/flypapertech/avian/blob/master/LICENSE)
+[![Dependencies](https://david-dm.org/flypapertech/avian/status.svg)](https://david-dm.org/flypapertech/avian)
 [![Docker Pulls](https://img.shields.io/docker/pulls/flypapertech/avian)](https://hub.docker.com/r/flypapertech/avian)
-[![Docker Automated Build](https://img.shields.io/docker/automated/flypapertech/avian)](https://hub.docker.com/repository/docker/flypapertech/avian/builds)
-[![Docker Build Status](https://img.shields.io/docker/build/flypapertech/avian)](https://hub.docker.com/repository/docker/flypapertech/avian/builds)
 
 ## Synopsis
 

@@ -12,8 +12,5 @@ RUN apk update
 RUN apk add alpine-sdk coreutils python3 nodejs npm redis
 RUN npm install -g @flypapertech/avian
 RUN npm install -g webpack
-RUN "nohup redis-server &"
+RUN "redis-server &> /dev/null &"
 WORKDIR /app
-
-EXPOSE 8080
-CMD ["avian"]
