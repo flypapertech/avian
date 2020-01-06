@@ -96,6 +96,7 @@ Suggested Redis Installation Methods
     --bundleOnly                                        [boolean] [default: false]
     --redisHost                                             [default: "127.0.0.1"]
     --redisPort                                                    [default: 6379]
+    --redisPass                                                    [default: ""]
     --redisSessionDB                                                  [default: 1]
     --redisCacheDB                                                    [default: 2]
     --redisCronSchedulerDB                                            [default: 3]
