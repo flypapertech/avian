@@ -211,7 +211,7 @@ class ServerEvent {
 }
 
 function subscribe(callback: any) {
-    const subscriber = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDB})
+    const subscriber = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDB, password: argv.redisPass })
     subscriber.subscribe("sse")
     subscriber.on("error", (error) => {
         console.log("Redis error: " + error)

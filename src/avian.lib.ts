@@ -104,6 +104,9 @@ export class Argv {
         .option("redisPort", {
             default: 6379
         })
+        .option("redisPass", {
+            default: ""
+        })
         .option("redisSessionDB", {
             default: 1
         })
