@@ -60,7 +60,7 @@ jobs:
           name: Authenticate with registry
           command: echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" > ~/repo/.npmrc
       - run:
-          name: Publish package
+          name: Publish Package
           command: npm publish
 
   build-node8:
@@ -77,6 +77,10 @@ jobs:
     <<: *common-build
     docker:
       - image: circleci/node:11
+  build-node12:
+    <<: *common-build
+    docker:
+      - image: circleci/node:12
 
 workflows:
   version: 2
@@ -93,4 +97,5 @@ workflows:
             - build-node8
             - build-node10
             - build-node11
+            - build-node12
           <<: *filter-run-on-master-and-version-tag-only
