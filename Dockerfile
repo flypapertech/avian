@@ -12,6 +12,7 @@ RUN apk update
 RUN apk add alpine-sdk coreutils python3 nodejs npm redis
 RUN npm install -g @flypapertech/avian
 RUN npm install -g webpack
-RUN "redis-server &> /dev/null &"
+RUN npm install pm2 -g
+RUN pm2 install pm2-redis
 WORKDIR /app
-CMD ["avian run test"]
+CMD ["/bin/sh"]
