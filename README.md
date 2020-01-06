@@ -15,6 +15,7 @@ Create Enterprise-class component driven applications that scale.
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
 - A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, X-Tag, SkateJS, Ember, and much more.
 - Supports popular view templating engines such as Pug, EJS, Handlebars and plain HTML.
+- Official Docker image is now in development.
 
 ## Installation
 
