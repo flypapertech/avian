@@ -14,3 +14,4 @@ RUN npm install -g @flypapertech/avian
 RUN npm install -g webpack
 RUN "redis-server &> /dev/null &"
 WORKDIR /app
+CMD ["avian run test"]
