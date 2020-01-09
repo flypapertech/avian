@@ -535,7 +535,13 @@ if (cluster.isMaster) {
         },
     }))
 
-    avian.use(require("express-redis")({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDB, password: argv.redisPass}, "cache"))
+    avian.use((req, res, next) => {
+        req.cache = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDB, password: argv.redisPass})
+        .on("ready", () => {
+            next()
+        })
+    })
+
     if (argv.sslCert && argv.sslKey) {
         https.createServer({
             cert: fs.readFileSync(argv.sslCert),
