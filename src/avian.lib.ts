@@ -21,7 +21,16 @@ import * as fs from "fs"
  * @interface
  */
 declare global {
+
+    /**  
+     * Express 
+     * @namespace 
+     */
     namespace Express {
+        
+        /** 
+         * Request 
+         */
         interface Request {
             argv: typeof argv
             cache: RedisClient
@@ -33,7 +42,15 @@ declare global {
         }
     }
 
+    /**  
+     * CronJob
+     * @namespace 
+     */ 
     namespace CronJob {
+
+        /** 
+         * Params 
+         */
          interface Params {
             args: string[],
             command: string,
@@ -42,6 +59,10 @@ declare global {
             expression: string,
             name: string
         }
+
+        /** 
+         * Results 
+         */
         interface Results extends Params {
             success: boolean
         }
@@ -49,7 +70,7 @@ declare global {
 }
 
 /**
- * Avian Argv
+ * Avian Argv Processing
  * @description All command line arguments and options, as well as environment variables honored by then, are available to Avian here.
  * @class
  * @global
