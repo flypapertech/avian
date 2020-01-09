@@ -126,7 +126,7 @@ export class Argv {
             default: 6379
         })
         .option("redisPass", {
-            default: ""
+            default: undefined
         })
         .option("redisSessionDB", {
             default: 1

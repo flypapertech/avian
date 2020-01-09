@@ -247,7 +247,7 @@ if (cluster.isMaster) {
 
     if (argv.cronJobScheduler) {
 
-        const cronJobQueue = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCronSchedulerDB})
+        const cronJobQueue = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCronSchedulerDB, password: argv.redisPass})
 
         setInterval(() => {
 
@@ -524,7 +524,7 @@ if (cluster.isMaster) {
     avian.use(enableAuthHeadersForExpressSession)
 
     avian.use(session({
-        store: new redisStore({host: argv.redisHost, db: argv.redisSessionDB}),
+        store: new redisStore({host: argv.redisHost, port: argv.redisPort, db: argv.redisSessionDB, password: argv.redisPass}),
         proxy: true,
         secret: sessionSecret,
         resave: false,
@@ -535,7 +535,7 @@ if (cluster.isMaster) {
         },
     }))
 
-    avian.use(require("express-redis")(argv.redisPort, argv.redisHost, {db: argv.redisCacheDB}, "cache"))
+    avian.use(require("express-redis")({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDB, password: argv.redisPass}, "cache"))
     if (argv.sslCert && argv.sslKey) {
         https.createServer({
             cert: fs.readFileSync(argv.sslCert),
