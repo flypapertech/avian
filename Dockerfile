@@ -21,5 +21,6 @@ RUN npm run test
 RUN npm install -g .
 
 ENV AVIAN_APP_HOME /usr/lib/node_modules/@flypapertech/avian/examples/hello-world
+WORKDIR ${AVIAN_APP_HOME}
 EXPOSE 8080
 CMD ["avian"]
