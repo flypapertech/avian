@@ -78,6 +78,10 @@ jobs:
     <<: *common-build
     docker:
       - image: circleci/node:12
+  build-node13:
+    <<: *common-build
+    docker:
+      - image: circleci/node:13
 
 workflows:
   version: 2
@@ -91,10 +95,13 @@ workflows:
           <<: *filter-run-always
       - build-node12:
           <<: *filter-run-always
+      - build-node13:
+          <<: *filter-run-always
       - deploy:
           requires:
             - build-node8
             - build-node10
             - build-node11
             - build-node12
+            - build-node13
           <<: *filter-run-on-master-and-version-tag-only
