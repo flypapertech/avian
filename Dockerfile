@@ -17,7 +17,8 @@ WORKDIR /tmp/avian
 RUN npm install
 RUN npm run build
 RUN npm run test
-RUN npm install -g webpack . && rm -rf /tmp/avian
+RUN npm install -g webpack
+RUN npm install -g .
 
 ENV AVIAN_APP_HOME /usr/lib/node_modules/@flypapertech/avian/examples/hello-world
 WORKDIR ${AVIAN_APP_HOME}
