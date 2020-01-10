@@ -191,7 +191,9 @@ function startProdWebpackCompiler(webpackProd: any) {
     })
 
 }
-
+/**
+ * Server Events
+ */
 class ServerEvent {
     private data: string = ""
     constructor() {
@@ -210,6 +212,10 @@ class ServerEvent {
     }
 }
 
+/**
+ * Subscribe to Server Events
+ * @description More info to follow.
+ */
 function subscribe(callback: any) {
     const subscriber = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDB, password: argv.redisPass })
     subscriber.subscribe("sse")
@@ -456,36 +462,19 @@ if (cluster.isMaster) {
 
         case "pino":
 
-            mkdirp.sync(argv.home + "/logs/")
-            avian.use((req, res, next) => {
-                
-                req.logger = require("express-pino-logger")({
-                    name: argv.name,
-                    level: "info"
-                })
-                
-                req.logger.destination(argv.home + "/logs/")
-            })
+            avian.use(require("express-pino-logger")({
+                name: argv.name,
+                level: "info"
+            }))
 
             break
 
         case "bunyan":
 
-            mkdirp.sync(argv.home + "/logs/")
-            avian.use((req, res, next) => {
-                
-                req.logger = require("express-bunyan-logger")({
+            avian.use(require("express-bunyan-logger")({
                 name: argv.name,
-                streams: [
-                    {
-                        level: "info",
-                        type: "rotating-file",
-                        path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
-                        period: "1d",
-                        count: 365,
-                    },
-                ],
-            })})
+                level: "info"
+            }))
 
             break
 
@@ -505,6 +494,12 @@ if (cluster.isMaster) {
             }))
             break
     }
+
+    avian.use((req, res, next) => {
+        // @ts-ignore
+        if (!req.logger) req.logger = req.log
+        next()
+    })
 
     avian.engine("html", require("ejs").renderFile)
     avian.use(injectArgv)
