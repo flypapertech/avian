@@ -1,5 +1,5 @@
 ##
-#
+# Examples: hello-world
 ##
 
 FROM flypapertech/avian:latest
