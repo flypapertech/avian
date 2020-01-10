@@ -2,7 +2,6 @@ import jsonfile = require("jsonfile")
 import * as yargs from "yargs"
 import { RedisClient } from "redis"
 import { DateTime } from "luxon"
-
 // import * as LoggerRoutes from "./logger.routes"
 
 // import { LoggerService } from "./services/Logger"
@@ -36,7 +35,6 @@ declare global {
             cache: RedisClient
             doNotCompress: boolean | undefined
             epilogues: any
-            log: any
             logger: any
             sessionSecret: string,
         }
@@ -143,7 +141,7 @@ export class Argv {
         .option("logger", {
             alias: "l",
             describe: "Which logging framework to use.",
-            choices: ["bunyan", "fluent"]
+            choices: ["pino", "bunyan", "fluent"]
         })
         .option("loggerFluentLabel", {
             alias: "lfl",

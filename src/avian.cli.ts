@@ -454,21 +454,34 @@ if (cluster.isMaster) {
      */
     switch (argv.logger) {
 
+        case "pino":
+
+            avian.use((req, res, next) => {
+                req.logger = require("express-pino-logger")({
+                    name: argv.name,
+                    level: "info"
+                }, mkdirp.sync(argv.home + "/logs/"))})
+
+            break
+
         case "bunyan":
 
             mkdirp.sync(argv.home + "/logs/")
-            avian.use(require("express-bunyan-logger")({
+            avian.use((req, res, next) => {
+                
+                req.logger = require("express-bunyan-logger")({
                 name: argv.name,
                 streams: [
                     {
-                        level: "debug",
+                        level: "info",
                         type: "rotating-file",
                         path: argv.home + `/logs/${argv.name}.${process.pid}.json`,
                         period: "1d",
                         count: 365,
                     },
                 ],
-            }))
+            })})
+
             break
 
         case "fluent":
@@ -727,24 +740,45 @@ if (cluster.isMaster) {
             }
 
             switch (argv.logger) {
-                case "bunyan":
+
+                case "pino":
                     if (req.query.level === "debug") {
-                        req.log.debug(req.body)
+                        req.logger.debug(req.body)
                     }
                     if (req.query.level === "info") {
-                        req.log.info(req.body)
+                        req.logger.info(req.body)
                     }
                     if (req.query.level === "error") {
-                        req.log.error(req.body)
+                        req.logger.error(req.body)
                     }
                     if (req.query.level === "warn") {
-                        req.log.warn(req.body)
+                        req.logger.warn(req.body)
                     }
                     if (req.query.level === "fatal") {
-                        req.log.fatal(req.body)
+                        req.logger.fatal(req.body)
                     }
                     if (req.query.level === "trace") {
-                        req.log.trace(req.body)
+                        req.logger.trace(req.body)
+                    }
+                    break
+                case "bunyan":
+                    if (req.query.level === "debug") {
+                        req.logger.debug(req.body)
+                    }
+                    if (req.query.level === "info") {
+                        req.logger.info(req.body)
+                    }
+                    if (req.query.level === "error") {
+                        req.logger.error(req.body)
+                    }
+                    if (req.query.level === "warn") {
+                        req.logger.warn(req.body)
+                    }
+                    if (req.query.level === "fatal") {
+                        req.logger.fatal(req.body)
+                    }
+                    if (req.query.level === "trace") {
+                        req.logger.trace(req.body)
                     }
                     break
                 case "fluent":

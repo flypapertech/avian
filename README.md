@@ -20,11 +20,12 @@ Avian is an application server based on years of experience, built on [Express](
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
 - A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS.
 - Supports popular view templating engines such as Pug, EJS, Handlebars and plain HTML.
-- Supports Fluentd and Bunyan logging frameworks out of the box
+- Supports Pino, Bunyan, and Fluentd logging frameworks.
 
 ## Installation
 
 ### NPM
+
 The latest stable release of Avian is available on [npmjs.com](https://www.npmjs.com/package/@flypapertech/avian).
 
 The most common scenario is to install Avian as a dependency of your project.
@@ -39,7 +40,7 @@ And can be accessed as...
 
     node ./node_modules/.bin/avian
 
-Alternatively, Avian can be installed globally, making it possible to serve multiple applications with a single installation of Avian. 
+Alternatively, Avian can be installed globally, making it possible to serve multiple applications with a single installation of Avian.
 
     npm install @flypapertech/avian -g
 
@@ -59,7 +60,7 @@ Avian requires NodeJS version 8.0 and above.
 
 #### Redis Server
 
-Avian uses Redis Server for storing session data, caching component config object requests and arbitrary caching requirements you may have.  Avian does not support password protected Redis Servers at this time.
+Avian uses Redis Server for storing session data, caching component config object requests and arbitrary caching requirements you may have.
 
 Suggested Redis Installation Methods
 
@@ -96,13 +97,13 @@ Suggested Redis Installation Methods
     --bundleOnly                                        [boolean] [default: false]
     --redisHost                                             [default: "127.0.0.1"]
     --redisPort                                                    [default: 6379]
-    --redisPass                                                    [default: ""]
+    --redisPass                                                    [default: undefined]
     --redisSessionDB                                                  [default: 1]
     --redisCacheDB                                                    [default: 2]
     --redisCronSchedulerDB                                            [default: 3]
-    --webpackHome                                                    [default: ""]
+    --webpackHome                                                    [default: undefined]
     --logger, -l                Which logging framework to use.
-                                                    [choices: "bunyan", "fluent"]
+                                                    [choices: "pino", "bunyan", "fluent"]
     --loggerFluentLabel, --lfl                                  [default: "debug"]
     --loggerFluentTag, --lft                                    [default: "debug"]
     --loggerFluentHost, --lfh                               [default: "127.0.0.1"]
