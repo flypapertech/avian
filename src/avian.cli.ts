@@ -456,11 +456,16 @@ if (cluster.isMaster) {
 
         case "pino":
 
+            mkdirp.sync(argv.home + "/logs/")
             avian.use((req, res, next) => {
+                
                 req.logger = require("express-pino-logger")({
                     name: argv.name,
                     level: "info"
-                }, mkdirp.sync(argv.home + "/logs/"))})
+                })
+                
+                req.logger.destination(argv.home + "/logs/")
+            })
 
             break
 
