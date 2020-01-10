@@ -1,11 +1,15 @@
 version: "3"
 services:
     app:
-        build: ../../
-        image: flypapertech/avian:latest
+        build: .
         ports:
             - "8080:8080"
         volumes:
-            - ..:/app
+            - ..:/examples
         environment:
-            - AVIAN_APP_HOME=/app
+            - AVIAN_APP_HOME=/examples/hello-world
+            - AVIAN_APP_REDIS_HOST=cache
+        depends_on:
+            - cache
+    cache:
+        image: redis:alpine
