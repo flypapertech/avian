@@ -51,7 +51,6 @@
     "fast-glob": "^3.1.0",
     "findit": "^2.0.0",
     "graceful-fs": "^4.2.3",
-    "handlebars": "4.5.3",
     "jsonfile": "5.0.0",
     "luxon": "^1.16.1",
     "macaddress": "0.2.9",
