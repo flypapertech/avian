@@ -16,8 +16,8 @@ import mkdirp = require("mkdirp")
 import * as path from "path"
 import * as redis from "redis"
 import * as rimraf from "rimraf"
-import * as webpack from "webpack"
 import { argv, utils } from "./avian.lib"
+import {Compiler, ICompiler, MultiCompiler} from "webpack"
 
 import injectArgv from "./middlewares/injectArgv"
 import loadAppServersIntoAvian from "./functions/loadAppServersIntoAvian"
@@ -81,7 +81,8 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
 })
 
 function startDevWebpackWatcher(webpackDev: any) {
-    let componentsCompiler: webpack.Compiler
+    const webpack = require("webpack")
+    let componentsCompiler: Compiler
     componentsCompiler = webpack(
         webpackDev.ComponentsConfig,
     )
@@ -89,7 +90,7 @@ function startDevWebpackWatcher(webpackDev: any) {
         avianEmitter.emit("buildStarted", "components")
     })
 
-    let servicesCompiler: webpack.Compiler
+    let servicesCompiler: Compiler
     servicesCompiler = webpack(
         webpackDev.ServicesConfig,
     )
@@ -113,7 +114,7 @@ function startDevWebpackWatcher(webpackDev: any) {
 
 function watcherCallback(name: string) {
     const chunkVersions = {} as any
-    const watcherCallback: webpack.ICompiler.Handler = (err, stats) => {
+    const watcherCallback: ICompiler.Handler = (err, stats) => {
         if (err || stats.hasErrors()) {
             if (err) {
                 console.error(err)
@@ -156,7 +157,8 @@ function watcherCallback(name: string) {
 }
 
 function startProdWebpackCompiler(webpackProd: any) {
-    let webpackCompiler: webpack.MultiCompiler
+    const webpack = require("webpack")
+    let webpackCompiler: MultiCompiler
     webpackCompiler = webpack([
         webpackProd.ComponentsConfig,
         webpackProd.ServicesConfig,
