@@ -12,7 +12,7 @@ import { Request, Router } from "express"
 import * as glob from "glob"
 import * as cluster from "cluster"
 import * as os from "os"
-import * as fs from "fs"
+import * as fs from "graceful-fs"
 
 /** 
  * Avian Express Namespace & Interfaces
