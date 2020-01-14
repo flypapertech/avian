@@ -12,15 +12,18 @@ Create Enterprise-class component driven applications that scale.
 
 ## Synopsis
 
-Avian is an application server based on years of experience, built on [Express](https://github.com/expressjs/express) and [Redis](https://redislabs.com/) that meets infinitely scalable demands.
+Avian is a application server and platform for running highly scalable, stateless, component based applications. It is highly optimized for running inside of Docker containers and both Virtual and Physical machines. Its architecture highly encourages stateless designed patterns. Its design is the result of years of experience in developing and maintaining applications at global scale, while easing development for large software engineering teams.
+
+Avian is built on top of the [Express](https://expressjs.com/) web framework, and uses [Redis](https://redislabs.com/) for managing sessions and application state. Bundling is managed by [Webpack](https://webpack.js.org/).
 
 ## Key Features
 
 - Multi-core / Multi-threaded application host operations remove the burden of load balancing across cpu cores.
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
+- Supports script files written in both TypeScript and JavaScript (and we'd be willing to support Dart, and others)
 - A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS.
-- Supports popular view templating engines such as Pug, EJS, Handlebars and plain HTML.
-- Supports Pino, Bunyan, and Fluentd logging frameworks.
+- Views can be authored in any view engine supported by Express, such as Pug, EJS, Handlebars and plain HTML.
+- Supported logging frameworks can be Pino, Bunyan, and Fluentd.
 
 ## Installation
 
