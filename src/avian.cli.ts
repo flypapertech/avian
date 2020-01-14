@@ -22,6 +22,7 @@ import {Compiler, ICompiler, MultiCompiler} from "webpack"
 import injectArgv from "./middlewares/injectArgv"
 import loadAppServersIntoAvian from "./functions/loadAppServersIntoAvian"
 
+// TODO this should be undefined, but perhaps not empty for this evaluation...
 if (argv.webpackHome === "") argv.webpackHome = argv.home
 
 // TODO consider moving to avian.lib.ts as this is a constant that is used in multiple files.
