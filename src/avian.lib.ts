@@ -2,12 +2,6 @@ import jsonfile = require("jsonfile")
 import * as yargs from "yargs"
 import { RedisClient } from "redis"
 import { DateTime } from "luxon"
-// import * as LoggerRoutes from "./logger.routes"
-
-// import { LoggerService } from "./services/Logger"
-
-// new LoggerService().entry
-
 import { Request, Router } from "express"
 import * as glob from "glob"
 import * as cluster from "cluster"
