@@ -628,8 +628,6 @@ if (cluster.isMaster) {
             }))
         }
 
-        avian.engine("pug", require("pug").__express)
-        avian.engine("ejs", require("ejs").__express)
         avian.set("views", argv.home)
 
         if (argv.mode === "production") {
