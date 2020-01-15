@@ -12,20 +12,24 @@ Create Enterprise-class component driven applications that scale.
 
 ## Synopsis
 
-Avian is a application server and platform for running highly scalable, stateless, component based applications. It is highly optimized for running inside of Docker containers and both Virtual and Physical machines. Its architecture highly encourages stateless designed patterns. Its design is the result of years of experience in developing and maintaining applications at global scale, while easing development for large software engineering teams.
-
-Avian is built on top of the [Express](https://expressjs.com/) web framework, and uses [Redis](https://redislabs.com/) for managing sessions and application state. Bundling is managed by [Webpack](https://webpack.js.org/).
+Avian is a platform for running highly available, horizontally scalable, stateless, component based applications. It is optimized for public cloud, private cloud, bare metal, virtual machines, and containers. Its design is the result of years of experience in developing and maintaining applications at scale, while easing development and maintainability for large software engineering teams.
 
 ## Key Features
 
-- Multi-core / Multi-threaded application host operations remove the burden of load balancing across cpu cores.
+Avian is built on top of the popular [Express](https://expressjs.com/) web framework for [NodeJS](https://nodejs.com), uses [Redis](https://redislabs.com/) for managing application state afinity, sessions, view caching of view templates, and managing application state afinity, while [Webpack](https://webpack.js.org/) manages the transpilation and bundling of your client and server-side component files.
+
+- Cluster mode for load balancing across available CPU cores.
 - Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
-- Supports script files written in both TypeScript and JavaScript (and we'd be willing to support Dart, and others)
-- A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS.
+- Supports client side scripts and server-side service routes (APIs) written in JavaScript and TypeScript with no configuration required.
+- A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, virtually 
+- Serving of static files.
 - Views can be authored in any view engine supported by Express, such as Pug, EJS, Handlebars and plain HTML.
-- Supported logging frameworks can be Pino, Bunyan, and Fluentd.
+    - Each component can use its own view engine. Making it possible to migrate your application componenets from one engine to another over time.
+- Out-of-the box Supported logging frameworks are be Pino, Bunyan, and Fluentd.
 
 ## Installation
+
+### Docker
 
 ### NPM
 
@@ -147,7 +151,7 @@ Avian uses [express-session](https://github.com/expressjs/session) to manage cli
   - Avian uses secure [HttpOnly Cookies](https://developer.mozilla.org/en-US/docs/Web/HTTP/Cookies#Secure_and_HttpOnly_cookies) for managing browser based client sessions.
 
 - Mobile Device and API Clients
-  - Avian augments express-session to allow API and mobile device sessions management.  Since those clients may not use coookies they simply need to send their session ID in the authorization header of all requests made to Avian. See below for an example header.
+  - Avian augments express-session to allow API and mobile device sessions management.  Since those clients may not use cookies they simply need to send their session ID in the authorization header of all requests made to Avian. See below for an example header.
 
 ```json
 headers: {
