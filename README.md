@@ -16,20 +16,21 @@ Avian is a platform for running highly available, horizontally scalable, statele
 
 ## Key Features
 
-Avian is built on top of the popular [Express](https://expressjs.com/) web framework for [NodeJS](https://nodejs.com), uses [Redis](https://redislabs.com/) for managing application state afinity, sessions, view caching of view templates, and managing application state afinity, while [Webpack](https://webpack.js.org/) manages the transpilation and bundling of your client and server-side component files.
+Avian is built on top of the popular [Express](https://expressjs.com/) web framework for [NodeJS](https://nodejs.com), uses [Redis](https://redislabs.com/) for managing application state afinity, sessions, and the caching of view templates, while [Webpack](https://webpack.js.org/) manages the transpilation and bundling of your client and server-side component files.
 
 - Cluster mode for load balancing across available CPU cores.
-- Out of the box webpacking with sane defaults.  Don't worry you can override and/or add to them whenever you want :)
-- Supports client side scripts and server-side service routes (APIs) written in JavaScript and TypeScript with no configuration required.
-- A unique and easy to use component-based model that is flexible with popular frameworks such as Angular, Vue.js, ReactJS, virtually 
-- Serving of static files.
-- Views can be authored in any view engine supported by Express, such as Pug, EJS, Handlebars and plain HTML.
-    - Each component can use its own view engine. Making it possible to migrate your application componenets from one engine to another over time.
-- Out-of-the box Supported logging frameworks are be Pino, Bunyan, and Fluentd.
+- Out of the box webpacking with sane defaults. Don't worry you can override and/or add to them whenever you want :)
+- Routes are generated based on how your componenent folders are structured. Similar to Next.JS.
+- Supports client side scripts and server-side service routes (APIs) written in JavaScript and TypeScript.
+- The serving of static files.
+- Views can be authored in EJS, Twig, Pug, and plain HTML.
+- Logging frameworks are Pino, Bunyan, and Fluentd.
 
 ## Installation
 
 ### Docker
+
+Official Docker instructions coming soon. For now, check out the hello-world example in the examples directory. 
 
 ### NPM
 
