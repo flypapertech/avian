@@ -617,13 +617,13 @@ if (cluster.isMaster) {
 
     loadAppServersIntoAvian(avian).then(() => {
         avian.use("/assets", express.static(argv.home + "/assets"))
-        avian.use("/", express.static(argv.home + `/${argv.statidDir}`))
+        avian.use("/", express.static(argv.home + `/${argv.staticdDir}`))
         avian.use("/node_modules", express.static(argv.home + "/node_modules"))
         avian.use("/bower_components", express.static(argv.home + "/bower_components"))
         avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))
         if (argv.spa) {
             avian.use(history({
-                index: `/${argv.defaultComponent}`,
+                index: `/${argv.entrypoint}`,
             }))
         }
 
@@ -806,7 +806,7 @@ if (cluster.isMaster) {
         })*/
 
         avian.all("/", (req, res, next) => {
-            res.redirect(`/${argv.defaultComponent}`)
+            res.redirect(`/${argv.entrypoint}`)
         })
     
     }).catch(err => console.log(err))

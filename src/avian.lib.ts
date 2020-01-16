@@ -98,8 +98,8 @@ export class Argv {
             default: "static",
             describe: "Which directory you would like to serve static files from. Will be accessible at the root of your application (e.g. /)."
         })
-        .option("defaultComponent", {
-            alias: "dc",
+        .option("entrypoint", {
+            alias: "ep",
             default: "index",
             describe: "The point of entry to your application."
         })
