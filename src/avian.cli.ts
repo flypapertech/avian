@@ -616,9 +616,8 @@ if (cluster.isMaster) {
     })
 
     loadAppServersIntoAvian(avian).then(() => {
-        avian.use("/static", express.static(argv.home + "/static"))
         avian.use("/assets", express.static(argv.home + "/assets"))
-        avian.use("/", express.static(argv.home + "/public"))
+        avian.use("/", express.static(argv.home + `/${argv.statidDir}`))
         avian.use("/node_modules", express.static(argv.home + "/node_modules"))
         avian.use("/bower_components", express.static(argv.home + "/bower_components"))
         avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))

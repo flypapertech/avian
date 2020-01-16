@@ -93,6 +93,11 @@ export class Argv {
             default: 8080,
             describe: "Which port to serve your application on."
         })
+         .option("staticDir", {
+            alias: "sd",
+            default: "static",
+            describe: "Which directory you would like to serve static files from. Will be accessible at the root of your application (e.g. /)."
+        })
         .option("defaultComponent", {
             alias: "dc",
             default: "index",
