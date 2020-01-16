@@ -92,36 +92,39 @@ Suggested Redis Installation Methods
     --version                   Show version number                      [boolean]
     --name, -n                  The name of your application[default: "localhost"]
     --home, -h                  The directory of your application.
-                                                [default: current working directory]
+                                                [default: Current working directory]
     --mode, -m                  Deployment mode to run Avian in.
                     [choices: "development", "production"] [default: "development"]
     --port, -p                  Which port to serve your application on.
                                                                     [default: 8080]
-    --defaultComponent, --dc    The point of entry to your application.
+    --staticDir, --sd           Which directory you would like to serve static
+                                files from. Will be accessible at the root of your
+                                application (e.g. /).          [default: "static"]
+    --entrypoint, --ep          The point of entry to your application.
                                                                 [default: "index"]
-    --spa                       Start Avian in a single-page-application
+    --spa                       Start Avian in a single-page-application (SPA)
                                 configuration.          [boolean] [default: false]
     --bundleSkip                                        [boolean] [default: false]
     --bundleOnly                                        [boolean] [default: false]
     --redisHost                                             [default: "127.0.0.1"]
     --redisPort                                                    [default: 6379]
-    --redisPass                                                    [default: undefined]
+    --redisPass
     --redisSessionDB                                                  [default: 1]
     --redisCacheDB                                                    [default: 2]
     --redisCronSchedulerDB                                            [default: 3]
-    --webpackHome                                                    [default: undefined]
+    --webpackHome                                                    [default: ""]
     --logger, -l                Which logging framework to use.
-                                                    [choices: "pino", "bunyan", "fluent"]
+                                            [choices: "pino", "bunyan", "fluent"]
     --loggerFluentLabel, --lfl                                  [default: "debug"]
     --loggerFluentTag, --lft                                    [default: "debug"]
     --loggerFluentHost, --lfh                               [default: "127.0.0.1"]
     --loggerFluentPort, --lfp                                     [default: 24224]
     --sslCert                                                             [string]
     --sslKey                                                              [string]
+    --compression                                       [boolean] [default: false]
     --cronJobScheduler, --cjs   Avian components are capable of scheduling
                                 cron-like jobs that are executed on the server.
                                                         [boolean] [default: false]
-    --compression               Use express-compression [boolean] [default: false]
 
 ### Application Folder Structure
 
