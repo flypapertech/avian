@@ -20,7 +20,7 @@ Avian is built on top of the popular [Express](https://expressjs.com/) web frame
 
 - Cluster mode for load balancing across available CPU cores.
 - Out of the box webpacking with sane defaults. Don't worry you can override and/or add to them whenever you want :)
-- Routes are generated based on how your componenent folders are structured. Similar to Next.JS.
+- Routes are generated based on how your component folders are structured.
 - Supports client side scripts and server-side service routes (APIs) written in JavaScript and TypeScript.
 - The serving of static files.
 - Views can be authored in EJS, Twig, Pug, and plain HTML.
