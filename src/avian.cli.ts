@@ -21,6 +21,7 @@ import {Compiler, ICompiler, MultiCompiler} from "webpack"
 
 import injectArgv from "./middlewares/injectArgv"
 import loadAppServersIntoAvian from "./functions/loadAppServersIntoAvian"
+import capitalizeFirstLetter from "./functions/capitalizeFirstLetter"
 
 // TODO this should be undefined, but perhaps not empty for this evaluation...
 if (argv.webpackHome === "") argv.webpackHome = argv.home
@@ -42,15 +43,6 @@ avianEmitter.on("buildStarted", (name: string) => {
         runningBuilds.components = true
     }
 })
-
-/**
- * Capitalizes first letter
- * @param str 
- * @returns string 
- */
-function capitalizeFirstLetter(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1)
-}
 
 let pendingChunks: string[] = []
 avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {

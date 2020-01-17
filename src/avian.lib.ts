@@ -9,7 +9,7 @@ import * as os from "os"
 import * as fs from "graceful-fs"
 
 /** 
- * Avian Express Namespace & Interfaces
+ * Avian Namespace & Interfaces
  * @description To be exported at build time to avian.lib.d.ts
  * @interface
  */
