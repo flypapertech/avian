@@ -1,15 +1,15 @@
 import * as webpack from "webpack"
 import * as merge from "webpack-merge"
-import { ComponentsCommmonConfig, ServicesCommonConfig } from "./webpack.common"
+import { ComponentsCommmonConfig, ServerCommonConfig } from "./webpack.common"
 
 const componentsDevSpecificConfig: webpack.Configuration = {
     devtool: "inline-source-map",
     mode: "development"
 }
 
-const servicesDevSpecificConfig: webpack.Configuration = {
+const serverDevSpecificConfig: webpack.Configuration = {
     mode: "development"
 }
 
 export let ComponentsConfig = merge(ComponentsCommmonConfig, componentsDevSpecificConfig)
-export let ServicesConfig = merge(ServicesCommonConfig, servicesDevSpecificConfig)
+export let ServerConfig = merge(ServerCommonConfig, serverDevSpecificConfig)

@@ -11,7 +11,7 @@ const injectArgv: RequestHandler = (req, res, next) => {
  
         } 
         catch(error) { 
-            res.status(500).send("Unable to determine a session secret. So Avian Args will noe be available to your service rourtes")
+            res.status(500).send("Unable to determine a session secret. So Avian Args will not be available to your server rourtes")
         }
     }
 

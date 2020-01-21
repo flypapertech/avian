@@ -20,7 +20,7 @@ import { argv, utils } from "./avian.lib"
 import {Compiler, ICompiler, MultiCompiler} from "webpack"
 
 import injectArgv from "./middlewares/injectArgv"
-import loadAppServersIntoAvian from "./functions/loadAppServersIntoAvian"
+import {loadAppRoutesIntoAvian, loadAppServerFilesIntoAvian }from "./functions/loadAppServersIntoAvian"
 import capitalizeFirstLetter from "./functions/capitalizeFirstLetter"
 
 // TODO this should be undefined, but perhaps not empty for this evaluation...
@@ -31,14 +31,14 @@ const sessionSecret = process.env.AVIAN_APP_SESSION_SECRET || crypto.createHash(
 
 const avianEmitter = new events.EventEmitter()
 const runningBuilds = {
-    services: false,
+    serverFiles: false,
     components: false,
 }
 
 avianEmitter.on("buildStarted", (name: string) => {
     console.log(`Avian - Started Bundling ${capitalizeFirstLetter(name)}`)
-    if (name === "services") {
-        runningBuilds.services = true
+    if (name === "serverFiles") {
+        runningBuilds.serverFiles = true
     } else if (name === "components") {
         runningBuilds.components = true
     }
@@ -48,12 +48,12 @@ let pendingChunks: string[] = []
 avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
     pendingChunks.push(...changedChunks)
     console.log(`Avian - Finished Bundling ${capitalizeFirstLetter(name)}`)
-    if (name === "services") {
-        runningBuilds.services = false
+    if (name === "serverFiles") {
+        runningBuilds.serverFiles = false
     } else if (name === "components") {
         runningBuilds.components = false
     }
-    if (runningBuilds.components === false && runningBuilds.services === false) {
+    if (runningBuilds.components === false && runningBuilds.serverFiles === false) {
         if (argv.bundleOnly) {
             console.log("Avian - Bundle Only Enabled Shutting Down")
             process.exit()
@@ -63,10 +63,12 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
         if (!utils.isAvianRunning()) {
             console.log("Avian - Starting Server")
             utils.startAllWorkers()
-        } else if (pendingChunks.some((chunk) => chunk.includes("service"))) {
+            loadAppServerFilesIntoAvian()
+        } else if (pendingChunks.some((chunk) => chunk.includes("server"))) {
             console.log("Avian - Restarting Server")
             utils.killAllWorkers()
             utils.startAllWorkers()
+            loadAppServerFilesIntoAvian()
         }
 
         pendingChunks = []
@@ -83,26 +85,26 @@ function startDevWebpackWatcher(webpackDev: any) {
         avianEmitter.emit("buildStarted", "components")
     })
 
-    let servicesCompiler: Compiler
-    servicesCompiler = webpack(
-        webpackDev.ServicesConfig,
+    let serverFilesCompiler: Compiler
+    serverFilesCompiler = webpack(
+        webpackDev.ServerConfig,
     )
-    servicesCompiler.hooks.watchRun.tap("Starting", () => {
-        avianEmitter.emit("buildStarted", "services")
+    serverFilesCompiler.hooks.watchRun.tap("Starting", () => {
+        avianEmitter.emit("buildStarted", "serverFiles")
     })
 
     console.log("Avian - Watching For Changes")
     const watching = componentsCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
-        ignored: ["components/**/*.service.*", "node_modules", "serverless"],
+        ignored: ["components/**/*.server.*", "node_modules", "serverless"],
     }, watcherCallback("components"))
 
-    servicesCompiler.watch({
+    serverFilesCompiler.watch({
         aggregateTimeout: 300,
         poll: 1000,
         ignored: ["components/**/*.client.*", "node_modules", "serverless"],
-    }, watcherCallback("services"))
+    }, watcherCallback("serverFiles"))
 }
 
 function watcherCallback(name: string) {
@@ -154,7 +156,7 @@ function startProdWebpackCompiler(webpackProd: any) {
     let webpackCompiler: MultiCompiler
     webpackCompiler = webpack([
         webpackProd.ComponentsConfig,
-        webpackProd.ServicesConfig,
+        webpackProd.ServerConfig,
     ])
 
     console.log("Avian - Started Bundling")
@@ -351,6 +353,7 @@ if (cluster.isMaster) {
         console.log("Avian - Skipped Bundling")
         utils.startAllWorkers()
         utils.setWorkersToAutoRestart()
+        loadAppServerFilesIntoAvian()
     } else {
         import("typescript").then((ts) => {
             rimraf.sync(`${argv.home}/private/*`)
@@ -613,7 +616,7 @@ if (cluster.isMaster) {
         })
     })
 
-    loadAppServersIntoAvian(avian).then(() => {
+    loadAppRoutesIntoAvian(avian).then(() => {
         avian.use("/assets", express.static(argv.home + "/assets"))
         avian.use("/", express.static(argv.home + `/${argv.staticDir}`))
         avian.use("/node_modules", express.static(argv.home + "/node_modules"))
@@ -788,20 +791,6 @@ if (cluster.isMaster) {
 
             res.sendStatus(200)
         })
-
-        /** 
-         *  Avian Service Routes
-         *  @description Avian provides numerous out of the box helper service routes for application developers.
-         */
-        
-        /* services.forEach((route: any) => {
-            route.method(route.path, (req: Request, res: Response, next: Function) => {
-
-                route.action(req, res, next)
-                    .then(() => next)
-                    .catch((error: any) => next(error))
-            })
-        })*/
 
         avian.all("/", (req, res, next) => {
             res.redirect(`/${argv.entrypoint}`)

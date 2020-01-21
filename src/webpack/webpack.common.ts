@@ -102,10 +102,10 @@ const componentsCommonConfig: webpack.Configuration = {
     }
 }
 
-const servicesCommonConfig: webpack.Configuration = {
+const serverCommonConfig: webpack.Configuration = {
     target: "node",
     entry: webpackWatchedGlobEntries.getEntries([
-            `${argv.home}/components/**/*.service.*`
+            `${argv.home}/components/**/*.server.*`
         ]
     ),
     output: {
@@ -144,4 +144,4 @@ const servicesCommonConfig: webpack.Configuration = {
 }
 
 export let ComponentsCommmonConfig = componentsCommonConfig
-export let ServicesCommonConfig = servicesCommonConfig
+export let ServerCommonConfig = serverCommonConfig

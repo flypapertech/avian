@@ -1,14 +1,14 @@
 import * as webpack from "webpack"
 import * as merge from "webpack-merge"
-import { ComponentsCommmonConfig, ServicesCommonConfig } from "./webpack.common"
+import { ComponentsCommmonConfig, ServerCommonConfig } from "./webpack.common"
 
 const componentsProdSpecificConfig: webpack.Configuration = {
     mode: "production"
 }
 
-const servicesProdSpecificConfig: webpack.Configuration = {
+const serverProdSpecificConfig: webpack.Configuration = {
     mode: "production"
 }
 
 export let ComponentsConfig = merge(ComponentsCommmonConfig, componentsProdSpecificConfig)
-export let ServicesConfig = merge(ServicesCommonConfig, servicesProdSpecificConfig)
+export let ServerConfig = merge(ServerCommonConfig, serverProdSpecificConfig)
