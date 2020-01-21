@@ -10,7 +10,7 @@ import { argv } from "../avian.lib"
  */
 export async function loadAppRoutesIntoAvian(avian: express.Express) {
 
-    const compiledServerRouteFiles = glob.sync([`${argv.home}/private/**/*.server.routes.*.js`, "!server.routes.js"]).sort()
+    const compiledServerRouteFiles = glob.sync([`${argv.home}/private/**/*.server.routes.*js`]).sort()
     if (fs.existsSync(`${argv.home}/private/server.routes.js`)) {
         compiledServerRouteFiles.unshift(`${argv.home}/private/server.routes.js`)
     }
@@ -68,7 +68,7 @@ export async function loadAppRoutesIntoAvian(avian: express.Express) {
  */
 export async function loadAppServerFilesIntoAvian() {
 
-    const compiledServerRouteFiles = glob.sync([`${argv.home}/private/**/*.server.*.js`, `!${argv.home}/private/**/*.server.routes.*.js`])
+    const compiledServerRouteFiles = glob.sync([`${argv.home}/private/**/*.server.*.js`, `!*server.routes.*.js`])
 
     for (let i = 0 ; i < compiledServerRouteFiles.length ; i++) {
         try {
