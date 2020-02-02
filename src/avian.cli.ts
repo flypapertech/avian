@@ -450,7 +450,9 @@ if (cluster.isMaster) {
         const compression = require('compression')
         avian.use(compression({
             filter: (req: express.Request, res: express.Response) => {
-                return !req.doNotCompress
+                if (req.doNotCompress) return false
+                // fallback to standard express compression filter
+                return compression.filter(req, res)
             }
         }))
     }
