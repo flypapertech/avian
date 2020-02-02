@@ -621,7 +621,7 @@ if (cluster.isMaster) {
 
     loadAppRoutesIntoAvian(avian).then(() => {
         avian.use("/assets", expressStaticGzip(argv.home + "/assets", {enableBrotli: true}))
-        avian.use("/", expressStaticGzip(argv.home + `/${argv.staticDir}`, {enableBrotli: true}))
+        avian.use("/", expressStaticGzip(argv.home + `/${argv.staticDir}`, {enableBrotli: true, index: false, orderPreference: ["br"]}))
         avian.use("/node_modules", express.static(argv.home + "/node_modules"))
         avian.use("/bower_components", express.static(argv.home + "/bower_components"))
         avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))
