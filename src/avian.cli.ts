@@ -22,6 +22,7 @@ import {Compiler, ICompiler, MultiCompiler} from "webpack"
 import injectArgv from "./middlewares/injectArgv"
 import {loadAppRoutesIntoAvian, loadAppServerFilesIntoAvian }from "./functions/loadAppServersIntoAvian"
 import capitalizeFirstLetter from "./functions/capitalizeFirstLetter"
+import * as expressStaticGzip from "express-static-gzip"
 
 // TODO this should be undefined, but perhaps not empty for this evaluation...
 if (argv.webpackHome === "") argv.webpackHome = argv.home
@@ -617,8 +618,8 @@ if (cluster.isMaster) {
     })
 
     loadAppRoutesIntoAvian(avian).then(() => {
-        avian.use("/assets", express.static(argv.home + "/assets"))
-        avian.use("/", express.static(argv.home + `/${argv.staticDir}`))
+        avian.use("/assets", expressStaticGzip(argv.home + "/assets", {enableBrotli: true}))
+        avian.use("/", expressStaticGzip(argv.home + `/${argv.staticDir}`, {enableBrotli: true}))
         avian.use("/node_modules", express.static(argv.home + "/node_modules"))
         avian.use("/bower_components", express.static(argv.home + "/bower_components"))
         avian.use("/jspm_packages", express.static(argv.home + "/jspm_packages"))

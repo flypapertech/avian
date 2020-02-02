@@ -47,6 +47,7 @@
     "express-minify": "1.0.0",
     "express-pino-logger": "^4.0.0",
     "express-session": "1.15.6",
+    "express-static-gzip": "2.0.6",
     "fast-glob": "^3.1.0",
     "findit": "^2.0.0",
     "graceful-fs": "^4.2.3",
@@ -63,11 +64,11 @@
     "typescript": "3.3.3",
     "vue-loader": "15.6.2",
     "vue-template-compiler": "2.6.6",
+    "webpack": ">=4.28.0",
     "webpack-merge": "4.2.1",
     "webpack-node-externals": "1.7.2",
     "webpack-watched-glob-entries-plugin": "2.1.4",
-    "yargs": "13.2.0",
-    "webpack": ">=4.28.0"
+    "yargs": "13.2.0"
   },
   "resolutions": {
     "*/**/hoek": "^4.2.0",
