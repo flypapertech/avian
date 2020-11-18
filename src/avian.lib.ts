@@ -125,13 +125,13 @@ export class Argv {
         .option("redisPass", {
             default: undefined
         })
-        .option("redisSessionDB", {
+        .option("redisSessionDb", {
             default: 1
         })
-        .option("redisCacheDB", {
+        .option("redisCacheDb", {
             default: 2
         })
-        .option("redisCronSchedulerDB", {
+        .option("redisCronSchedulerDb", {
             default: 3
         })
         .option("webpackHome", {

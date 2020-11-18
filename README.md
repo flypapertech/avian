@@ -109,9 +109,9 @@ Suggested Redis Installation Methods
     --redisHost                                             [default: "127.0.0.1"]
     --redisPort                                                    [default: 6379]
     --redisPass
-    --redisSessionDB                                                  [default: 1]
-    --redisCacheDB                                                    [default: 2]
-    --redisCronSchedulerDB                                            [default: 3]
+    --redisSessionDb                                                  [default: 1]
+    --redisCacheDb                                                    [default: 2]
+    --redisCronSchedulerDb                                            [default: 3]
     --webpackHome                                                    [default: ""]
     --logger, -l                Which logging framework to use.
                                             [choices: "pino", "bunyan", "fluent"]

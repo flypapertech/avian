@@ -215,7 +215,7 @@ class ServerEvent {
  * @description More info to follow.
  */
 function subscribe(callback: any) {
-    const subscriber = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDB, password: argv.redisPass })
+    const subscriber = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDb, password: argv.redisPass })
     subscriber.subscribe("sse")
     subscriber.on("error", (error) => {
         console.log("Redis error: " + error)
@@ -251,7 +251,7 @@ if (cluster.isMaster) {
 
     if (argv.cronJobScheduler) {
 
-        const cronJobQueue = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCronSchedulerDB, password: argv.redisPass})
+        const cronJobQueue = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCronSchedulerDb, password: argv.redisPass})
 
         setInterval(() => {
 
@@ -538,7 +538,7 @@ if (cluster.isMaster) {
     avian.use(enableAuthHeadersForExpressSession)
 
     avian.use(session({
-        store: new redisStore({host: argv.redisHost, port: argv.redisPort, db: argv.redisSessionDB, password: argv.redisPass}),
+        store: new redisStore({host: argv.redisHost, port: argv.redisPort, db: argv.redisSessionDb, password: argv.redisPass}),
         proxy: true,
         secret: sessionSecret,
         resave: false,
@@ -549,7 +549,7 @@ if (cluster.isMaster) {
         },
     }))
 
-    const cache = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDB, password: argv.redisPass})
+    const cache = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDb, password: argv.redisPass})
     avian.use((req, res, next) => {
         req.cache = cache 
         if (req.cache.connected) {
