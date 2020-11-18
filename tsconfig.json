@@ -8,7 +8,7 @@
 		"removeComments": true,
 		"declaration": true,
 		"outDir": "dist",
-		"lib": ["es2020"],
+		"lib": ["es2020", "dom"],
 		"rootDirs": [
 			"src",
 			"spec"
