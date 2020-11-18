@@ -1,5 +1,5 @@
 import * as webpack from "webpack"
-import * as merge from "webpack-merge"
+import { merge }  from "webpack-merge"
 import { ComponentsCommmonConfig, ServerCommonConfig } from "./webpack.common"
 
 const componentsProdSpecificConfig: webpack.Configuration = {
