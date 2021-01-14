@@ -6,6 +6,7 @@
 		"module": "commonjs",
 		"moduleResolution": "node",
 		"removeComments": true,
+		"skipLibCheck": true,
 		"declaration": true,
 		"outDir": "dist",
 		"lib": ["es2020", "dom"],

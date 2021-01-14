@@ -4,6 +4,7 @@ import * as path from "path"
 import nodeExternals = require("webpack-node-externals")
 import { argv } from "../avian.lib"
 import { srcPath } from "../functions/srcPath"
+// @ts-ignore
 import webpackWatchedGlobEntries = require("webpack-watched-glob-entries-plugin")
 
 const componentsCommonConfig: webpack.Configuration = {
@@ -82,7 +83,7 @@ const componentsCommonConfig: webpack.Configuration = {
             {
                 test: /\.tsx?$/,
                 exclude: /node_modules/,
-                loaders: [
+                use: [
                     {
                         loader: "babel-loader",
                         options: {
@@ -137,7 +138,14 @@ const serverCommonConfig: webpack.Configuration = {
             },
             {
                 test: /\.tsx?$/,
-                loaders: ["babel-loader", "ts-loader"]
+                use: [
+                    {
+                        loader: "babel-loader"
+                    },
+                    {
+                        loader: "ts-loader"
+                    }
+                ]
             }
         ]
     }

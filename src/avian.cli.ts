@@ -17,12 +17,16 @@ import * as path from "path"
 import * as redis from "redis"
 import * as rimraf from "rimraf"
 import { argv, utils } from "./avian.lib"
-import {Compiler, ICompiler, MultiCompiler} from "webpack"
+import {Chunk, Compiler, MultiCompiler, Stats } from "webpack"
 
 import injectArgv from "./middlewares/injectArgv"
 import {loadAppRoutesIntoAvian, loadAppServerFilesIntoAvian }from "./functions/loadAppServersIntoAvian"
 import capitalizeFirstLetter from "./functions/capitalizeFirstLetter"
 import * as expressStaticGzip from "express-static-gzip"
+
+declare interface CallbackFunction<T> {
+	(err?: Error, result?: T): any;
+}
 
 // TODO this should be undefined, but perhaps not empty for this evaluation...
 if (argv.webpackHome === "") argv.webpackHome = argv.home
@@ -110,8 +114,8 @@ function startDevWebpackWatcher(webpackDev: any) {
 
 function watcherCallback(name: string) {
     const chunkVersions = {} as any
-    const watcherCallback: ICompiler.Handler = (err, stats) => {
-        if (err || stats.hasErrors()) {
+    const watcherCallback: CallbackFunction<Stats> = (err, stats) => {
+        if (err || stats?.hasErrors()) {
             if (err) {
                 console.error(err)
             } else if (stats) {
@@ -133,19 +137,21 @@ function watcherCallback(name: string) {
             return
         }
 
-        if (stats.hasWarnings()) {
-            stats.toJson().warnings.forEach((warning: any) => {
+        if (stats?.hasWarnings()) {
+            stats?.toJson().warnings.forEach((warning: any) => {
                 console.log(warning)
             })
         }
+        const changedChunks: Chunk[] = []
 
-        const changedChunks = stats.compilation.chunks.filter((chunk) => {
+        stats?.compilation.chunks.forEach((chunk) => {
             const oldVersion = chunkVersions[chunk.name]
             chunkVersions[chunk.name] = chunk.hash
-            return chunk.hash !== oldVersion
-          }).map((chunk) => chunk.name)
+            if (chunk.hash !== oldVersion)
+                changedChunks.push(chunk)
+        })
 
-        avianEmitter.emit("buildCompleted", name, changedChunks)
+        avianEmitter.emit("buildCompleted", name, changedChunks.map((chunk) => chunk.name))
         return
     }
 
@@ -162,7 +168,7 @@ function startProdWebpackCompiler(webpackProd: any) {
 
     console.log("Avian - Started Bundling")
     webpackCompiler.run((err, stats) => {
-        if (err || stats.hasErrors()) {
+        if (err || stats?.hasErrors()) {
             if (err) {
                 console.error(err)
             } else if (stats) {
@@ -395,7 +401,8 @@ if (cluster.isMaster) {
                     import("./webpack/webpack.development").then((defaultWebpackDev) => {
                         startDevWebpackWatcher(defaultWebpackDev)
                     }).catch((error) => {
-                        console.log("Avian - Failed to load default development webpack config")
+                        console.error(error)
+                        console.error("Avian - Failed to load default development webpack config")
                     })
                 })
             } else {
@@ -406,7 +413,8 @@ if (cluster.isMaster) {
                     import("./webpack/webpack.production").then((defaultWebpackProd) => {
                         startProdWebpackCompiler(defaultWebpackProd)
                     }).catch((error) => {
-                        console.log("Avian - Failed to load default production webpack config")
+                        console.error(error)
+                        console.error("Avian - Failed to load default production webpack config")
                     })
                 })
             }
