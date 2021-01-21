@@ -147,7 +147,7 @@ function watcherCallback(name: string) {
         stats?.compilation.chunks.forEach((chunk) => {
             const oldVersion = chunkVersions[chunk.name]
             chunkVersions[chunk.name] = chunk.hash
-            if (chunk.hash !== oldVersion)
+            if (chunk.hash !== oldVersion && chunk.name)
                 changedChunks.push(chunk)
         })
 
@@ -397,6 +397,7 @@ if (cluster.isMaster) {
                 import(argv.home + "/private/webpack.development").then((webpackDev) => {
                     startDevWebpackWatcher(webpackDev)
                 }).catch((error) => {
+                    console.error(error)
                     console.log("Avian - Falling back to default dev webpack config")
                     import("./webpack/webpack.development").then((defaultWebpackDev) => {
                         startDevWebpackWatcher(defaultWebpackDev)
