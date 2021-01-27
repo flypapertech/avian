@@ -365,6 +365,7 @@ if (cluster.isMaster) {
             const program = ts.createProgram(webpackConfigs, {
                 allowJs: true,
                 noEmitOnError: true,
+                esModuleInterop: true,
                 noImplicityAny: true,
                 target: ts.ScriptTarget.ES5,
                 modules: ts.ModuleKind.CommonJS,
