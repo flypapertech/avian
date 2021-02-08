@@ -49,9 +49,13 @@ avianEmitter.on("buildStarted", (name: string) => {
     }
 })
 
-let finishedCompilations: string[] = []
+let needsServerRestart = false
 avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
-    finishedCompilations.push(name)
+    // there is a possibility that a compilation got kicked off and nothing was done
+    if (changedChunks.length !== 0 && name === "serverFiles") {
+        needsServerRestart = true
+    }
+
     console.log(`Avian - Finished Bundling ${capitalizeFirstLetter(name)}`)
     if (name === "serverFiles") {
         runningBuilds.serverFiles = false
@@ -69,14 +73,13 @@ avianEmitter.on("buildCompleted", (name: string, changedChunks: string[]) => {
             console.log("Avian - Starting Server")
             utils.startAllWorkers()
             loadAppServerFilesIntoAvian()
-        } else if (finishedCompilations.some((name) => name === "serverFiles")) {
+        } else if (needsServerRestart) {
             console.log("Avian - Restarting Server")
             utils.killAllWorkers()
             utils.startAllWorkers()
             loadAppServerFilesIntoAvian()
+            needsServerRestart = false
         }
-
-        finishedCompilations = []
     }
 })
 
