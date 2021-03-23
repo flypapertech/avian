@@ -1,6 +1,6 @@
 {
   "name": "@flypapertech/avian",
-  "version": "0.6.43",
+  "version": "0.6.44",
   "description": "Create Enterprise-class component driven applications that scale.",
   "publishConfig": {
     "access": "public"
@@ -13,7 +13,7 @@
   "main": "./dist/avian.lib.js",
   "types": "./dist/avian.lib.d.ts",
   "bin": {
-    "avian": "./dist/avian.cli.js"
+    "avian": "dist/avian.cli.js"
   },
   "scripts": {
     "build": "node_modules/.bin/tsc --project ./;",
