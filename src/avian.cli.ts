@@ -575,8 +575,9 @@ if (cluster.isMaster) {
         }
     })
 
+    let server
     if (argv.sslCert && argv.sslKey) {
-        https.createServer({
+        server = https.createServer({
             cert: fs.readFileSync(argv.sslCert),
             key: fs.readFileSync(argv.sslKey),
         }, avian).listen(argv.port, () => {
@@ -589,7 +590,7 @@ if (cluster.isMaster) {
             )
         })
     } else {
-        avian.listen(argv.port, () => {
+        server = avian.listen(argv.port, () => {
             console.log("Avian - Process: %sd, Name: %s, Home: %s, Port: %d, Mode: %s",
                 process.pid,
                 argv.name,
@@ -599,6 +600,8 @@ if (cluster.isMaster) {
             )
         })
     }
+
+    server.keepAliveTimeout = argv.keepAliveTimeout * 1000
 
     let sseClients: Array<{interval: NodeJS.Timeout, res: express.Response }> = []
     subscribe((channel: any, message: any) => {

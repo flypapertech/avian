@@ -116,6 +116,11 @@ export class Argv {
             default: false,
             type: "boolean"
         })
+        .option("keepAliveTimeout", {
+            default: 65,
+            describe: "Sets the keep alive timeout in seconds. Defaults to 65 to be greater than the default ELB idleTimeout of 60 seconds.",
+            type: "number"
+        })
         .option("redisHost", {
             default: "127.0.0.1"
         })
