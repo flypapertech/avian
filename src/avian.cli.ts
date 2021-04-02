@@ -224,7 +224,15 @@ class ServerEvent {
  * @description More info to follow.
  */
 function subscribe(callback: any) {
-    const subscriber = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDb, password: argv.redisPass })
+    const subscriber = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDb, password: argv.redisPass,
+    retry_strategy: (options) => {
+        if (argv.redisReconnectTimeout !== -1 && options.total_retry_time > argv.redisReconnectTimeout) {
+            return new Error("Retry time exhausted.")
+        }
+
+        return Math.min(options.attempt * 100, 3000);
+    }})
+
     subscriber.subscribe("sse")
     subscriber.on("error", (error) => {
         console.log("Redis error: " + error)

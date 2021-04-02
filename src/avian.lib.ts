@@ -130,6 +130,9 @@ export class Argv {
         .option("redisPass", {
             default: undefined
         })
+        .option("redisReconnectTimeout", {
+            default: 1000 * 60 * 5
+        })
         .option("redisSessionDb", {
             default: 1
         })
