@@ -122,7 +122,7 @@ function watcherCallback(name: string) {
             if (err) {
                 console.error(err)
             } else if (stats) {
-                stats.toJson().errors.forEach((err: any) => {
+                stats.toJson().errors?.forEach((err: any) => {
                     console.error(err)
                 })
             }
@@ -141,7 +141,7 @@ function watcherCallback(name: string) {
         }
 
         if (stats?.hasWarnings()) {
-            stats?.toJson().warnings.forEach((warning: any) => {
+            stats?.toJson().warnings?.forEach((warning: any) => {
                 console.log(warning)
             })
         }
@@ -175,7 +175,7 @@ function startProdWebpackCompiler(webpackProd: any) {
             if (err) {
                 console.error(err)
             } else if (stats) {
-                stats.toJson().errors.forEach((err: any) => {
+                stats.toJson().errors?.forEach((err: any) => {
                     console.error(err)
                 })
             }
