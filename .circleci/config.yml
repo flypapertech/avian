@@ -70,10 +70,10 @@ jobs:
     docker:
       - image: circleci/node:14
 
-  build-node16:
-    <<: *common-build
-    docker:
-      - image: cimg/node:16
+  # build-node16:
+  #   <<: *common-build
+  #   docker:
+  #     - image: cimg/node:16
 
 workflows:
   version: 2
@@ -83,11 +83,11 @@ workflows:
           <<: *filter-run-always
       - build-node14:
           <<: *filter-run-always
-      - build-node16:
-          <<: *filter-run-always
+      # - build-node16:
+      #     <<: *filter-run-always
       - deploy:
           requires:
             - build-node12
             - build-node14
-            - build-node16
+            # - build-node16
           <<: *filter-run-on-master-and-version-tag-only
