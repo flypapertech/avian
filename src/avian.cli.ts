@@ -25,7 +25,7 @@ import capitalizeFirstLetter from "./functions/capitalizeFirstLetter"
 import * as expressStaticGzip from "express-static-gzip"
 
 declare interface CallbackFunction<T> {
-	(err?: Error, result?: T): any;
+    (err?: null | Error, result?: T): any;
 }
 
 // TODO this should be undefined, but perhaps not empty for this evaluation...
@@ -115,7 +115,7 @@ function startDevWebpackWatcher(webpackDev: any) {
     }, watcherCallback("serverFiles"))
 }
 
-function watcherCallback(name: string) {
+function watcherCallback(name: string): CallbackFunction<Stats> {
     const chunkVersions = {} as any
     const watcherCallback: CallbackFunction<Stats> = (err, stats) => {
         if (err || stats?.hasErrors()) {
