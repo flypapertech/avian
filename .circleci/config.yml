@@ -46,7 +46,7 @@ jobs:
   deploy:
     working_directory: ~/repo
     docker:
-      - image: circleci/node:14
+      - image: circleci/node:16
     steps:
       - *step-checkout
       - *step-restore-cache
@@ -60,34 +60,26 @@ jobs:
           name: Publish Package
           command: npm publish
 
-  build-node12:
-    <<: *common-build
-    docker:
-      - image: circleci/node:12
-
   build-node14:
     <<: *common-build
     docker:
       - image: circleci/node:14
 
-  # build-node16:
-  #   <<: *common-build
-  #   docker:
-  #     - image: cimg/node:16
+  build-node16:
+    <<: *common-build
+    docker:
+      - image: cimg/node:16
 
 workflows:
   version: 2
   build_all:
     jobs:
-      - build-node12:
-          <<: *filter-run-always
       - build-node14:
           <<: *filter-run-always
-      # - build-node16:
-      #     <<: *filter-run-always
+      - build-node16:
+          <<: *filter-run-always
       - deploy:
           requires:
-            - build-node12
             - build-node14
-            # - build-node16
+            - build-node16
           <<: *filter-run-on-master-and-version-tag-only
