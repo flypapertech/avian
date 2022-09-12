@@ -523,7 +523,7 @@ if (cluster.isMaster) {
         next()
     })
 
-    avian.engine("html", require("ejs").renderFile)
+    avian.set("view engine", "ejs")
     avian.use(injectArgv)
 
     avian.locals.argv = argv
