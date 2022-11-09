@@ -1,6 +1,6 @@
 {
   "name": "@flypapertech/avian",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "Create Enterprise-class component driven applications that scale.",
   "publishConfig": {
     "access": "public"
