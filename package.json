@@ -93,7 +93,7 @@
     "@types/webpack-merge": "5.0.0",
     "@types/webpack-node-externals": "2.5.3",
     "@types/yargs": "16.0.1",
-    "mocha": "^5.2.0",
+    "mocha": "^10.1.0",
     "snyk": "1.989.0",
     "ts-node": "10.9.1",
     "tslint": "6.1.3",
