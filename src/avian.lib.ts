@@ -176,6 +176,16 @@ export class Argv {
             type: "boolean",
             default: false
         })
+        .option("sessionTTL", {
+            type: "number",
+            describe: "The time you want the session store to keep the session alive for in milliseconds",
+            default: 86400000 * 7
+        })
+        .option("sessionCookieMaxAge", {
+            type: "number",
+            describe: "The max age of the session cookie in milliseconds",
+            default: undefined
+        })
         .option("cronJobScheduler", {
             alias: "cjs",
             default: false,

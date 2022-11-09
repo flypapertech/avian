@@ -559,14 +559,14 @@ if (cluster.isMaster) {
     avian.use(enableAuthHeadersForExpressSession)
 
     avian.use(session({
-        store: new redisStore({host: argv.redisHost, port: argv.redisPort, db: argv.redisSessionDb, password: argv.redisPass}),
+        store: new redisStore({host: argv.redisHost, port: argv.redisPort, db: argv.redisSessionDb, password: argv.redisPass, ttl: argv.sessionTTL / 1000}),
         proxy: true,
         secret: sessionSecret,
         resave: false,
         saveUninitialized: true,
         cookie: {
             httpOnly: true,
-            maxAge: 2592000000,
+            maxAge: argv.sessionCookieMaxAge,
         },
     }))
 
