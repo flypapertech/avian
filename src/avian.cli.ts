@@ -563,6 +563,7 @@ if (cluster.isMaster) {
         proxy: true,
         secret: sessionSecret,
         resave: false,
+        rolling: argv.sessionCookieRolling,
         saveUninitialized: true,
         cookie: {
             httpOnly: true,

@@ -184,7 +184,12 @@ export class Argv {
         .option("sessionCookieMaxAge", {
             type: "number",
             describe: "The max age of the session cookie in milliseconds",
-            default: undefined
+            default: 2592000000
+        })
+        .option("sessionCookieRolling", {
+            type: "boolean",
+            describe: "Should express session update the client cookie max age upon every api call",
+            default: false
         })
         .option("cronJobScheduler", {
             alias: "cjs",
