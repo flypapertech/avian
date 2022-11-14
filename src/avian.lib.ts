@@ -191,6 +191,16 @@ export class Argv {
             describe: "Should express session update the client cookie max age upon every api call",
             default: false
         })
+        .option("sessionSaveUninitialized", {
+            type: "boolean",
+            describe: "Should express session save uninitialized session",
+            default: false
+        })
+        .option("sessionResave", {
+            type: "boolean",
+            describe: "Should express session resave",
+            default: false
+        })
         .option("cronJobScheduler", {
             alias: "cjs",
             default: false,

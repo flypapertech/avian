@@ -562,9 +562,9 @@ if (cluster.isMaster) {
         store: new redisStore({host: argv.redisHost, port: argv.redisPort, db: argv.redisSessionDb, password: argv.redisPass, ttl: argv.sessionTTL / 1000}),
         proxy: true,
         secret: sessionSecret,
-        resave: false,
+        resave: argv.sessionResave,
         rolling: argv.sessionCookieRolling,
-        saveUninitialized: true,
+        saveUninitialized: argv.sessionSaveUninitialized,
         cookie: {
             httpOnly: true,
             maxAge: argv.sessionCookieMaxAge,
