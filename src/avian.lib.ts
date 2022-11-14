@@ -178,13 +178,13 @@ export class Argv {
         })
         .option("sessionTTL", {
             type: "number",
-            describe: "The time you want the session store to keep the session alive for in milliseconds",
-            default: 86400000 * 7
+            describe: "The time you want the session store to keep the session alive for in milliseconds [7 days]",
+            default: 60 * 60 * 24 * 7 * 1000
         })
         .option("sessionCookieMaxAge", {
             type: "number",
-            describe: "The max age of the session cookie in milliseconds",
-            default: 2592000000
+            describe: "The max age of the session cookie in milliseconds [30 days]",
+            default: 60 * 60 * 24 * 30 * 1000
         })
         .option("sessionCookieRolling", {
             type: "boolean",
