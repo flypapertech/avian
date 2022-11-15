@@ -1,6 +1,6 @@
 import jsonfile = require("jsonfile")
 import * as yargs from "yargs"
-import { RedisClient } from "redis"
+import { RedisClientType } from "redis"
 import { DateTime } from "luxon"
 import { Request, Router } from "express"
 import * as glob from "glob"
@@ -26,7 +26,7 @@ declare global {
          */
         interface Request {
             argv: typeof argv
-            cache: RedisClient
+            cache: RedisClientType<any, any, any>
             doNotCompress: boolean | undefined
             epilogues: any
             logger: any
@@ -279,21 +279,18 @@ export class Utils {
      * @param callback 
      * @returns  
      */
-    public getComponentConfigObject(component: string, req: Request, subcomponent: string | undefined, callback: Function) {
+    public async getComponentConfigObject(component: string, req: Request, subcomponent: string | undefined, callback: Function) {
         try {
             const cacheKey = (subcomponent) ? `${component}/${subcomponent}` : component
-            const config: any = {}
-            req.cache.get(cacheKey, (err, config) => {
-                if (config) {
-                    callback(JSON.parse(config))
-                    return
-                }
-
+            const config = await req.cache.get(cacheKey)
+            if (config) {
+                callback(JSON.parse(config))
+                return
+            }
+            else {
                 const configString = this.setComponentConfigObjectCache(component, req, subcomponent)
                 callback(JSON.parse(configString))
-            })
-
-            return config
+            }
         } catch (error) {
             console.error(error)
             callback({})

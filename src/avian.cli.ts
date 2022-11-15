@@ -223,22 +223,15 @@ class ServerEvent {
  * Subscribe to Server Events
  * @description More info to follow.
  */
-function subscribe(callback: any) {
-    const subscriber = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDb, password: argv.redisPass,
-    retry_strategy: (options) => {
-        if (argv.redisReconnectTimeout !== -1 && options.total_retry_time > argv.redisReconnectTimeout) {
-            return new Error("Retry time exhausted.")
-        }
+async function subscribe(callback: any) {
 
-        return Math.min(options.attempt * 100, 3000);
-    }})
+    const subscriber = redis.createClient({database: argv.redisCacheDb,  password: argv.redisPass, socket:{host: argv.redisHost, port: argv.redisPort}})
+    await subscriber.connect()
 
-    subscriber.subscribe("sse")
+    subscriber.subscribe("sse", callback)
     subscriber.on("error", (error) => {
         console.log("Redis error: " + error)
     })
-
-    subscriber.on("message", callback)
 }
 
 
@@ -265,12 +258,12 @@ if (cluster.isMaster) {
      * Cron Job Scheduler
      * @description Avian provides the ability for individual components to have an array of cron jobs to be executed by workers. 
      */
+     if (argv.cronJobScheduler) {
 
-    if (argv.cronJobScheduler) {
+        const cronJobQueue = redis.createClient({socket:{host: argv.redisHost, port: argv.redisPort}, database: argv.redisCronSchedulerDb, password: argv.redisPass})
+        cronJobQueue.connect()
 
-        const cronJobQueue = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCronSchedulerDb, password: argv.redisPass})
-
-        setInterval(() => {
+        setInterval(async () => {
 
             const schedule = require("node-schedule")
 
@@ -281,7 +274,6 @@ if (cluster.isMaster) {
             componentConfigFiles.forEach((config) => {
 
                 try {
-
                     if(require(config).cronJobs) {
 
                         const cronJobs = require(config).cronJobs
@@ -289,15 +281,18 @@ if (cluster.isMaster) {
                         cronJobs.forEach((cronJob: CronJob.Params) => {
 
                             if (cronJob.enabled) {
-                                const job = schedule.scheduleJob(cronJob.expression, () => {
-                                    cronJobQueue.get(cronJob.name.toString(), (error, reply) => {
-                                        if (error) return console.error(error)
-                                        
+                                const job = schedule.scheduleJob(cronJob.expression, async () => {
+                                    try {
+                                        const reply = await cronJobQueue.get(cronJob.name.toString())
                                         if (!reply) {
                                             cronJobQueue.set(cronJob.name.toString(), JSON.stringify(cronJob))
                                             console.log(`Avian - Cron Job "${cronJob.name}" added to the job queue.`)
                                         }
-                                    })
+                                    }
+                                    catch(error) {
+                                        console.error(error)
+                                    }
+                                        
                                 })
                             }
                         })
@@ -310,46 +305,48 @@ if (cluster.isMaster) {
 
         }, 3000)
 
-        setInterval(() => {
+        setInterval(async () => {
 
-            cronJobQueue.keys("*", (error, cronJobsInQueue) => {
-                if (error) return console.error(error)
-                if (cronJobsInQueue.length > 0) {
-                    
-                    for (const id in cluster.workers) {
+            try {
+            const cronJobsInQueue = await cronJobQueue.keys("*")
 
-                        let index: number = 0
+            if (cronJobsInQueue.length > 0) {
+                
+                for (const id in cluster.workers) {
 
-                        if (cluster.workers[id]) {
+                    let index: number = 0
 
-                            cronJobQueue.get(cronJobsInQueue[index], (error, job) => {
-                                if (error) return console.error(error)
-                                if (job) {
+                    if (cluster.workers[id]) {
 
-                                    // NOTE remove the job from the queue and send this job to a worker.
-                                    try { 
-                                        cronJobQueue.del(JSON.parse(job).name.toString())
-                                        cluster.workers[id]!.send(JSON.parse(job))
-                                        index++
-                                    }
-                                    catch (error) {
-                                        console.error("Avian - Something went wrong placing a job on this worker.")
-                                    }
-                                }
-                            })
+                        const job = await cronJobQueue.get(cronJobsInQueue[index])
+                        if (job) {
+
+                            // NOTE remove the job from the queue and send this job to a worker.
+                            try { 
+                                cronJobQueue.del(JSON.parse(job).name.toString())
+                                cluster.workers[id]!.send(JSON.parse(job))
+                                index++
+                            }
+                            catch (error) {
+                                console.error("Avian - Something went wrong placing a job on this worker.")
+                            }
                         }
                     }
                 }
-                else {
-                    console.log("Avian - The component cron job queue appears to be empty. Nothing to run...")
-                }
-            })
+            }
+            else {
+                console.log("Avian - The component cron job queue appears to be empty. Nothing to run...")
+            }
+        }
+        catch(error) {
+            console.error(error)
+        }
 
         }, 30000)
 
         /** Cron Job Completion Confirmation from Worker */
 
-        cluster.on("message", (worker, cronJobResults: CronJob.Results) => {
+        cluster.on("message", async (worker, cronJobResults: CronJob.Results) => {
             if (!cronJobResults.success) {
                 console.log(`Avian - Worker ${worker.id} failed to run job: ${cronJobResults.name}`)
                 // NOTE since the job failed we should re-queue it for other nodes to consider for execution.
@@ -359,11 +356,9 @@ if (cluster.isMaster) {
             }
 
             console.log(`Avian - Worker ${worker.id} has completed the job: ${cronJobResults.name}`)
-            cronJobQueue.del(cronJobResults.name.toString(), (error, response) => {
-                if (response === 1)
-                    console.log(`Avian - Job ${cronJobResults.name} has been removed from the job queue.`)
-            })
-            return
+            const response = await cronJobQueue.del(cronJobResults.name.toString())
+            if (response === 1)
+                console.log(`Avian - Job ${cronJobResults.name} has been removed from the job queue.`)
         })
     }
 
@@ -571,10 +566,12 @@ if (cluster.isMaster) {
         },
     }))
 
-    const cache = redis.createClient({host: argv.redisHost, port: argv.redisPort, db: argv.redisCacheDb, password: argv.redisPass})
+    const cache = redis.createClient({database: argv.redisCacheDb,  password: argv.redisPass, socket:{host: argv.redisHost, port: argv.redisPort}})
+    cache.connect()
+
     avian.use((req, res, next) => {
         req.cache = cache 
-        if (req.cache.connected) {
+        if (req.cache.isReady) {
             next()
         }
         else {
@@ -613,7 +610,7 @@ if (cluster.isMaster) {
     server.keepAliveTimeout = argv.keepAliveTimeout * 1000
 
     let sseClients: Array<{interval: NodeJS.Timeout, res: express.Response }> = []
-    subscribe((channel: any, message: any) => {
+    subscribe((message: string, channel: any) => {
         const messageEvent = new ServerEvent()
         messageEvent.addData(message)
         for (const client of sseClients) {
