@@ -308,40 +308,39 @@ if (cluster.isMaster) {
         setInterval(async () => {
 
             try {
-            const cronJobsInQueue = await cronJobQueue.keys("*")
+                const cronJobsInQueue = await cronJobQueue.keys("*")
 
-            if (cronJobsInQueue.length > 0) {
-                
-                for (const id in cluster.workers) {
+                if (cronJobsInQueue.length > 0) {
+                    
+                    for (const id in cluster.workers) {
 
-                    let index: number = 0
+                        let index: number = 0
 
-                    if (cluster.workers[id]) {
+                        if (cluster.workers[id]) {
 
-                        const job = await cronJobQueue.get(cronJobsInQueue[index])
-                        if (job) {
+                            const job = await cronJobQueue.get(cronJobsInQueue[index])
+                            if (job) {
 
-                            // NOTE remove the job from the queue and send this job to a worker.
-                            try { 
-                                cronJobQueue.del(JSON.parse(job).name.toString())
-                                cluster.workers[id]!.send(JSON.parse(job))
-                                index++
-                            }
-                            catch (error) {
-                                console.error("Avian - Something went wrong placing a job on this worker.")
+                                // NOTE remove the job from the queue and send this job to a worker.
+                                try { 
+                                    cronJobQueue.del(JSON.parse(job).name.toString())
+                                    cluster.workers[id]!.send(JSON.parse(job))
+                                    index++
+                                }
+                                catch (error) {
+                                    console.error("Avian - Something went wrong placing a job on this worker.")
+                                }
                             }
                         }
                     }
                 }
+                else {
+                    console.log("Avian - The component cron job queue appears to be empty. Nothing to run...")
+                }
             }
-            else {
-                console.log("Avian - The component cron job queue appears to be empty. Nothing to run...")
+            catch(error) {
+                console.error(error)
             }
-        }
-        catch(error) {
-            console.error(error)
-        }
-
         }, 30000)
 
         /** Cron Job Completion Confirmation from Worker */
@@ -553,8 +552,10 @@ if (cluster.isMaster) {
 
     avian.use(enableAuthHeadersForExpressSession)
 
+    const redisClient = redis.createClient({ legacyMode: true, database: argv.redisSessionDb, password: argv.redisPass, socket: {host: argv.redisHost, port: argv.redisPort} })
+    redisClient.connect().catch(console.error)
     avian.use(session({
-        store: new redisStore({host: argv.redisHost, port: argv.redisPort, db: argv.redisSessionDb, password: argv.redisPass, ttl: argv.sessionTTL / 1000}),
+        store: new redisStore({store: redisClient, ttl: argv.sessionTTL / 1000}),
         proxy: true,
         secret: sessionSecret,
         resave: argv.sessionResave,
