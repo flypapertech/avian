@@ -553,27 +553,22 @@ if (cluster.isMaster) {
     avian.use(enableAuthHeadersForExpressSession)
 
     const redisClient = redis.createClient({ legacyMode: true, database: argv.redisSessionDb, password: argv.redisPass, socket: {host: argv.redisHost, port: argv.redisPort, connectTimeout: 60 * 1000} })
-    redisClient.connect().then(() => {
-        avian.use(session({
-            store: new redisStore({client: redisClient, ttl: argv.sessionTTL / 1000}),
-            proxy: true,
-            secret: sessionSecret,
-            resave: argv.sessionResave,
-            rolling: argv.sessionCookieRolling,
-            saveUninitialized: argv.sessionSaveUninitialized,
-            cookie: {
-                httpOnly: true,
-                maxAge: argv.sessionCookieMaxAge,
-            },
-        }))
-    }).catch((error) => console.error(error))
+    redisClient.connect().catch(console.error)
+    avian.use(session({
+        store: new redisStore({client: redisClient, ttl: argv.sessionTTL / 1000}),
+        proxy: true,
+        secret: sessionSecret,
+        resave: argv.sessionResave,
+        rolling: argv.sessionCookieRolling,
+        saveUninitialized: argv.sessionSaveUninitialized,
+        cookie: {
+            httpOnly: true,
+            maxAge: argv.sessionCookieMaxAge,
+        },
+    }))
 
-    const avianCache = redis.createClient({
-        url: `redis://${argv.redisHost}:${argv.redisPort}/${argv.redisCacheDb}`
-    })
     const cache = redis.createClient({database: argv.redisCacheDb,  password: argv.redisPass, socket:{ host: argv.redisHost, port: argv.redisPort, connectTimeout: 60 * 1000 }})
-
-    cache.connect().catch((error) => console.error(error))
+    cache.connect().catch(console.error)
 
     avian.use((req, res, next) => {
         req.cache = cache 
