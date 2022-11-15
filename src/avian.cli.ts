@@ -573,12 +573,20 @@ if (cluster.isMaster) {
     })
     const cache = redis.createClient({database: argv.redisCacheDb,  password: argv.redisPass, socket:{ host: argv.redisHost, port: argv.redisPort, connectTimeout: 60 * 1000 }})
 
-    cache.connect().then(() => {
-        avian.use((req, res, next) => {
-            req.cache = cache 
+    cache.connect().catch((error) => console.error(error))
+
+    avian.use((req, res, next) => {
+        req.cache = cache 
+        req.cache = cache 
+        if (req.cache.isReady) {
             next()
-        })
-    }).catch((error) => console.error(error))
+        }
+        else {
+            req.cache.on("ready", () => {
+                next()
+            })
+        }
+    })
 
     let server
     if (argv.sslCert && argv.sslKey) {
