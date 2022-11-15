@@ -577,12 +577,11 @@ if (cluster.isMaster) {
 
     avian.use((req, res, next) => {
         req.cache = cache 
-        req.cache = cache 
         if (req.cache.isReady) {
             next()
         }
         else {
-            req.cache.on("ready", () => {
+            req.cache.once("ready", () => {
                 next()
             })
         }
