@@ -555,7 +555,7 @@ if (cluster.isMaster) {
     const redisClient = redis.createClient({ legacyMode: true, database: argv.redisSessionDb, password: argv.redisPass, socket: {host: argv.redisHost, port: argv.redisPort} })
     redisClient.connect().catch(console.error)
     avian.use(session({
-        store: new redisStore({store: redisClient, ttl: argv.sessionTTL / 1000}),
+        store: new redisStore({client: redisClient, ttl: argv.sessionTTL / 1000}),
         proxy: true,
         secret: sessionSecret,
         resave: argv.sessionResave,
