@@ -7,6 +7,7 @@ import * as glob from "glob"
 import * as cluster from "cluster"
 import * as os from "os"
 import * as fs from "graceful-fs"
+import { number } from "yargs"
 
 /** 
  * Avian Namespace & Interfaces
@@ -130,8 +131,10 @@ export class Argv {
         .option("redisPass", {
             default: undefined
         })
-        .option("redisReconnectTimeout", {
-            default: -1
+        .option("redisConnectionTimeout", {
+            type: "number",
+            describe: "The connection timeout to use for redis clients",
+            default: 5000
         })
         .option("redisSessionDb", {
             default: 1

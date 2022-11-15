@@ -225,7 +225,7 @@ class ServerEvent {
  */
 async function subscribe(callback: any) {
 
-    const subscriber = redis.createClient({database: argv.redisCacheDb,  password: argv.redisPass, socket:{host: argv.redisHost, port: argv.redisPort, connectTimeout: 60 * 1000}})
+    const subscriber = redis.createClient({database: argv.redisCacheDb,  password: argv.redisPass, socket:{host: argv.redisHost, port: argv.redisPort, connectTimeout: argv.redisConnectionTimeout}})
     await subscriber.connect()
 
     subscriber.subscribe("sse", callback)
@@ -260,7 +260,7 @@ if (cluster.isMaster) {
      */
      if (argv.cronJobScheduler) {
 
-        const cronJobQueue = redis.createClient({socket:{host: argv.redisHost, port: argv.redisPort, connectTimeout: 60 * 1000}, database: argv.redisCronSchedulerDb, password: argv.redisPass})
+        const cronJobQueue = redis.createClient({socket:{host: argv.redisHost, port: argv.redisPort, connectTimeout: argv.redisConnectionTimeout}, database: argv.redisCronSchedulerDb, password: argv.redisPass})
         cronJobQueue.connect().then(() => {
             setInterval(async () => {
 
@@ -552,7 +552,7 @@ if (cluster.isMaster) {
 
     avian.use(enableAuthHeadersForExpressSession)
 
-    const redisClient = redis.createClient({ legacyMode: true, database: argv.redisSessionDb, password: argv.redisPass, socket: {host: argv.redisHost, port: argv.redisPort, connectTimeout: 60 * 1000} })
+    const redisClient = redis.createClient({ legacyMode: true, database: argv.redisSessionDb, password: argv.redisPass, socket: {host: argv.redisHost, port: argv.redisPort, connectTimeout: argv.redisConnectionTimeout} })
     redisClient.connect().catch(console.error)
     avian.use(session({
         store: new redisStore({client: redisClient, ttl: argv.sessionTTL / 1000}),
@@ -567,7 +567,7 @@ if (cluster.isMaster) {
         },
     }))
 
-    const cache = redis.createClient({database: argv.redisCacheDb,  password: argv.redisPass, socket:{ host: argv.redisHost, port: argv.redisPort, connectTimeout: 60 * 1000 }})
+    const cache = redis.createClient({database: argv.redisCacheDb,  password: argv.redisPass, socket:{ host: argv.redisHost, port: argv.redisPort, connectTimeout: argv.redisConnectionTimeout }})
     cache.connect().catch(console.error)
 
     avian.use((req, res, next) => {
