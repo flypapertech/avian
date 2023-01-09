@@ -52,7 +52,7 @@
     "fast-glob": "3.2.11",
     "graceful-fs": "4.2.10",
     "jsonfile": "5.0.0",
-    "luxon": "^1.16.1",
+    "luxon": "^2.5.2",
     "mkdirp": "1.0.4",
     "node-schedule": "^1.3.2",
     "path-exists": "3.0.0",
