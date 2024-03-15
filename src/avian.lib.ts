@@ -1,13 +1,13 @@
 import jsonfile = require("jsonfile")
-import * as yargs from "yargs"
 import { RedisClientType } from "redis"
 import { DateTime } from "luxon"
 import { Request, Router } from "express"
-import * as glob from "glob"
-import * as cluster from "cluster"
-import * as os from "os"
-import * as fs from "graceful-fs"
-import { number } from "yargs"
+import fg from "fast-glob"
+import cluster from "cluster"
+import os from "os"
+import fs from "graceful-fs"
+import yargs from "yargs"
+import { hideBin } from "yargs/helpers"
 
 /** 
  * Avian Namespace & Interfaces
@@ -68,9 +68,8 @@ declare global {
  * @class
  * @global
  */
-export class Argv {
-    
-    public argv = yargs
+
+export const argv = yargs(hideBin(process.argv))
         .env("AVIAN_APP") 
         .option("name", {
             alias: "n",
@@ -210,10 +209,8 @@ export class Argv {
             describe:
             "Avian components are capable of scheduling cron-like jobs that are executed on the server.",
             type: "boolean"
-        }).argv
-}
+        }).parseSync()
 
-export const argv = new Argv().argv
 
 /**  
  * Avian Server Namespace
@@ -317,7 +314,7 @@ export class Utils {
      */
     public getComponentViewPath(pathToViewFileWithoutExtension: string): string {
         try {
-            const matches = glob.sync(`${pathToViewFileWithoutExtension}.*`)
+            const matches = fg.sync(`${pathToViewFileWithoutExtension}.*`)
             return matches.length === 0 ? "" : matches[0]
         } catch (err) {
             return ""
@@ -328,6 +325,7 @@ export class Utils {
      * @returns true if avian running 
      */
     public isAvianRunning(): boolean {
+        if (!cluster.workers) return false
         return Object.keys(cluster.workers).length > 0
     }
     /**

@@ -1,19 +1,20 @@
 #!/usr/bin/env node
-import * as cluster from "cluster"
-import * as history from "connect-history-api-fallback"
+import cluster from "cluster"
+import history from "connect-history-api-fallback"
 import * as cookie from "cookie"
 import * as signature from "cookie-signature"
 import * as crypto from "crypto"
 import * as events from "events"
 import { RequestHandler } from "express"
-import * as express from "express"
+import express from "express"
 import { json } from "express"
-import * as session from "express-session"
+import session from "express-session"
 import * as fs from "graceful-fs"
 import * as glob from "fast-glob"
 import * as https from "https"
-import mkdirp = require("mkdirp")
+import { mkdirp } from "mkdirp"
 import * as path from "path"
+import * as ts from "typescript"
 import * as redis from "redis"
 import * as rimraf from "rimraf"
 import { argv, utils } from "./avian.lib"
@@ -22,7 +23,7 @@ import {Chunk, Compiler, MultiCompiler, Stats } from "webpack"
 import injectArgv from "./middlewares/injectArgv"
 import {loadAppRoutesIntoAvian, loadAppServerFilesIntoAvian }from "./functions/loadAppServersIntoAvian"
 import capitalizeFirstLetter from "./functions/capitalizeFirstLetter"
-import * as expressStaticGzip from "express-static-gzip"
+import expressStaticGzip from "express-static-gzip"
 
 declare interface CallbackFunction<T> {
     (err?: null | Error, result?: T): any;
@@ -148,6 +149,7 @@ function watcherCallback(name: string): CallbackFunction<Stats> {
         const changedChunks: Chunk[] = []
 
         stats?.compilation.chunks.forEach((chunk) => {
+            if (!chunk.name) return
             const oldVersion = chunkVersions[chunk.name]
             chunkVersions[chunk.name] = chunk.hash
             if (chunk.hash !== oldVersion && chunk.name)
@@ -367,65 +369,63 @@ if (cluster.isMaster) {
         utils.setWorkersToAutoRestart()
         loadAppServerFilesIntoAvian()
     } else {
-        import("typescript").then((ts) => {
-            rimraf.sync(`${argv.home}/private/*`)
-            rimraf.sync(`${argv.home}/public/*`)
+        rimraf.sync(`${argv.home}/private/*`)
+        rimraf.sync(`${argv.home}/public/*`)
 
-            const webpackConfigs = glob.sync(`${argv.webpackHome}/webpack.development.*`) as string[]
-            webpackConfigs.push(...glob.sync(`${argv.webpackHome}/webpack.production.*`) as string[])
-            const program = ts.createProgram(webpackConfigs, {
-                allowJs: true,
-                noEmitOnError: true,
-                esModuleInterop: true,
-                noImplicityAny: true,
-                target: ts.ScriptTarget.ES5,
-                modules: ts.ModuleKind.CommonJS,
-                outDir: `${argv.home}/private`,
-                skipLibCheck: true,
-                lib: [
-                    "lib.es2015.d.ts",
-                ],
-            })
-            const emitResult = program.emit()
+        const webpackConfigs = glob.sync(`${argv.webpackHome}/webpack.development.*`) as string[]
+        webpackConfigs.push(...glob.sync(`${argv.webpackHome}/webpack.production.*`) as string[])
+        const program = ts.createProgram(webpackConfigs, {
+            allowJs: true,
+            noEmitOnError: true,
+            esModuleInterop: true,
+            noImplicityAny: true,
+            target: ts.ScriptTarget.ES5,
+            modules: ts.ModuleKind.CommonJS,
+            outDir: `${argv.home}/private`,
+            skipLibCheck: true,
+            lib: [
+                "lib.es2015.d.ts",
+            ],
+        })
+        const emitResult = program.emit()
 
-            const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
-            allDiagnostics.forEach((diagnostic) => {
-                if (diagnostic.file) {
-                    const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
-                    const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
-                    console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
-                } else {
-                    console.log(`${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`)
-                }
-            })
-
-            if (argv.mode === "development") {
-                import(argv.home + "/private/webpack.development").then((webpackDev) => {
-                    startDevWebpackWatcher(webpackDev)
-                }).catch((error) => {
-                    console.error(error)
-                    console.log("Avian - Falling back to default dev webpack config")
-                    import("./webpack/webpack.development").then((defaultWebpackDev) => {
-                        startDevWebpackWatcher(defaultWebpackDev)
-                    }).catch((error) => {
-                        console.error(error)
-                        console.error("Avian - Failed to load default development webpack config")
-                    })
-                })
+        const allDiagnostics = ts.getPreEmitDiagnostics(program).concat(emitResult.diagnostics)
+        allDiagnostics.forEach((diagnostic) => {
+            if (diagnostic.file) {
+                const { line, character } = diagnostic.file.getLineAndCharacterOfPosition(diagnostic.start!)
+                const message = ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")
+                console.log(`${diagnostic.file.fileName} (${line + 1},${character + 1}): ${message}`)
             } else {
-                import(argv.home + "/private/webpack.production").then((webpackProd) => {
-                    startProdWebpackCompiler(webpackProd)
-                }).catch((error) => {
-                    console.log("Avian - Falling back to default prod webpack config")
-                    import("./webpack/webpack.production").then((defaultWebpackProd) => {
-                        startProdWebpackCompiler(defaultWebpackProd)
-                    }).catch((error) => {
-                        console.error(error)
-                        console.error("Avian - Failed to load default production webpack config")
-                    })
-                })
+                console.log(`${ts.flattenDiagnosticMessageText(diagnostic.messageText, "\n")}`)
             }
         })
+
+        if (argv.mode === "development") {
+            import(argv.home + "/private/webpack.development.js").then((webpackDev) => {
+                startDevWebpackWatcher(webpackDev)
+            }).catch((error) => {
+                console.error(error)
+                console.log("Avian - Falling back to default dev webpack config")
+                import("./webpack/webpack.development.js").then((defaultWebpackDev) => {
+                    startDevWebpackWatcher(defaultWebpackDev)
+                }).catch((error) => {
+                    console.error(error)
+                    console.error("Avian - Failed to load default development webpack config")
+                })
+            })
+        } else {
+            import(argv.home + "/private/webpack.production.js").then((webpackProd) => {
+                startProdWebpackCompiler(webpackProd)
+            }).catch((error) => {
+                console.log("Avian - Falling back to default prod webpack config")
+                import("./webpack/webpack.production.js").then((defaultWebpackProd) => {
+                    startProdWebpackCompiler(defaultWebpackProd)
+                }).catch((error) => {
+                    console.error(error)
+                    console.error("Avian - Failed to load default production webpack config")
+                })
+            })
+        }
     }
 } else {
 
@@ -434,7 +434,7 @@ if (cluster.isMaster) {
      */
     
     if (argv.cronJobScheduler) {
-        process.on('message', (job) => {
+        process.on('message', (job: any) => {
 
             if (job.name) {
 
@@ -478,16 +478,15 @@ if (cluster.isMaster) {
 
         case "pino":
 
-            avian.use(require("express-pino-logger")({
-                name: argv.name,
-                level: "info"
+            avian.use(require("pino-http")({
+                useLevel: "info",
             }))
 
             break
 
         case "bunyan":
 
-            avian.use(require("express-bunyan-logger")({
+            avian.use(require("express-bunyan-logger-updated")({
                 name: argv.name,
                 level: "info"
             }))
@@ -563,6 +562,7 @@ if (cluster.isMaster) {
         saveUninitialized: argv.sessionSaveUninitialized,
         cookie: {
             httpOnly: true,
+            sameSite: "strict",
             maxAge: argv.sessionCookieMaxAge,
         },
     }))

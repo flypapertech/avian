@@ -41,7 +41,7 @@ export async function loadAppRoutesIntoAvian(avian: express.Express) {
 
         const routeBase = "/" + routeArray.join("/")
         try {
-            const serverRoutes = await import (`${compiledServerRouteFiles[i]}`)
+            const serverRoutes = require(`${compiledServerRouteFiles[i]}`)
             let compiledServerRoutes: any
             if (serverRoutes.default) {
                 compiledServerRoutes = serverRoutes.default
@@ -66,14 +66,13 @@ export async function loadAppRoutesIntoAvian(avian: express.Express) {
 /**
  * Loads app server files
  */
-export async function loadAppServerFilesIntoAvian() {
+export function loadAppServerFilesIntoAvian() {
 
     const compiledServerRouteFiles = glob.sync([`${argv.home}/private/**/*.server.*.js`, `!*server.routes.*.js`])
 
     for (let i = 0 ; i < compiledServerRouteFiles.length ; i++) {
         try {
-            const server = await import (`${compiledServerRouteFiles[i]}`)
-            // TODO what to do after this import?
+            const server = require(`${compiledServerRouteFiles[i]}`)
         } catch (err) {
             console.error(err)
         }
